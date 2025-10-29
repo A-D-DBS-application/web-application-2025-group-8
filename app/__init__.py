@@ -1,19 +1,14 @@
+print("✅ __init__.py wordt uitgevoerd en create_app bestaat!")
 from flask import Flask
-#from .models import db
-from app.config import ConfigABC
+from .config import Config
+from flask_sqlalchemy import SQLAlchemy
 
+db = SQLAlchemy()
 def create_app():
     app = Flask(__name__)
-    #app.config.from_object(ConfigABC)
-
-    #db.init_app(app)
-
-    #with app.app_context():
-        #db.create_all()
-        
-
-    #from .routes import main
-    #app.register_blueprint(main)
-
+    app.config.from_object(Config)
+    db.init_app(app)
+    from .routes import main
+    app.register_blueprint(main)
     return app
 
