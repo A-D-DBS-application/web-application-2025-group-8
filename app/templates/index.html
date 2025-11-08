@@ -15,31 +15,95 @@
 
 <!-- PLATFORM OVERZICHT -->
 <section>
-    <h2 class="section-title">Platform Overzicht</h2>
+  <h2 class="section-title">Platform Overzicht</h2>
+  <div class="cards-grid">
+    <div class="card">
+      <p>📄 Schriftelijke Vragen</p>
+      <small style="color: #f97316; visibility: hidden;">placeholder</small>
+    </div>
+
+    <div class="card">
+      <p>🏷️ Actieve Thema’s</p>
+      <small style="color: #f97316; visibility: hidden;">placeholder</small>
+    </div>
+
+    <div class="card">
+      <p>👥 Volksvertegenwoordigers</p>
+      <small style="color: #f97316; visibility: hidden;">placeholder</small>
+    </div>
+
+    <div class="card">
+      <p>📈 Beantwoorde Vragen</p>
+      <small style="color: #f97316; visibility: hidden;">placeholder</small>
+    </div>
+  </div>
+</section>
+
+<!-- Populaire Thema's -->
+<section>
+    <h2 class="section-title">Populaire Thema's</h2>
     <div class="cards-grid">
-        <div class="card">
-            <p style="font-size: 2rem; font-weight: 700; margin: 0;">{{ aantal_vragen }}</p>
-            <p>📄 Schriftelijke Vragen</p>
-            <small style="color: #f97316;">+12% deze maand</small>
-        </div>
-
-        <div class="card">
-            <p style="font-size: 2rem; font-weight: 700; margin: 0;">{{ aantal_themas }}</p>
-            <p>🏷️ Actieve Thema’s</p>
-            <small style="color: #f97316;">24 meest populair</small>
-        </div>
-
-        <div class="card">
-            <p style="font-size: 2rem; font-weight: 700; margin: 0;">{{ aantal_persoonfuncties }}</p>
-            <p>👥 Volksvertegenwoordigers</p>
-            <small style="color: #f97316;">7 fracties</small>
-        </div>
-
-        <div class="card">
-            <p style="font-size: 2rem; font-weight: 700; margin: 0;">{{ percentage_beantwoord or 0 }}%</p>
-            <p>📈 Beantwoorde Vragen</p>
-            <small style="color: #f97316;">Gemiddelde responstijd: 18 dagen</small>
-        </div>
+        <div class="card" style="text-align:center;">Onderwijs</div>
+        <div class="card" style="text-align:center;">Milieu & Klimaat</div>
+        <div class="card" style="text-align:center;">Mobiliteit</div>
+        <div class="card" style="text-align:center;">Gezondheidszorg</div>
+        <div class="card" style="text-align:center;">Economie</div>
+        <div class="card" style="text-align:center;">Welzijn</div>
+        <div class="card" style="text-align:center;">Cultuur</div>
+        <div class="card" style="text-align:center;">Sport</div>
     </div>
 </section>
+
+<!-- Fracties in het Vlaams Parlement -->
+<section style="background-color:#f6f8fa; padding-bottom:3rem;">
+  <h2 class="section-title">Fracties in het Vlaams Parlement</h2>
+
+  <!-- Regering -->
+  <h3 style="text-align:center; font-size:1.3rem; margin-top:2rem; color:#1e3a8a;">💼 Regering (Coalitie)</h3>
+  <div class="cards-grid" style="margin-top:1rem;">
+    <div class="card" style="display:flex;align-items:center;gap:1rem;">
+      <div style="background-color:#fbbf24;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">31</div>
+      <div><strong>N-VA</strong><br><span style="font-size:0.9rem;color:#555;">31 zetels</span></div>
+    </div>
+    <div class="card" style="display:flex;align-items:center;gap:1rem;">
+      <div style="background-color:#dc2626;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">18</div>
+      <div><strong>Vooruit</strong><br><span style="font-size:0.9rem;color:#555;">18 zetels</span></div>
+    </div>
+    <div class="card" style="display:flex;align-items:center;gap:1rem;">
+      <div style="background-color:#ea580c;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">16</div>
+      <div><strong>CD&V</strong><br><span style="font-size:0.9rem;color:#555;">16 zetels</span></div>
+    </div>
+  </div>
+
+  <!-- Oppositie -->
+  <h3 style="text-align:center; font-size:1.3rem; margin-top:3rem; color:#1e3a8a;">⚖️ Oppositie</h3>
+  <div class="cards-grid" style="margin-top:1rem;">
+    <div class="card" style="display:flex;align-items:center;gap:1rem;">
+      <div style="background-color:#1e40af;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">31</div>
+      <div><strong>Vlaams Belang</strong><br><span style="font-size:0.9rem;color:#555;">31 zetels</span></div>
+    </div>
+    <div class="card" style="display:flex;align-items:center;gap:1rem;">
+      <div style="background-color:#16a34a;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">9</div>
+      <div><strong>Groen</strong><br><span style="font-size:0.9rem;color:#555;">9 zetels</span></div>
+    </div>
+    <div class="card" style="display:flex;align-items:center;gap:1rem;">
+      <div style="background-color:#b91c1c;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">9</div>
+      <div><strong>PVDA</strong><br><span style="font-size:0.9rem;color:#555;">9 zetels</span></div>
+    </div>
+    <div class="card" style="display:flex;align-items:center;gap:1rem;">
+      <div style="background-color:#2563eb;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">8</div>
+      <div><strong>Open Vld</strong><br><span style="font-size:0.9rem;color:#555;">8 zetels</span></div>
+    </div>
+    <div class="card" style="display:flex;align-items:center;gap:1rem;">
+      <div style="background-color:#9333ea;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">1</div>
+      <div><strong>Team Fouad Ahidar</strong><br><span style="font-size:0.9rem;color:#555;">1 zetel</span></div>
+    </div>
+    <div class="card" style="display:flex;align-items:center;gap:1rem;">
+      <div style="background-color:#6b7280;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">1</div>
+      <div><strong>Onafhankelijke</strong><br><span style="font-size:0.9rem;color:#555;">1 zetel</span></div>
+    </div>
+  </div>
+</section>
+
 {% endblock %}
+
