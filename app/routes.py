@@ -5,12 +5,10 @@ main = Blueprint('main', __name__)
 
 @main.route('/')
 def home():
-    return "Welkom bij je Flask-app met Supabase"
+    return render_template("index.html")
 
 @main.route('/personen')
 def personen_tabel():
     kolomnamen = [kolom.name for kolom in Persoon.__table__.columns]
     personen = []
     return render_template("personen.html", kolomnamen=kolomnamen, personen=personen)
-
-
