@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-4">Priority Scoring – Schriftelijke Vragen</h1>
+    <table class="table-auto w-full border-collapse">
+        <thead>
+            <tr class="bg-gray-100 text-left">
+                <th class="p-2">Onderwerp</th>
+                <th class="p-2">Ingediend</th>
+                <th class="p-2">Beantwoord</th>
+                <th class="p-2"># Thema’s</th>
+                <th class="p-2">Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data %}
+            <tr class="border-b">
+                <td class="p-2">{{ item.onderwerp }}</td>
+                <td class="p-2">{{ item.ingediend }}</td>
+                <td class="p-2">{{ item.beantwoord }}</td>
+                <td class="p-2 text-center">{{ item.aantal_themas }}</td>
+                <td class="p-2 font-semibold">{{ item.priority_score }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

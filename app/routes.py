@@ -150,3 +150,45 @@ def statistieken_personen():
         })
 
     return render_template("statistieken_personen.html", data=data)
+
+#priority scoring algoritme 
+from datetime import datetime
+from app.models import ThemaKoppeling  # staat er waarschijnlijk al, zo niet: importeren
+
+# --- PRIORITY SCORING ALGORITME ---
+@main.route('/statistieken/priority')
+def statistieken_priority():
+    vragen = db.session.query(SchriftelijkeVragen).all()
+    data = []
+
+    for vraag in vragen:
+        #  Hoe recent is de vraag?
+        dagen_verschil = (datetime.now().date() - vraag.ingediend).days if vraag.ingediend else 999
+        recency_score = max(0, 100 - dagen_verschil)
+
+        #  Aantal thema’s gekoppeld aan de vraag
+        aantal_themas = (
+            db.session.query(ThemaKoppeling)
+            .filter(ThemaKoppeling.id_schv == vraag.id)
+            .count()
+        )
+        thema_score = aantal_themas * 10
+
+        #  Antwoordstatus: onbeantwoord = extra gewicht
+        antwoord_score = 50 if vraag.beantwoord is None else 0
+
+        # Totale prioriteitsscore
+        total_score = recency_score + thema_score + antwoord_score
+
+        data.append({
+            "onderwerp": vraag.onderwerp,
+            "ingediend": vraag.ingediend.strftime("%Y-%m-%d") if vraag.ingediend else "-",
+            "beantwoord": "Nee" if vraag.beantwoord is None else "Ja",
+            "aantal_themas": aantal_themas,
+            "priority_score": total_score,
+        })
+
+    # Sorteer van hoogste naar laagste prioriteit
+    data.sort(key=lambda x: x["priority_score"], reverse=True)
+
+    return render_template("statistieken_priority.html", data=data)
