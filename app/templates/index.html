@@ -1,42 +1,45 @@
-<!DOCTYPE html>
-<html lang="nl">
-<head>
-    <meta charset="UTF-8">
-    <title>Home - Flask + Supabase</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 60px;
-            text-align: center;
-            background-color: #f0f0f0;
-        }
-        h1 {
-            color: #222;
-            margin-bottom: 10px;
-        }
-        p {
-            color: #444;
-            font-size: 1.1em;
-            margin-bottom: 30px;
-        }
-        a.button {
-            display: inline-block;
-            background-color: #28a745;
-            color: white;
-            padding: 12px 25px;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-        a.button:hover {
-            background-color: #1e7e34;
-        }
-    </style>
-</head>
-<body>
-    <h1>Welkom bij je Flask-app met Supabase 🎉</h1>
-    <p>Klik op de knop hieronder om de tabel met personen te bekijken.</p>
-    <a href="{{ url_for('main.personen_tabel') }}" class="button">Bekijk Personen</a>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+<!-- HERO -->
+<section class="hero">
+    <h1 class="hero-title">Vlaams Parlement Transparantie</h1>
+    <p class="hero-subtitle">
+        Ontdek schriftelijke vragen, volg volksvertegenwoordigers en krijg inzicht in politieke thema’s
+    </p>
+    <div class="hero-buttons">
+        <a href="#" class="btn">🔍 Zoek Vragen</a>
+        <a href="#" class="btn">📊 Bekijk Statistieken</a>
+    </div>
+</section>
+
+<!-- PLATFORM OVERZICHT -->
+<section>
+    <h2 class="section-title">Platform Overzicht</h2>
+    <div class="cards-grid">
+        <div class="card">
+            <p style="font-size: 2rem; font-weight: 700; margin: 0;">{{ aantal_vragen }}</p>
+            <p>📄 Schriftelijke Vragen</p>
+            <small style="color: #f97316;">+12% deze maand</small>
+        </div>
+
+        <div class="card">
+            <p style="font-size: 2rem; font-weight: 700; margin: 0;">{{ aantal_themas }}</p>
+            <p>🏷️ Actieve Thema’s</p>
+            <small style="color: #f97316;">24 meest populair</small>
+        </div>
+
+        <div class="card">
+            <p style="font-size: 2rem; font-weight: 700; margin: 0;">{{ aantal_persoonfuncties }}</p>
+            <p>👥 Volksvertegenwoordigers</p>
+            <small style="color: #f97316;">7 fracties</small>
+        </div>
+
+        <div class="card">
+            <p style="font-size: 2rem; font-weight: 700; margin: 0;">{{ percentage_beantwoord or 0 }}%</p>
+            <p>📈 Beantwoorde Vragen</p>
+            <small style="color: #f97316;">Gemiddelde responstijd: 18 dagen</small>
+        </div>
+    </div>
+</section>
+{% endblock %}

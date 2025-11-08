@@ -1,0 +1,22 @@
+<div id="stats" class="stats-section">
+    <div class="container">
+        <h2 class="section-title">Platform Overzicht</h2>
+        <div class="stats-grid">
+            {% for stat in stats %}
+            <div class="stat-card">
+                <div class="stat-icon-wrapper">
+                    {% if stat.icon == 'file-text' %}📄
+                    {% elif stat.icon == 'tag' %}🏷️
+                    {% elif stat.icon == 'users' %}👥
+                    {% elif stat.icon == 'trending-up' %}📈
+                    {% endif %}
+                </div>
+                <div class="stat-content">
+                    <p class="stat-value">{{ stat.value }}</p>
+                    <p class="stat-label">{{ stat.label }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

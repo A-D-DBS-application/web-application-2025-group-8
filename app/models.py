@@ -55,10 +55,9 @@ class Persoonfunctie(db.Model):
 class Thema(db.Model):
     __tablename__ = "Thema"
 
-    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    naam = db.Column(db.String, nullable=False)
+    id = db.Column(db.Uuid, primary_key=True)
+    naam = db.Column(db.Text, nullable=False)
     omschrijving = db.Column(db.Text)
-    thema = db.Column(db.String)
 
 
 class SchriftelijkeVragen(db.Model):

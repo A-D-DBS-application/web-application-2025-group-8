@@ -1,0 +1,16 @@
+<div class="fracties-section">
+    <div class="container">
+        <h2 class="section-title">Fracties in het Vlaams Parlement</h2>
+        <div class="fracties-grid">
+            {% for fractie in fracties %}
+            <div class="fractie-card">
+                <div class="fractie-badge">{{ fractie.naam[0] }}</div>
+                <div>
+                    <h3 class="fractie-name">{{ fractie.naam }}</h3>
+                    <p class="fractie-seats">{{ fractie.zetels }} zetels</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
