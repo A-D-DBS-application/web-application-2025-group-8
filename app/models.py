@@ -5,33 +5,35 @@ from sqlalchemy import Enum
 import enum
 
 
-# ===== Enum voor geslacht =====
+# ===== ENUM VOOR GESLACHT =====
 class GeslachtEnum(enum.Enum):
     M = "M"
     V = "V"
     X = "X"
 
 
-# ===== Tabellen =====
-
+# ===== FRACTIE =====
 class Fractie(db.Model):
-    __tablename__ = "Fractie"
+    __tablename__ = "fractie"
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     naam = db.Column(db.String, nullable=False)
     logo_url = db.Column(db.String)
 
 
+# ===== FUNCTIES =====
 class Functies(db.Model):
-    __tablename__ = "Functies"
+    __tablename__ = "functies"
+
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     code = db.Column(db.String, unique=True, nullable=False)
     naam = db.Column(db.String, nullable=False)
     omschrijving = db.Column(db.Text)
 
 
+# ===== PERSOON =====
 class Persoon(db.Model):
-    __tablename__ = "Persoon"
+    __tablename__ = "persoon"
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     voornaam = db.Column(db.String, nullable=False)
@@ -39,43 +41,49 @@ class Persoon(db.Model):
     geboortedatum = db.Column(db.Date)
     geslacht = db.Column(Enum(GeslachtEnum, name="geslacht_enum"))
     roepnaam = db.Column(db.String)
+    kieskring = db.Column(db.String, nullable=False)
 
 
+# ===== PERSOONFUNCTIE =====
 class Persoonfunctie(db.Model):
-    __tablename__ = "Persoonfunctie"
+    __tablename__ = "persoonfunctie"
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    id_fnc = db.Column(UUID(as_uuid=True), db.ForeignKey("Functies.id"), nullable=False)
-    id_prs = db.Column(UUID(as_uuid=True), db.ForeignKey("Persoon.id"), nullable=False)
-    id_frc = db.Column(UUID(as_uuid=True), db.ForeignKey("Fractie.id"))
+    id_fnc = db.Column(UUID(as_uuid=True), db.ForeignKey("functies.id"), nullable=False)
+    id_prs = db.Column(UUID(as_uuid=True), db.ForeignKey("persoon.id"), nullable=False)
+    id_frc = db.Column(UUID(as_uuid=True), db.ForeignKey("fractie.id"))
     van = db.Column(db.Date, nullable=False)
     tot = db.Column(db.Date)
 
 
+# ===== THEMA =====
 class Thema(db.Model):
-    __tablename__ = "Thema"
+    __tablename__ = "thema"
 
-    id = db.Column(db.Uuid, primary_key=True)
-    naam = db.Column(db.Text, nullable=False)
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    naam = db.Column(db.String, nullable=False)
     omschrijving = db.Column(db.Text)
 
 
+# ===== SCHRIFTELIJKE VRAGEN =====
 class SchriftelijkeVragen(db.Model):
-    __tablename__ = "SchriftelijkeVragen"
+    __tablename__ = "schriftelijke_vragen"
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     ingediend = db.Column(db.Date, nullable=False)
     onderwerp = db.Column(db.String, nullable=False)
     tekst = db.Column(db.Text)
-    id_prsfnc_vs = db.Column(UUID(as_uuid=True), db.ForeignKey("Persoonfunctie.id"), nullable=False)
-    id_prsfnc_min = db.Column(UUID(as_uuid=True), db.ForeignKey("Persoonfunctie.id"), nullable=False)
+    id_prsfnc_vs = db.Column(UUID(as_uuid=True), db.ForeignKey("persoonfunctie.id"), nullable=False)
+    id_prsfnc_min = db.Column(UUID(as_uuid=True), db.ForeignKey("persoonfunctie.id"), nullable=False)
     beantwoord = db.Column(db.Date)
 
 
+# ===== THEMA KOPPELING =====
 class ThemaKoppeling(db.Model):
-    __tablename__ = "ThemaKoppeling"
+    __tablename__ = "thema_koppeling"
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    id_thm = db.Column(UUID(as_uuid=True), db.ForeignKey("Thema.id"), nullable=False)
-    id_schv = db.Column(UUID(as_uuid=True), db.ForeignKey("SchriftelijkeVragen.id"), nullable=False)
+    id_thm = db.Column(UUID(as_uuid=True), db.ForeignKey("thema.id"), nullable=False)
+    id_schv = db.Column(UUID(as_uuid=True), db.ForeignKey("schriftelijke_vragen.id"), nullable=False)
     volgnr = db.Column(db.Integer, nullable=False)
+

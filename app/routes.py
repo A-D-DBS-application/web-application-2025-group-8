@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template
-from app.models import Persoon, Fractie, Thema, SchriftelijkeVragen, Persoonfunctie, ThemaKoppeling
+from app.models import Persoon, Fractie, Thema, SchriftelijkeVragen, Persoonfunctie, ThemaKoppeling, Functies
 from sqlalchemy import func
 from app import db
 
