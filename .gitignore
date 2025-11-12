@@ -1,3 +1,14 @@
-venv/
+# Python cache
 __pycache__/
 *.pyc
+# Virtual environments
+venv/
+.env/
+# Environment variables / secrets
+*.env
+# IDE / Editor files
+.vscode/
+.idea/
+# OS generated files
+.DS_Store
+7
