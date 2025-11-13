@@ -174,11 +174,9 @@ def statistieken_priority():
         )
         thema_score = aantal_themas * 10
 
-        #  Antwoordstatus: onbeantwoord = extra gewicht
-        antwoord_score = 50 if vraag.beantwoord is None else 0
 
         # Totale prioriteitsscore
-        total_score = recency_score + thema_score + antwoord_score
+        total_score = recency_score + thema_score
 
         data.append({
             "onderwerp": vraag.onderwerp,
