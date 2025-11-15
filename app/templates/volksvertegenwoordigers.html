@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+  <h1 class="hero-title">Volksvertegenwoordigers</h1>
+  <p class="hero-subtitle">
+    Overzicht van alle volksvertegenwoordigers met hun fractie, functie en kieskring
+  </p>
+</section>
+
+<section style="padding:2rem;">
+  <table style="width:100%; border-collapse:collapse;">
+    <thead style="background:#f3f4f6;">
+      <tr>
+        <th style="padding:8px; text-align:left;">Naam volksvertegenwoordiger</th>
+        <th style="padding:8px; text-align:left;">Fractie</th>
+        <th style="padding:8px; text-align:left;">Kieskring</th>
+        <th style="padding:8px; text-align:left;">Functie</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% if volksvertegenwoordigers %}
+        {% for persoon in volksvertegenwoordigers %}
+        <tr style="border-bottom:1px solid #ddd;">
+          <td style="padding:8px;">{{ persoon.naam }}</td>
+          <td style="padding:8px;">{{ persoon.fractie }}</td>
+          <td style="padding:8px;">{{ persoon.kieskring }}</td>
+          <td style="padding:8px;">{{ persoon.functie }}</td>
+        </tr>
+        {% endfor %}
+      {% else %}
+        <tr>
+          <td colspan="4" style="text-align:center; color:#555;">
+            Er zijn momenteel geen volksvertegenwoordigers beschikbaar.
+          </td>
+        </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

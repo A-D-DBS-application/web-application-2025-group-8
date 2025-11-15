@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+  <h1 class="hero-title">Zoek Schriftelijke Vragen</h1>
+  <p class="hero-subtitle">
+    Geef een trefwoord in om vragen te vinden waarin dit voorkomt
+  </p>
+</section>
+
+<section style="padding:2rem;">
+  <form method="POST" style="text-align:center; margin-bottom:2rem;">
+    <input 
+      type="text" 
+      name="trefwoord" 
+      placeholder="Bijv. PFAS, onderwijs, mobiliteit..." 
+      style="width:50%; padding:0.5rem; border:1px solid #ccc; border-radius:6px;"
+      required
+    >
+    <button type="submit" class="btn" style="margin-left:1rem;">Zoeken</button>
+  </form>
+
+  {% if resultaten %}
+  <table style="width:100%; border-collapse:collapse;">
+    <thead style="background:#f3f4f6;">
+      <tr>
+        <th style="padding:8px; text-align:left;">Onderwerp</th>
+        <th style="padding:8px; text-align:left;">Indiener</th>
+        <th style="padding:8px; text-align:left;">Datum Beantwoord</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for vraag in resultaten %}
+      <tr style="border-bottom:1px solid #ddd;">
+        <td style="padding:8px;">{{ vraag.onderwerp }}</td>
+        <td style="padding:8px;">
+          {% set pf = db.session.query(Persoonfunctie).get(vraag.id_prsfnc_vs) %}
+          {% if pf %}
+            {% set persoon = db.session.query(Persoon).get(pf.id_prs) %}
+            {{ persoon.voornaam }} {{ persoon.naam }}
+          {% else %}
+            -
+          {% endif %}
+        </td>
+        <td style="padding:8px;">
+          {{ vraag.beantwoord.strftime("%Y-%m-%d") if vraag.beantwoord else "-" }}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% elif resultaten is not none %}
+  <p style="text-align:center; color:#555;">Geen resultaten gevonden voor dit trefwoord.</p>
+  {% endif %}
+</section>
+{% endblock %}

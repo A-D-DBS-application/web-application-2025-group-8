@@ -307,3 +307,49 @@ def statistieken_priority():
         data = []
 
     return render_template("statistieken_priority.html", data=data)
+
+@main.route('/volksvertegenwoordigers')
+def volksvertegenwoordigers():
+    try:
+        personen = db.session.query(Persoon).all()
+        data = []
+        for p in personen:
+            persoonfuncties = db.session.query(Persoonfunctie).filter_by(id_prs=p.id).all()
+            for pf in persoonfuncties:
+                fractie = db.session.query(Fractie).get(pf.id_frc)
+                functie = db.session.query(Functies).get(pf.id_fnc)
+                data.append({
+                    "naam": f"{p.voornaam} {p.naam}",
+                    "fractie": fractie.naam if fractie else "-",
+                    "kieskring": p.kieskring or "-",
+                    "functie": functie.naam if functie else "-"
+                })
+    except OperationalError:
+        data = []
+    return render_template("volksvertegenwoordigers.html", volksvertegenwoordigers=data)
+
+# --- ZOEKFUNCTIE VOOR SCHRIFTELIJKE VRAGEN ---
+@main.route('/zoeken', methods=['GET', 'POST'])
+def zoeken():
+    resultaten = []
+
+    if request.method == 'POST':
+        trefwoord = request.form.get('trefwoord', '').strip()
+
+        if trefwoord:
+            resultaten = (
+                db.session.query(SchriftelijkeVragen)
+                .filter(
+                    (SchriftelijkeVragen.onderwerp.ilike(f"%{trefwoord}%")) |
+                    (SchriftelijkeVragen.tekst.ilike(f"%{trefwoord}%"))
+                )
+                .order_by(SchriftelijkeVragen.ingediend.desc())
+                .all()
+            )
+
+    return render_template('zoeken.html', resultaten=resultaten)
+
+# --- ACTIEVE THEMA'S PAGINA ---
+@main.route('/actieve_themas')
+def actieve_themas():
+    return render_template("actieve_themas.html")

@@ -8,8 +8,8 @@
         Ontdek schriftelijke vragen, volg volksvertegenwoordigers en krijg inzicht in politieke thema’s
     </p>
     <div class="hero-buttons">
-      <a href="#" class="btn">🔍 Zoek Vragen</a>
-      <a href="{{ url_for('main.statistieken_overzicht') }}" class="btn">📊 Bekijk Statistieken</a>
+      <a href="{{ url_for('main.zoeken') }}" class="btn">Zoek schriftelijke vragen op trefwoord</a>
+      <a href="{{ url_for('main.statistieken_overzicht') }}" class="btn">Bekijk statistieken</a>
     </div>
 
 </section>
@@ -18,42 +18,31 @@
 <section>
   <h2 class="section-title">Platform Overzicht</h2>
   <div class="cards-grid">
+
     <div class="card">
       <p>📄 Schriftelijke Vragen</p>
       <small style="color: #f97316; visibility: hidden;">placeholder</small>
     </div>
 
+    <a href="{{ url_for('main.actieve_themas') }}" class="btn">
+      Actieve Thema’s
+    </a>
+
+    <a href="{{ url_for('main.volksvertegenwoordigers') }}" class="btn">
+      Volksvertegenwoordigers
+    </a>
+
     <div class="card">
-      <p>🏷️ Actieve Thema’s</p>
+      <p>📑 Beantwoorde Vragen</p>
       <small style="color: #f97316; visibility: hidden;">placeholder</small>
     </div>
 
-    <div class="card">
-      <p>👥 Volksvertegenwoordigers</p>
-      <small style="color: #f97316; visibility: hidden;">placeholder</small>
-    </div>
-
-    <div class="card">
-      <p>📈 Beantwoorde Vragen</p>
-      <small style="color: #f97316; visibility: hidden;">placeholder</small>
-    </div>
   </div>
 </section>
 
-<!-- Populaire Thema's -->
-<section>
-    <h2 class="section-title">Populaire Thema's</h2>
-    <div class="cards-grid">
-        <div class="card" style="text-align:center;">Onderwijs</div>
-        <div class="card" style="text-align:center;">Milieu & Klimaat</div>
-        <div class="card" style="text-align:center;">Mobiliteit</div>
-        <div class="card" style="text-align:center;">Gezondheidszorg</div>
-        <div class="card" style="text-align:center;">Economie</div>
-        <div class="card" style="text-align:center;">Welzijn</div>
-        <div class="card" style="text-align:center;">Cultuur</div>
-        <div class="card" style="text-align:center;">Sport</div>
-    </div>
-</section>
+
+
+
 
 <!-- Fracties in het Vlaams Parlement -->
 <section style="background-color:#f6f8fa; padding-bottom:3rem;">
