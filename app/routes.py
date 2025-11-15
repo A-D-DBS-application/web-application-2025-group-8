@@ -353,3 +353,26 @@ def zoeken():
 @main.route('/actieve_themas')
 def actieve_themas():
     return render_template("actieve_themas.html")
+
+@main.route('/statistieken/vragen', methods=['GET'])
+def overzicht_schriftelijke_vragen():
+    try:
+        # Haal de schriftelijke vragen op met thema’s
+        vragen = (
+            db.session.query(
+                SchriftelijkeVragen.vraag,
+                SchriftelijkeVragen.datum_indiening,
+                SchriftelijkeVragen.datum_beantwoord,
+                Thema.naam.label("thema_naam")
+            )
+            .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
+            .join(Thema, Thema.id == ThemaKoppeling.id_thm)
+            .order_by(SchriftelijkeVragen.datum_indiening.desc())
+            .all()
+        )
+
+    except Exception as e:
+        print(e)
+        vragen = []
+
+    return render_template('schriftelijke_vragen.html', vragen=vragen)

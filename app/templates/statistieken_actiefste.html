@@ -17,19 +17,18 @@
         {% endfor %}
     </select>
 
-<label for="thema">Thema:</label>
-<select name="thema" id="thema">
-    {% for t in themas %}
-        <option value="{{ t.id }}"
-            {% if geselecteerd_thema_id and t.id == geselecteerd_thema_id %}
-                selected
-            {% endif %}
-        >
-            {{ t.naam }}
-        </option>
-    {% endfor %}
-</select>
-
+    <label for="thema">Thema:</label>
+    <select name="thema" id="thema">
+        {% for t in themas %}
+            <option value="{{ t.id }}"
+                {% if geselecteerd_thema_id and t.id == geselecteerd_thema_id %}
+                    selected
+                {% endif %}
+            >
+                {{ t.naam }}
+            </option>
+        {% endfor %}
+    </select>
 
     <button type="submit">Filter</button>
 </form>
