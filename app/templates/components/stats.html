@@ -4,13 +4,6 @@
         <div class="stats-grid">
             {% for stat in stats %}
             <div class="stat-card">
-                <div class="stat-icon-wrapper">
-                    {% if stat.icon == 'file-text' %}📄
-                    {% elif stat.icon == 'tag' %}🏷️
-                    {% elif stat.icon == 'users' %}👥
-                    {% elif stat.icon == 'trending-up' %}📈
-                    {% endif %}
-                </div>
                 <div class="stat-content">
                     <p class="stat-value">{{ stat.value }}</p>
                     <p class="stat-label">{{ stat.label }}</p>
