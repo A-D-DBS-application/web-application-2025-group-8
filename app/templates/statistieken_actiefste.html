@@ -1,62 +1,262 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Actiefste Volksvertegenwoordigers per Thema &amp; Kieskring</h2>
 
-<form method="GET"
-      action="{{ url_for('main.actiefste_per_thema_en_kieskring') }}"
-      class="form-section">
+<!-- Pagina-specifieke CSS: alleen voor deze view -->
+<style>
+  .stats-container {
+    max-width: 1100px;
+    margin: 0 auto 3rem;
+    padding: 0 1.5rem 3rem;
+  }
 
-    <label for="kieskring">Kieskring:</label>
-    <select name="kieskring" id="kieskring">
-        {% for kk in kieskringen %}
-            <option value="{{ kk }}"
-                    {% if kk == geselecteerde_kieskring %}selected{% endif %}>
-                {{ kk }}
-            </option>
-        {% endfor %}
-    </select>
+  .filters-card {
+    margin-top: -3rem; /* schuift de kaart een beetje in de blauwe hero */
+    padding: 1.75rem 2rem;
+    border-radius: 1.25rem;
+    background: #ffffff;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+  }
 
-    <label for="thema">Thema:</label>
-    <select name="thema" id="thema">
-        {% for t in themas %}
-            <option value="{{ t.id }}"
-                {% if geselecteerd_thema_id and t.id == geselecteerd_thema_id %}
-                    selected
-                {% endif %}
-            >
-                {{ t.naam }}
-            </option>
-        {% endfor %}
-    </select>
+  .filters-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem 2rem;
+    align-items: flex-end;
+  }
 
-    <button type="submit">Filter</button>
-</form>
+  .filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 1.25rem 2rem;
+  }
 
-<hr>
+  .filter-field {
+    display: flex;
+    flex-direction: column;
+    min-width: 200px;
+    flex: 1 1 220px;
+  }
 
-{% if data %}
-    <h3>Resultaten</h3>
-    <table>
-        <tr>
-            <th>Rang</th>
-            <th>Volksvertegenwoordiger</th>
-            <th>Fractie</th>
-            <th>Kieskring</th>
-            <th>Aantal vragen in dit thema</th>
-        </tr>
-        {% for r in data %}
-        <tr>
-            <td>{{ r.rang }}</td>
-            <td>{{ r.naam }}</td>
-            <td>{{ r.fractie }}</td>
-            <td>{{ r.kieskring }}</td>
-            <td>{{ r.aantal_vragen }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-{% else %}
-    <p>Geen resultaten gevonden voor deze combinatie.</p>
-{% endif %}
+  .filter-field label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #4b5563;
+    margin-bottom: 0.4rem;
+  }
+
+  .filter-field select {
+    border-radius: 0.75rem;
+    border: 1px solid #d1d5db;
+    padding: 0.55rem 0.8rem;
+    font-size: 0.95rem;
+    outline: none;
+  }
+
+  .filter-field select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 1px #2563eb33;
+  }
+
+  .filter-field-button {
+    flex: 0 0 140px;          /* vaste, kleinere kolom voor de knop */
+    display: flex;
+    align-items: flex-end;    /* onderaan uitlijnen met de selects */
+    justify-content: flex-end;/* knop tegen de rechterkant van de kolom */
+  }
+
+
+  .vv-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.2rem 1.4rem;
+  }
+
+  .vv-rank {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  .vv-content {
+    flex: 1;
+  }
+
+  .vv-name {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .vv-fraction {
+    margin: 0.1rem 0 0.3rem;
+    font-size: 0.9rem;
+    color: #4b5563;
+  }
+
+  .vv-count {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .vv-meta {
+    margin-top: 0.25rem;
+    font-size: 0.85rem;
+    color: #6b7280;
+  }
+
+  .vv-meta span {
+    font-weight: 500;
+  }
+
+  .empty-state {
+    margin-top: 2.5rem;
+    padding: 2rem;
+    border-radius: 1.25rem;
+    background: #ffffff;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    text-align: center;
+  }
+
+  .empty-state p {
+    margin-top: 0.5rem;
+    color: #6b7280;
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 768px) {
+    .filters-card {
+      margin-top: -1.5rem;
+      padding: 1.25rem 1.4rem;
+    }
+
+    .filters-row {
+      flex-direction: column;
+    }
+
+    .filter-field {
+      width: 100%;
+    }
+
+    .filter-field-button {
+      width: 100%;
+    }
+
+    .filter-field-button .btn {
+      width: 100%;
+      text-align: center;
+    }
+  }
+</style>
+
+<!-- HERO -->
+<section class="hero">
+  <h1 class="hero-title">Actiefste Volksvertegenwoordigers</h1>
+  <p class="hero-subtitle">
+    Ontdek welke volksvertegenwoordigers het meest actief zijn per thema en kieskring.
+  </p>
+</section>
+
+<section class="stats-container">
+
+  <!-- Filterkaart -->
+  <div class="card filters-card">
+    <h2 class="section-title" style="font-size:1.4rem; text-align:left; margin-bottom:1rem;">
+      Filter op thema en kieskring
+    </h2>
+
+    <form method="get" class="filters-form">
+      <div class="filters-row">
+        <!-- Kieskring -->
+        <div class="filter-field">
+          <label for="kieskring">Kieskring</label>
+          <select name="kieskring" id="kieskring">
+            <option value="">Alle kieskringen</option>
+            {% for k in kieskringen %}
+              <option value="{{ k }}"
+                {% if geselecteerde_kieskring == k %}selected{% endif %}>
+                {{ k }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Thema -->
+        <div class="filter-field">
+          <label for="thema">Thema</label>
+          <select name="thema" id="thema">
+            <option value="">Alle thema’s</option>
+            {% for t in themas %}
+              <option value="{{ t }}"
+                {% if geselecteerd_thema == t %}selected{% endif %}>
+                {{ t }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Filterknop -->
+        <div class="filter-field filter-field-button">
+          <button type="submit" class="btn">
+            Filter
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Resultaten -->
+  {% if resultaten and resultaten|length > 0 %}
+    <h2 class="section-title" style="margin-top:2.5rem;">Resultaten</h2>
+    <p style="text-align:center; color:#6b7280; margin-bottom:1.5rem;">
+      We tonen de meest actieve volksvertegenwoordigers voor de gekozen combinatie.
+    </p>
+
+    <div class="cards-grid">
+      {% for r in resultaten %}
+        <div class="card vv-card">
+          <div class="vv-rank">
+            #{{ loop.index }}
+          </div>
+          <div class="vv-content">
+            <h3 class="vv-name">{{ r.naam }}</h3>
+            <p class="vv-fraction">{{ r.fractie }}</p>
+            <p class="vv-count">
+              {{ r.aantal_vragen }} schriftelijke vragen
+            </p>
+            <p class="vv-meta">
+              Thema: <span>{{ r.thema }}</span> ·
+              Kieskring: <span>{{ r.kieskring }}</span>
+            </p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <div class="empty-state">
+      <h2 class="section-title" style="font-size:1.3rem; margin-bottom:0.5rem;">
+        Geen resultaten gevonden
+      </h2>
+      <p>
+        Voor deze combinatie van thema en kieskring zijn geen resultaten beschikbaar.
+        Probeer een andere selectie, of kies “Alle kieskringen” of “Alle thema’s”.
+      </p>
+    </div>
+  {% endif %}
+
+</section>
 
 {% endblock %}
+
