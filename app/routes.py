@@ -2,22 +2,53 @@ from flask import Blueprint, render_template
 from app.models import Persoon, Fractie, Thema, SchriftelijkeVragen, Persoonfunctie, ThemaKoppeling, Functies
 from sqlalchemy import func
 from app import db
+from sqlalchemy.exc import OperationalError
+
 
 main = Blueprint('main', __name__)
 
 # --- HOOFDPAGINA ---
 @main.route('/')
 def index():
-    aantal_vragen = db.session.query(func.count(SchriftelijkeVragen.id)).scalar() or 0
-    aantal_themas = db.session.query(func.count(Thema.id)).scalar() or 0
-    aantal_personen = db.session.query(func.count(Persoon.id)).scalar() or 0
-    aantal_fracties = db.session.query(func.count(Fractie.id)).scalar() or 0
-    aantal_beantwoord = (
-        db.session.query(func.count(SchriftelijkeVragen.id))
-        .filter(SchriftelijkeVragen.beantwoord.isnot(None))
-        .scalar()
-        or 0
-    )
+    try:
+        # Statistieken
+        aantal_vragen = db.session.query(func.count(SchriftelijkeVragen.id)).scalar() or 0
+        aantal_themas = db.session.query(func.count(Thema.id)).scalar() or 0
+        aantal_personen = db.session.query(func.count(Persoon.id)).scalar() or 0
+        aantal_fracties = db.session.query(func.count(Fractie.id)).scalar() or 0
+        aantal_beantwoord = (
+            db.session.query(func.count(SchriftelijkeVragen.id))
+            .filter(SchriftelijkeVragen.beantwoord.isnot(None))
+            .scalar()
+            or 0
+        )
+
+        # Recentste vragen
+        vragen = (
+            db.session.query(SchriftelijkeVragen)
+            .order_by(SchriftelijkeVragen.ingediend.desc())
+            .limit(5)
+            .all()
+        )
+
+        # Thema’s
+        themas = Thema.query.all()
+        themes_data = [{'naam': t.naam, 'count': 0} for t in themas]
+
+        # Fracties
+        fracties_data = Fractie.query.all()
+        fracties = [{'naam': f.naam, 'zetels': 0} for f in fracties_data]
+
+    except OperationalError:
+        # Database niet bereikbaar → geen crash, maar lege data
+        aantal_vragen = 0
+        aantal_themas = 0
+        aantal_personen = 0
+        aantal_fracties = 0
+        aantal_beantwoord = 0
+        vragen = []
+        themes_data = []
+        fracties = []
 
     stats_data = [
         {'label': 'Schriftelijke Vragen', 'value': aantal_vragen, 'icon': 'file-text'},
@@ -26,19 +57,13 @@ def index():
         {'label': 'Beantwoorde Vragen', 'value': f"{aantal_beantwoord}/{aantal_vragen}" if aantal_vragen else "0", 'icon': 'trending-up'},
     ]
 
-    vragen = (
-        db.session.query(SchriftelijkeVragen)
-        .order_by(SchriftelijkeVragen.ingediend.desc())
-        .limit(5)
-        .all()
+    return render_template(
+        'index.html',
+        stats=stats_data,
+        questions=vragen,
+        themes=themes_data,
+        fracties=fracties
     )
-
-    themas = Thema.query.all()
-    themes_data = [{'naam': t.naam, 'count': 0} for t in themas]
-    fracties_data = Fractie.query.all()
-    fracties = [{'naam': f.naam, 'zetels': 0} for f in fracties_data]
-
-    return render_template('index.html', stats=stats_data, questions=vragen, themes=themes_data, fracties=fracties)
 
 
 # --- OVERZICHTPAGINA STATISTIEKEN ---
