@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Actiefste Volksvertegenwoordigers per Thema &amp; Kieskring</h2>
+
+<form method="GET"
+      action="{{ url_for('main.actiefste_per_thema_en_kieskring') }}"
+      class="form-section">
+
+    <label for="kieskring">Kieskring:</label>
+    <select name="kieskring" id="kieskring">
+        {% for kk in kieskringen %}
+            <option value="{{ kk }}"
+                    {% if kk == geselecteerde_kieskring %}selected{% endif %}>
+                {{ kk }}
+            </option>
+        {% endfor %}
+    </select>
+
+<label for="thema">Thema:</label>
+<select name="thema" id="thema">
+    {% for t in themas %}
+        <option value="{{ t.id }}"
+            {% if geselecteerd_thema_id and t.id == geselecteerd_thema_id %}
+                selected
+            {% endif %}
+        >
+            {{ t.naam }}
+        </option>
+    {% endfor %}
+</select>
+
+
+    <button type="submit">Filter</button>
+</form>
+
+<hr>
+
+{% if data %}
+    <h3>Resultaten</h3>
+    <table>
+        <tr>
+            <th>Rang</th>
+            <th>Volksvertegenwoordiger</th>
+            <th>Fractie</th>
+            <th>Kieskring</th>
+            <th>Aantal vragen in dit thema</th>
+        </tr>
+        {% for r in data %}
+        <tr>
+            <td>{{ r.rang }}</td>
+            <td>{{ r.naam }}</td>
+            <td>{{ r.fractie }}</td>
+            <td>{{ r.kieskring }}</td>
+            <td>{{ r.aantal_vragen }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p>Geen resultaten gevonden voor deze combinatie.</p>
+{% endif %}
+
+{% endblock %}

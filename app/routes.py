@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request
 from app.models import Persoon, Fractie, Thema, SchriftelijkeVragen, Persoonfunctie, ThemaKoppeling, Functies
 from sqlalchemy import func
 from app import db
@@ -185,6 +185,85 @@ def statistieken_personen():
         data = []
 
     return render_template("statistieken_personen.html", data=data)
+
+
+# --- ACTIEFSTE VOLKSVERTEGENWOORDIGERS PER THEMA & KIESKRING ---
+@main.route('/statistieken/actiefste', methods=['GET'])
+def actiefste_per_thema_en_kieskring():
+    try:
+        # Alle verschillende kieskringen ophalen (voor de dropdown)
+        kieskringen = [
+            k[0] for k in (
+                db.session.query(Persoon.kieskring)
+                .distinct()
+                .order_by(Persoon.kieskring)
+                .all()
+            )
+            if k[0] is not None
+        ]
+
+        # Alle thema's voor de dropdown
+        themas = Thema.query.order_by(Thema.naam).all()
+
+        # Wat heeft de gebruiker geselecteerd?
+        geselecteerde_kieskring = request.args.get('kieskring')
+        geselecteerd_thema_id = request.args.get('thema')
+
+        data = []
+
+        if geselecteerde_kieskring and geselecteerd_thema_id:
+            rows = (
+                db.session.query(
+                    Persoon.id.label("persoon_id"),
+                    Persoon.voornaam,
+                    Persoon.naam,
+                    Persoon.kieskring,
+                    Fractie.naam.label("fractie_naam"),
+                    func.count(SchriftelijkeVragen.id).label("aantal_vragen"),
+                )
+                .join(Persoonfunctie, Persoonfunctie.id_prs == Persoon.id)
+                .join(Fractie, Fractie.id == Persoonfunctie.id_frc)
+                .join(SchriftelijkeVragen, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
+                .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
+                .filter(Persoon.kieskring == geselecteerde_kieskring)
+                .filter(ThemaKoppeling.id_thm == geselecteerd_thema_id)
+                .group_by(
+                    Persoon.id,
+                    Persoon.voornaam,
+                    Persoon.naam,
+                    Persoon.kieskring,
+                    Fractie.naam,
+                )
+                .order_by(func.count(SchriftelijkeVragen.id).desc())
+                .all()
+            )
+
+            for idx, r in enumerate(rows, start=1):
+                data.append({
+                    "rang": idx,
+                    "naam": f"{r.voornaam} {r.naam}",
+                    "fractie": r.fractie_naam,
+                    "kieskring": r.kieskring,
+                    "aantal_vragen": r.aantal_vragen,
+                })
+
+    except OperationalError:
+        # Als de database niet bereikbaar is → lege state ipv 500 error
+        kieskringen = []
+        themas = []
+        geselecteerde_kieskring = None
+        geselecteerd_thema_id = None
+        data = []
+
+    return render_template(
+        "statistieken_actiefste.html",
+        kieskringen=kieskringen,
+        themas=themas,
+        geselecteerde_kieskring=geselecteerde_kieskring,
+        geselecteerd_thema_id=geselecteerd_thema_id,
+        data=data,
+    )
+
 
 
 # priority scoring algoritme 
