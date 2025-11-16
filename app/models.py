@@ -10,18 +10,18 @@ class GeslachtEnum(enum.Enum):
     X = "X"
 
 # ===== FRACTIE =====
-class Fractie(db.Model):
+class Fractie(db.Model): #database tabel met de naam fractie
     __tablename__ = "fractie"
 
-    id = db.Column(UUID(as_uuid=True), primary_key=True)  # geen default
-    naam = db.Column(db.String, nullable=False)
-    logo_url = db.Column(db.String)
+    id = db.Column(UUID(as_uuid=True), primary_key=True)  # geen default,kolom id is primary key
+    naam = db.Column(db.String, nullable=False) #mag niet leeg zijn
+    logo_url = db.Column(db.String) #mag wel leeg zijn, bevat url naar fractielogo
 
 # ===== FUNCTIES =====
-class Functies(db.Model):
+class Functies(db.Model): #database tabel met de naam functies
     __tablename__ = "functies"
 
-    id = db.Column(UUID(as_uuid=True), primary_key=True)  # geen default
+    id = db.Column(UUID(as_uuid=True), primary_key=True)  # geen default, wederom is de id de primary key
     code = db.Column(db.String, unique=True, nullable=False)
     naam = db.Column(db.String, nullable=False)
     omschrijving = db.Column(db.Text)
@@ -39,7 +39,7 @@ class Persoon(db.Model):
     kieskring = db.Column(db.String, nullable=False)
 
 # ===== PERSOONFUNCTIE =====
-class Persoonfunctie(db.Model):
+class Persoonfunctie(db.Model): #koppelt een persoon aan een functie en eventueel een fractie
     __tablename__ = "persoonfunctie"
 
     id = db.Column(UUID(as_uuid=True), primary_key=True)  # geen default

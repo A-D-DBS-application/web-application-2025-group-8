@@ -33,7 +33,7 @@ def index():
 
         # Thema’s
         themas = Thema.query.all()
-        themes_data = [{'naam': t.naam, 'count': 0} for t in themas]
+        themes_data = [{'naam': t.naam, 'count': 0} for t in themas] #maak lijst van thema's elk krijgt voorlopig count 0
 
         # Fracties
         fracties_data = Fractie.query.all()
@@ -63,7 +63,7 @@ def index():
         questions=vragen,
         themes=themes_data,
         fracties=fracties
-    )
+    ) #stuurt alle data naar de pagina index.html
 
 
 # --- OVERZICHTPAGINA STATISTIEKEN ---
