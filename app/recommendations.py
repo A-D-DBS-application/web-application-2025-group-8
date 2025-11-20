@@ -1,17 +1,19 @@
-from app.models import SchriftelijkeVragen, ThemaKoppeling, Thema, Persoon, Persoonfunctie
-from app import db
-from sqlalchemy import func
-from datetime import datetime
-import math
+from app.models import SchriftelijkeVragen, ThemaKoppeling, Thema, Persoon, Persoonfunctie, Fractie, Functies
+
+from app import db #haalt de SQLAlchemy-database binding (session/engine) op
+from sqlalchemy import func #geeft toegang tot SQL functies zoals count() die je in query-expressies gebruikt.
+from datetime import datetime #voor tijd/recency-berekeningen (hoe recent is een vraag).
+import math #nodig voor wiskundige functies, indien nodig.
 
 
 # ----------------------
 # Helper: haal thema's per vraag op
 # ----------------------
-def get_themas_for_vraag(vraag_id):
+#Waarom: thema's zijn cruciaal voor content-based matching; we willen makkelijk het thema-overlap berekenen.
+def get_themas_for_vraag(vraag_id): #functie die alle themanamen ophaalt die gekoppeld zijn aan één vraag
     rows = (
-        db.session.query(Thema.naam)
-        .join(ThemaKoppeling, ThemaKoppeling.id_thm == Thema.id)
+        db.session.query(Thema.naam) #bouwt een SQLAlchemy query die alleen de kolom Thema.naam selecteert
+        .join(ThemaKoppeling, ThemaKoppeling.id_thm == Thema.id) #oegt een SQL JOIN toe tussen Thema en ThemaKoppeling op de foreign key-relatie (koppelingstabel).
         .filter(ThemaKoppeling.id_schv == vraag_id)
         .all()
     )
