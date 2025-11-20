@@ -9,13 +9,13 @@
 </section>
 
 <section style="padding:2rem;">
-  <table style="width:100%; border-collapse:collapse;">
-    <thead style="background:#f3f4f6;">
+  <table id="vvTable" style="width:100%; border-collapse:collapse;">
+    <thead style="background:#f3f4f6; cursor:pointer;">
       <tr>
-        <th style="padding:8px; text-align:left;">Naam volksvertegenwoordiger</th>
-        <th style="padding:8px; text-align:left;">Fractie</th>
-        <th style="padding:8px; text-align:left;">Kieskring</th>
-        <th style="padding:8px; text-align:left;">Functie</th>
+        <th onclick="sortTable(0)" style="padding:8px; text-align:left;">Naam volksvertegenwoordiger ⬍</th>
+        <th onclick="sortTable(1)" style="padding:8px; text-align:left;">Fractie ⬍</th>
+        <th onclick="sortTable(2)" style="padding:8px; text-align:left;">Kieskring ⬍</th>
+        <th onclick="sortTable(3)" style="padding:8px; text-align:left;">Functie ⬍</th>
       </tr>
     </thead>
     <tbody>
@@ -38,4 +38,23 @@
     </tbody>
   </table>
 </section>
+
+<script>
+let sortDirection = [true, true, true, true]; // bijhouden van oplopend/aflopend per kolom
+
+function sortTable(columnIndex) {
+  const table = document.getElementById("vvTable");
+  const rows = Array.from(table.rows).slice(1); // oversla header
+  const dir = sortDirection[columnIndex] ? 1 : -1;
+
+  rows.sort((a, b) => {
+    const A = a.cells[columnIndex].innerText.trim().toLowerCase();
+    const B = b.cells[columnIndex].innerText.trim().toLowerCase();
+    return A.localeCompare(B) * dir;
+  });
+
+  rows.forEach(row => table.tBodies[0].appendChild(row));
+  sortDirection[columnIndex] = !sortDirection[columnIndex];
+}
+</script>
 {% endblock %}
