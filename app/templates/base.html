@@ -120,6 +120,20 @@
     </style>
 </head>
 <body>
+    
+ <!-- NAVIGATIEBALK: TERUG + HOME -->
+    <nav class="navbar bg-light px-3 py-2 mb-3">
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">
+                ← Terug
+            </button>
+            <a href="{{ url_for('main.index') }}" class="btn btn-primary">
+                Home
+            </a>
+        </div>
+    </nav>
+    
+    
     <div class="page-container">
         {% block content %}{% endblock %}
     </div>
