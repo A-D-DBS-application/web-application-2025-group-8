@@ -1,0 +1,17 @@
+<h2>{{ vraag.onderwerp }}</h2>
+<p>{{ vraag.tekst }}</p>
+
+<h3>Gelijkaardige vragen</h3>
+
+{% if similar %}
+    <ul>
+    {% for v in similar %}
+        <li>
+            <a href="/vraag/{{ v.id }}">{{ v.onderwerp }}</a>
+            ({{ v.ingediend }})
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>Geen gelijkaardige vragen gevonden.</p>
+{% endif %}
