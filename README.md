@@ -23,6 +23,7 @@ https://miro.com/app/board/uXjVJz4H2AQ=/
 eerste feedbackmoment: https://ugentbe-my.sharepoint.com/personal/loran_devriendt_ugent_be/_layouts/15/stream.aspx?id=%2Fpersonal%2Floran%5Fdevriendt%5Fugent%5Fbe%2FDocuments%2FOpnamen%2FAD%20project%2D20251113%5F150225%2DOpname%20van%20vergadering%2Emp4&referrer=StreamWebApp%2EWeb&referrerScenario=AddressBarCopied%2Eview%2E689ac90e%2D80c3%2D4400%2Db9ec%2D16b2554bab86&ga=1
 
 ### Link to UI prototype
+https://lovable.dev/projects/423033f1-cd55-4120-af69-54792385afd1?permissionView=main
 
 ### Other links/info
 
