@@ -4,8 +4,6 @@ import uuid
 import time
 import requests
 import xml.etree.ElementTree as ET
-from io import BytesIO
-from PyPDF2 import PdfReader
 from dotenv import load_dotenv
 from supabase import create_client
 
@@ -29,20 +27,7 @@ BASE_API_URL = (
 )
 
 # === HELPERS ===
-def extract_text_from_pdf(pdf_bytes: bytes) -> str:
-    """Haalt tekst uit een PDF."""
-    text = ""
-    try:
-        reader = PdfReader(BytesIO(pdf_bytes))
-        for page in reader.pages:
-            text += page.extract_text() or ""
-    except Exception as e:
-        print(f"⚠️ PDF extractie mislukt: {e}")
-    return text.strip()
-
-
 def get_persoonfunctie_id(voornaam: str, naam: str, functie_uuid: str):
-    """Zoekt de juiste persoonfunctie-id op basis van naam/voornaam."""
     if not voornaam or not naam:
         return None
     res = supabase.table("persoon") \
@@ -51,7 +36,6 @@ def get_persoonfunctie_id(voornaam: str, naam: str, functie_uuid: str):
         .ilike("voornaam", f"%{voornaam}%") \
         .execute().data
     if not res:
-        print(f"⚠️ Geen persoon gevonden: {voornaam} {naam}")
         return None
     id_prs = res[0]["id"]
     pf = supabase.table("persoonfunctie") \
@@ -60,22 +44,21 @@ def get_persoonfunctie_id(voornaam: str, naam: str, functie_uuid: str):
         .eq("id_fnc", functie_uuid) \
         .execute().data
     if not pf:
-        print(f"⚠️ Geen functie gevonden voor {voornaam} {naam}")
         return None
     return pf[0]["id"]
 
 
-# === DETAIL-VERWERKING ===
 def process_detail(schv_id: str):
-    """Haalt detaildata op van één schriftelijke vraag."""
     url = f"{BASE_DETAIL_URL}{schv_id}"
-    r = requests.get(url)
-    if r.status_code != 200:
+    try:
+        r = requests.get(url, timeout=10)
+        r.raise_for_status()
+    except requests.RequestException:
         print(f"⚠️ Detail niet gevonden: {schv_id}")
         return None
+
     try:
         root = ET.fromstring(r.content)
-
         onderwerp = root.findtext("onderwerp", "").strip()
         vs_node = root.find("vraagsteller")
         vs_voornaam = vs_node.findtext("voornaam", "").strip() if vs_node is not None else ""
@@ -84,35 +67,30 @@ def process_detail(schv_id: str):
         min_voornaam = min_node.findtext("voornaam", "").strip() if min_node is not None else ""
         min_naam = min_node.findtext("naam", "").strip() if min_node is not None else ""
 
-        # === procedureverloop uitlezen ===
         datum_ingediend = None
         datum_beantwoord = None
         for pv in root.findall(".//procedureverloop"):
             status = pv.findtext("status", "")
             datum = pv.findtext("datum", "")
-            if "Vraag gesteld aan de minister" in status:
+            if any(x in status for x in ["Vraag gesteld", "Vraag ingediend"]):
                 datum_ingediend = datum.split("T")[0]
-            elif "Tijdig beantwoord" in status:
+            elif any(x in status for x in [
+                "Beantwoord",
+                "Antwoord",
+                "Laattijdig beantwoord",
+                "Tijdig beantwoord",
+                "Antwoord ontvangen",
+                "Antwoord gepubliceerd"
+            ]):
                 datum_beantwoord = datum.split("T")[0]
 
-        # === PDF ophalen ===
-        pdf_url = root.findtext(".//bestand-ordered/URL")
-        tekst = ""
-        if pdf_url:
-            try:
-                pdf_resp = requests.get(pdf_url)
-                if pdf_resp.status_code == 200:
-                    tekst = extract_text_from_pdf(pdf_resp.content)
-                else:
-                    print(f"⚠️ Geen PDF voor {schv_id}")
-            except Exception as e:
-                print(f"⚠️ Fout bij PDF download {schv_id}: {e}")
+        pdf_url = root.findtext(".//bestand-ordered/URL") or ""
 
         return {
             "id": str(uuid.uuid5(uuid.NAMESPACE_DNS, f"schv_{schv_id}")),
             "ingediend": datum_ingediend or "1900-01-01",
             "onderwerp": onderwerp,
-            "tekst": tekst,
+            "tekst": pdf_url.strip(),
             "id_prsfnc_vs": get_persoonfunctie_id(vs_voornaam, vs_naam, FUNCTIE_VV),
             "id_prsfnc_min": get_persoonfunctie_id(min_voornaam, min_naam, FUNCTIE_MIN),
             "beantwoord": datum_beantwoord,
@@ -123,41 +101,44 @@ def process_detail(schv_id: str):
 
 
 # === MAIN ===
-print("🔄 Recente schriftelijke vragen ophalen (eerste 50)...")
+print("🔄 Schriftelijke vragen 3001–4000 ophalen...")
 all_records = []
 count = 0
 
-for page in [1, 2]:
+for page in range(121, 161):  # Pagina’s 121–160 ≈ 1000 vragen (3001–4000)
     url = BASE_API_URL.format(page=page)
-    print(f"\n📥 Ophalen van {url}")
     resp = requests.get(url)
     if resp.status_code != 200:
         print(f"❌ Fout bij pagina {page}: {resp.status_code}")
         break
 
-    try:
-        data = resp.json()
-    except Exception as e:
-        print(f"❌ JSON parse fout: {e}")
+    data = resp.json()
+    results = data.get("result", [])
+    if not results:
         break
 
-    results = data.get("result", [])
-    print(f"📋 {len(results)} resultaten ontvangen.")
+    print(f"📋 Pagina {page}: {len(results)} resultaten.")
     for item in results:
         id_text = item.get("id", "")
         match = re.search(r"/(\d+)/pfls", id_text)
         if not match:
             continue
         schv_id = match.group(1)
+
         rec = process_detail(schv_id)
         if rec:
-            all_records.append(rec)
-            count += 1
-            print(f"✅ [{count}] {rec['onderwerp'][:80]}")
+            if not any(r["id"] == rec["id"] for r in all_records):  # Geen dubbels
+                all_records.append(rec)
+                count += 1
+                print(f"✅ [{count}] {rec['onderwerp'][:80]}")
 
-        time.sleep(0.4)
+        time.sleep(0.2)
 
-print(f"\n⬆️ Uploaden van {len(all_records)} records naar Supabase...")
-supabase.table("schriftelijke_vragen").upsert(all_records).execute()
+# Upsert in batches van 100
+batch_size = 100
+for i in range(0, len(all_records), batch_size):
+    batch = all_records[i:i + batch_size]
+    supabase.table("schriftelijke_vragen").upsert(batch).execute()
+    print(f"Batch {i//batch_size + 1} ({len(batch)} records) geüpload.")
 
-print("✅ Klaar! Eerste 50 schriftelijke vragen succesvol gekoppeld en ingevoerd.")
+print(f"Klaar! {len(all_records)} schriftelijke vragen (3001–4000) ingevoerd.")
