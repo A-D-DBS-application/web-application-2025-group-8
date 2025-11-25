@@ -1,2 +1,35 @@
 1) Waarom data op deze manier opghaald.
 2)enkel van deze legislatuur (maar pas vanaf april of maart) data ophalen. Waarom?
+
+
+cardinalities:
+1. persoon — persoonfunctie
+
+Elke persoon kan meerdere functies hebben in de tijd.
+Elke persoonfunctie hoort bij exact één persoon.
+→ 1:N relatie
+
+2. functies — persoonfunctie
+
+Eén functie (bv. “minister”) kan door meerdere persoonfuncties ingevuld worden doorheen de tijd.
+Elke persoonfunctie heeft precies één functie.
+→ 1:N relatie
+
+3. fractie — persoonfunctie
+
+Eén fractie kan meerdere personen bevatten.
+Een persoonfunctie hoort bij precies één fractie.
+→ 1:N relatie
+
+4. schriftelijke_vragen — thema_koppeling
+
+Een schriftelijke vraag kan meerdere thema’s hebben.
+Een thema kan aan meerdere vragen gekoppeld worden.
+Dit is een klassieke associatietabel (M:N).
+→ Globaal: M:N via thema_koppeling
+
+5. schriftelijke_vragen — persoonfunctie (via id_prsnc_vs & id_prsnc_min)
+
+Een vraag heeft exact één verantwoordelijke en exact één minister.
+Een persoonfunctie kan in meerdere vragen voorkomen.
+→ Beide zijn 1:N relaties
