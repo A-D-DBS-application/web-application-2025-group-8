@@ -1,0 +1,33 @@
+Dit bevat de basis user stories voor het Minimum Viable Product (MVP) van de applicatie.  
+
+------------------------------------------------------------
+
+1. Volksvertegenwoordigers
+
+- Als gebruiker wil ik een lijst van alle volksvertegenwoordigers kunnen bekijken zodat ik weet wie actief is.
+- Als gebruiker wil ik de kieskring van elke vertegenwoordiger kunnen zien zodat ik weet wie mijn lokale vertegenwoordiger is.
+- Als gebruiker wil ik de detailpagina van een volksvertegenwoordiger kunnen openen zodat ik zijn/haar activiteiten kan bekijken.
+
+------------------------------------------------------------
+
+2. Parlementaire Vragen
+
+- Als gebruiker wil ik een overzicht van parlementaire vragen zien zodat ik kan volgen welke thema’s recent behandeld worden.
+- Als gebruiker wil ik dat recente vragen bovenaan getoond worden zodat ik snel de nieuwste informatie terugvind.
+- Als gebruiker wil ik vragen kunnen filteren per thema zodat ik sneller relevante vragen kan vinden.
+
+------------------------------------------------------------
+
+3. Prioriteitsscore (Algoritme)
+
+- Als gebruiker wil ik dat elke vraag een prioriteitsscore heeft zodat ik direct zie welke vragen belangrijk of actueel zijn.
+- Als gebruiker wil ik dat recente vragen een hogere score krijgen zodat de actuele vragen automatisch bovenaan komen.
+- Als gebruiker wil ik dat vragen met meerdere thema’s een hogere score krijgen zodat complexere vragen meer gewicht krijgen.
+
+------------------------------------------------------------
+
+4. Kieskringfunctionaliteit
+
+- Als gebruiker wil ik kunnen zien wie binnen mijn kieskring het meest actief is zodat ik weet wie mijn belangen actief vertegenwoordigt.
+
+------------------------------------------------------------
