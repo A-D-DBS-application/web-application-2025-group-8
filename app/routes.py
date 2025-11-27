@@ -3,6 +3,8 @@ from app.models import Persoon, Fractie, Thema, SchriftelijkeVragen, Persoonfunc
 from sqlalchemy import func
 from app import db
 from sqlalchemy.exc import OperationalError
+from flask_caching import Cache
+
 
 
 main = Blueprint('main', __name__)
@@ -188,10 +190,17 @@ def statistieken_personen():
 
 
 # --- ACTIEFSTE VOLKSVERTEGENWOORDIGERS PER THEMA & KIESKRING ---
+
+
+# Caching initialiseren (zet dit in je __init__.py of bovenaan routes-bestand)
+from app import db, cache  # gebruik de cache die in __init__.py is geïnitialiseerd
+
+
 @main.route('/statistieken/actiefste', methods=['GET'])
+@cache.cached(timeout=3600, query_string=True)   # cache 1 uur per combinatie van parameters
 def actiefste_per_thema_en_kieskring():
     try:
-        # Alle verschillende kieskringen ophalen (voor de dropdown)
+        # Alle kieskringen en thema's voor dropdowns
         kieskringen = [
             k[0] for k in (
                 db.session.query(Persoon.kieskring)
@@ -201,17 +210,23 @@ def actiefste_per_thema_en_kieskring():
             )
             if k[0] is not None
         ]
+        themas = [{"id": t.id, "naam": t.naam} for t in Thema.query.order_by(Thema.naam).all()]
 
-        # Alle thema's voor de dropdown
-        themas = Thema.query.order_by(Thema.naam).all()
 
-        # Wat heeft de gebruiker geselecteerd?
         geselecteerde_kieskring = request.args.get('kieskring')
         geselecteerd_thema_id = request.args.get('thema')
-
         data = []
 
         if geselecteerde_kieskring and geselecteerd_thema_id:
+            # 🔹 Subquery: enkel persoonfuncties in gekozen kieskring
+            subq_pf = (
+                db.session.query(Persoonfunctie.id)
+                .join(Persoon, Persoon.id == Persoonfunctie.id_prs)
+                .filter(Persoon.kieskring == geselecteerde_kieskring)
+                .subquery()
+            )
+
+            # 🔹 Hoofdquery: gebruik subquery + filter vóór join
             rows = (
                 db.session.query(
                     Persoon.id.label("persoon_id"),
@@ -225,7 +240,7 @@ def actiefste_per_thema_en_kieskring():
                 .join(Fractie, Fractie.id == Persoonfunctie.id_frc)
                 .join(SchriftelijkeVragen, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
                 .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
-                .filter(Persoon.kieskring == geselecteerde_kieskring)
+                .filter(Persoonfunctie.id.in_(subq_pf))  # 🔥 filter eerst
                 .filter(ThemaKoppeling.id_thm == geselecteerd_thema_id)
                 .group_by(
                     Persoon.id,
@@ -263,6 +278,7 @@ def actiefste_per_thema_en_kieskring():
         geselecteerd_thema_id=geselecteerd_thema_id,
         data=data,
     )
+
 
 
 
