@@ -323,26 +323,38 @@ def statistieken_priority():
         data = []
 
     return render_template("statistieken_priority.html", data=data)
-
 @main.route('/volksvertegenwoordigers')
 def volksvertegenwoordigers():
     try:
-        personen = db.session.query(Persoon).all()
-        data = []
-        for p in personen:
-            persoonfuncties = db.session.query(Persoonfunctie).filter_by(id_prs=p.id).all()
-            for pf in persoonfuncties:
-                fractie = db.session.query(Fractie).get(pf.id_frc)
-                functie = db.session.query(Functies).get(pf.id_fnc)
-                data.append({
-                    "naam": f"{p.voornaam} {p.naam}",
-                    "fractie": fractie.naam if fractie else "-",
-                    "kieskring": p.kieskring or "-",
-                    "functie": functie.naam if functie else "-"
-                })
+        rows = (
+            db.session.query(
+                Persoon.voornaam,
+                Persoon.naam,
+                Persoon.kieskring,
+                Fractie.naam.label("fractie"),
+                Functies.naam.label("functie")
+            )
+            .join(Persoonfunctie, Persoonfunctie.id_prs == Persoon.id)
+            .join(Fractie, Fractie.id == Persoonfunctie.id_frc, isouter=True)
+            .join(Functies, Functies.id == Persoonfunctie.id_fnc, isouter=True)
+            .order_by(Persoon.naam)
+            .all()
+        )
+
+        data = [
+            {
+                "naam": f"{r.voornaam} {r.naam}",
+                "fractie": r.fractie or "-",
+                "kieskring": r.kieskring or "-",
+                "functie": r.functie or "-"
+            }
+            for r in rows
+        ]
     except OperationalError:
         data = []
+
     return render_template("volksvertegenwoordigers.html", volksvertegenwoordigers=data)
+
 
 # --- ZOEKFUNCTIE VOOR SCHRIFTELIJKE VRAGEN ---
 @main.route('/zoeken', methods=['GET', 'POST'])
