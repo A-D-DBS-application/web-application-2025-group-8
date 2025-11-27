@@ -5,7 +5,8 @@ from app import db
 from sqlalchemy.exc import OperationalError
 from flask_caching import Cache
 
-
+# priority scoring algoritme 
+from datetime import datetime, date
 
 main = Blueprint('main', __name__)
 
@@ -282,47 +283,73 @@ def actiefste_per_thema_en_kieskring():
 
 
 
-# priority scoring algoritme 
-from datetime import datetime
-from app.models import ThemaKoppeling  # staat er waarschijnlijk al, zo niet: importeren
 
-# --- PRIORITY SCORING ALGORITME ---
+
+
+
+# ✅ Zorg dat cache in __init__.py staat, bijvoorbeeld:
+# cache = Cache(config={'CACHE_TYPE': 'simple'})
+# cache.init_app(app)
+
 @main.route('/statistieken/priority')
+@cache.cached(timeout=1800)  # cache 30 minuten
 def statistieken_priority():
     try:
-        vragen = db.session.query(SchriftelijkeVragen).all()
-        data = []
-
-        for vraag in vragen:
-            # Hoe recent is de vraag?
-            dagen_verschil = (datetime.now().date() - vraag.ingediend).days if vraag.ingediend else 999
-            recency_score = max(0, 100 - dagen_verschil)
-
-            # Aantal thema’s gekoppeld aan de vraag
-            aantal_themas = (
-                db.session.query(ThemaKoppeling)
-                .filter(ThemaKoppeling.id_schv == vraag.id)
-                .count()
+        # 🔹 Eén query die alles in één keer ophaalt
+        rows = (
+            db.session.query(
+                SchriftelijkeVragen.id,
+                SchriftelijkeVragen.onderwerp,
+                SchriftelijkeVragen.ingediend,
+                SchriftelijkeVragen.beantwoord,
+                func.count(ThemaKoppeling.id_thm).label("aantal_themas")
             )
-            thema_score = aantal_themas * 10
+            .outerjoin(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
+            .group_by(SchriftelijkeVragen.id)
+            .all()
+        )
 
-            # Totale prioriteitsscore
-            total_score = recency_score + thema_score
+        data = []
+        vandaag = date.today()
+
+        for r in rows:
+            # --- Actualiteitsscore (laatste 100 dagen) ---
+            if r.ingediend:
+                dagen_verschil = (vandaag - r.ingediend).days
+                # Enkel laatste 100 dagen tellen mee, daarna score = 0
+                if dagen_verschil <= 100:
+                    # Lineair afnemen: 100 → 0 over 100 dagen
+                    recency_score = max(0, 100 - dagen_verschil)
+                else:
+                    recency_score = 0
+            else:
+                recency_score = 0
+
+            # --- Themascore ---
+            thema_score = min(50, r.aantal_themas * 12)
+
+            # --- Bonus of straf ---
+            antwoord_bonus = -20 if r.beantwoord else 0
+
+            # --- Totale prioriteit ---
+            total_score = max(0, recency_score + thema_score + antwoord_bonus)
 
             data.append({
-                "onderwerp": vraag.onderwerp,
-                "ingediend": vraag.ingediend.strftime("%Y-%m-%d") if vraag.ingediend else "-",
-                "beantwoord": "Nee" if vraag.beantwoord is None else "Ja",
-                "aantal_themas": aantal_themas,
-                "priority_score": total_score,
+                "onderwerp": r.onderwerp,
+                "ingediend": r.ingediend.strftime("%Y-%m-%d") if r.ingediend else "-",
+                "beantwoord": "Ja" if r.beantwoord else "Nee",
+                "aantal_themas": r.aantal_themas,
+                "priority_score": round(total_score, 1),
             })
 
-        # Sorteer van hoogste naar laagste prioriteit
+        # 🔹 Sorteer op hoogste prioriteit
         data.sort(key=lambda x: x["priority_score"], reverse=True)
+
     except OperationalError:
         data = []
 
     return render_template("statistieken_priority.html", data=data)
+
 @main.route('/volksvertegenwoordigers')
 def volksvertegenwoordigers():
     try:
