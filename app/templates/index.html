@@ -3,15 +3,14 @@
 {% block content %}
 <!-- HERO -->
 <section class="hero">
-    <h1 class="hero-title">Vlaams Parlement Transparantie</h1>
-    <p class="hero-subtitle">
-        Ontdek schriftelijke vragen, volg volksvertegenwoordigers en krijg inzicht in politieke thema’s
-    </p>
-    <div class="hero-buttons">
-      <a href="{{ url_for('main.zoeken') }}" class="btn">Zoek schriftelijke vragen op trefwoord</a>
-      <a href="{{ url_for('main.statistieken_overzicht') }}" class="btn">Bekijk statistieken</a>
-    </div>
-
+  <h1 class="hero-title">Vlaams Parlement Transparantie</h1>
+  <p class="hero-subtitle">
+    Ontdek schriftelijke vragen, volg volksvertegenwoordigers en krijg inzicht in politieke thema’s
+  </p>
+  <div class="hero-buttons">
+    <a href="{{ url_for('main.zoeken') }}" class="btn">Zoek schriftelijke vragen op trefwoord</a>
+    <a href="{{ url_for('main.statistieken_overzicht') }}" class="btn">Bekijk statistieken</a>
+  </div>
 </section>
 
 <!-- PLATFORM OVERZICHT -->
@@ -19,7 +18,7 @@
   <h2 class="section-title">Platform Overzicht</h2>
   <div class="cards-grid">
 
-    <a href="{{ url_for('main.overzicht_schriftelijke_vragen') }}" class="btn">
+    <a href="{{ url_for('main.schriftelijke_vragen') }}" class="btn">
       Schriftelijke Vragen
     </a>
 
@@ -86,4 +85,3 @@
 </section>
 
 {% endblock %}
-

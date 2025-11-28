@@ -384,8 +384,6 @@ def volksvertegenwoordigers():
 
 
 
-from sqlalchemy import func
-
 @main.route('/zoeken', methods=['GET', 'POST'])
 def zoeken():
     resultaten = []
@@ -427,28 +425,49 @@ def zoeken():
 def actieve_themas():
     return render_template("actieve_themas.html")
 
-@main.route('/statistieken/vragen', methods=['GET'])
-def overzicht_schriftelijke_vragen():
+# --- SCHRIFTELIJKE VRAGEN PAGINA ---
+@main.route('/schriftelijke_vragen')
+def schriftelijke_vragen():
     try:
-        # Haal de schriftelijke vragen op met thema’s
         vragen = (
-            db.session.query(
-                SchriftelijkeVragen.vraag,
-                SchriftelijkeVragen.datum_indiening,
-                SchriftelijkeVragen.datum_beantwoord,
-                Thema.naam.label("thema_naam")
-            )
-            .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
-            .join(Thema, Thema.id == ThemaKoppeling.id_thm)
-            .order_by(SchriftelijkeVragen.datum_indiening.desc())
+            db.session.query(SchriftelijkeVragen)
+            .filter(SchriftelijkeVragen.ingediend.isnot(None))
+            .order_by(SchriftelijkeVragen.ingediend.desc())
+            .limit(50)
             .all()
         )
 
-    except Exception as e:
-        print(e)
-        vragen = []
+        data = []
+        for v in vragen:
+            pf = db.session.query(Persoonfunctie).get(v.id_prsfnc_vs)
+            indiener = "-"
+            fractie = "-"
+            if pf:
+                persoon = db.session.query(Persoon).get(pf.id_prs)
+                fractie_obj = db.session.query(Fractie).get(pf.id_frc)
+                if persoon:
+                    indiener = f"{persoon.voornaam} {persoon.naam}"
+                if fractie_obj:
+                    fractie = fractie_obj.naam
 
-    return render_template('schriftelijke_vragen.html', vragen=vragen)
+            data.append({
+                "onderwerp": v.onderwerp,
+                "indiener": indiener,
+                "fractie": fractie,
+                "datum": v.ingediend.strftime("%Y-%m-%d") if v.ingediend else "-"
+            })
+
+        data.sort(key=lambda x: x["datum"], reverse=True)
+
+    except OperationalError as e:
+        print("❌ Databasefout:", e)
+        data = []
+
+    return render_template("schriftelijke_vragen.html", vragen=data)
+
+
+
+
 #verwijst naar ons recomendation algoritme
 from app.recommendations import vergelijkbare_vragen
 

@@ -1,47 +1,46 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- HERO (blauwe header) -->
+<!-- HERO -->
 <section class="hero">
   <h1 class="hero-title">Schriftelijke Vragen</h1>
-  <p class="hero-subtitle">Bekijk de recentste schriftelijke vragen, gesorteerd op datum van indiening</p>
+  <p class="hero-subtitle">
+    Bekijk de meest recente schriftelijke vragen en ontdek wie ze heeft ingediend.
+  </p>
 </section>
 
 <!-- INFO-BOX NET ONDER HEADER -->
 <section style="background-color:#f9fafb; padding:1.5rem 0;">
   <div style="max-width:800px; margin:auto; text-align:center; color:#374151;">
     <h2 style="font-size:1.3rem; font-weight:600;">Over dit overzicht</h2>
-    <p>Hieronder vind je de meest recente schriftelijke vragen. Je ziet per vraag het onderwerp, 
-       de datum van indiening en de datum waarop ze beantwoord werd (indien al beantwoord).</p>
+    <p>Hieronder vind je de 50 meest recente schriftelijke vragen, met de naam en fractie van de indiener.</p>
   </div>
 </section>
 
 <!-- TABEL -->
 <section style="padding:2rem;">
-  <table style="width:100%; border-collapse:collapse;">
+  <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
     <thead style="background:#f3f4f6;">
       <tr>
         <th style="padding:10px; text-align:left;">Onderwerp</th>
-        <th style="padding:10px; text-align:left;">Datum indiening</th>
-        <th style="padding:10px; text-align:left;">Datum beantwoord</th>
+        <th style="padding:10px; text-align:left;">Indiener</th>
+        <th style="padding:10px; text-align:left;">Fractie</th>
+        <th style="padding:10px; text-align:left;">Datum ingediend</th>
       </tr>
     </thead>
     <tbody>
       {% if vragen %}
         {% for v in vragen %}
         <tr style="border-bottom:1px solid #e5e7eb;">
-          <td style="padding:10px;">{{ v.onderwerp or v.vraag }}</td>
-          <td style="padding:10px;">
-            {{ v.datum_indiening.strftime('%d-%m-%Y') if v.datum_indiening else '-' }}
-          </td>
-          <td style="padding:10px;">
-            {{ v.datum_beantwoord.strftime('%d-%m-%Y') if v.datum_beantwoord else 'Nog niet beantwoord' }}
-          </td>
+          <td style="padding:10px;">{{ v.onderwerp }}</td>
+          <td style="padding:10px;">{{ v.indiener }}</td>
+          <td style="padding:10px;">{{ v.fractie }}</td>
+          <td style="padding:10px;">{{ v.datum }}</td>
         </tr>
         {% endfor %}
       {% else %}
         <tr>
-          <td colspan="3" style="text-align:center; padding:1rem;">Nog geen schriftelijke vragen beschikbaar.</td>
+          <td colspan="4" style="text-align:center; padding:1rem;">Nog geen schriftelijke vragen beschikbaar.</td>
         </tr>
       {% endif %}
     </tbody>
