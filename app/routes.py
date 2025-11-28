@@ -383,26 +383,44 @@ def volksvertegenwoordigers():
     return render_template("volksvertegenwoordigers.html", volksvertegenwoordigers=data)
 
 
-# --- ZOEKFUNCTIE VOOR SCHRIFTELIJKE VRAGEN ---
+
+from sqlalchemy import func
+
 @main.route('/zoeken', methods=['GET', 'POST'])
 def zoeken():
     resultaten = []
+    trefwoord = ""
 
     if request.method == 'POST':
         trefwoord = request.form.get('trefwoord', '').strip()
 
         if trefwoord:
+            # 🔹 Fuzzy + LIKE search gecombineerd
             resultaten = (
                 db.session.query(SchriftelijkeVragen)
                 .filter(
+                    (func.similarity(SchriftelijkeVragen.onderwerp, trefwoord) > 0.1) |
+                    (func.similarity(SchriftelijkeVragen.tekst, trefwoord) > 0.1) |
                     (SchriftelijkeVragen.onderwerp.ilike(f"%{trefwoord}%")) |
                     (SchriftelijkeVragen.tekst.ilike(f"%{trefwoord}%"))
                 )
-                .order_by(SchriftelijkeVragen.ingediend.desc())
+                .order_by(
+                    func.greatest(
+                        func.similarity(SchriftelijkeVragen.onderwerp, trefwoord),
+                        func.similarity(SchriftelijkeVragen.tekst, trefwoord)
+                    ).desc(),
+                    SchriftelijkeVragen.ingediend.desc()
+                )
+                .limit(100)  # ⏩ maximaal 100 resultaten voor snelheid
                 .all()
             )
+        else:
+            # Geen trefwoord → geen resultaten (leeg)
+            resultaten = []
 
-    return render_template('zoeken.html', resultaten=resultaten)
+    # GET-verzoek toont enkel de zoekbalk
+    return render_template('zoeken.html', resultaten=resultaten, trefwoord=trefwoord)
+
 
 # --- ACTIEVE THEMA'S PAGINA ---
 @main.route('/actieve_themas')

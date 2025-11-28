@@ -33,18 +33,8 @@
       {% for vraag in resultaten %}
       <tr style="border-bottom:1px solid #ddd;">
         <td style="padding:8px;">{{ vraag.onderwerp }}</td>
-        <td style="padding:8px;">
-          {% set pf = db.session.query(Persoonfunctie).get(vraag.id_prsfnc_vs) %}
-          {% if pf %}
-            {% set persoon = db.session.query(Persoon).get(pf.id_prs) %}
-            {{ persoon.voornaam }} {{ persoon.naam }}
-          {% else %}
-            -
-          {% endif %}
-        </td>
-        <td style="padding:8px;">
-          {{ vraag.beantwoord.strftime("%Y-%m-%d") if vraag.beantwoord else "-" }}
-        </td>
+        <td style="padding:8px;">{{ vraag.indiener }}</td>
+        <td style="padding:8px;">{{ vraag.beantwoord }}</td>
       </tr>
       {% endfor %}
     </tbody>
