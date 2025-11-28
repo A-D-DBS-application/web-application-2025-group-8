@@ -1,22 +1,63 @@
 {% extends "base.html" %}
 
 {% block content %}
+<!-- HERO -->
 <section class="hero">
   <h1 class="hero-title">Actieve Thema’s</h1>
-  <p class="hero-subtitle">Ontdek de populairste thema’s binnen het Vlaams Parlement</p>
+  <p class="hero-subtitle">
+    Ontdek de 10 thema’s waarover de afgelopen maand de meeste schriftelijke vragen werden gesteld.
+  </p>
 </section>
 
-<section style="padding:3rem 0; text-align:center;">
-  <h2 class="section-title">Populaire Thema's</h2>
-  <div class="cards-grid">
-      <div class="card" style="text-align:center;">Onderwijs</div>
-      <div class="card" style="text-align:center;">Milieu & Klimaat</div>
-      <div class="card" style="text-align:center;">Mobiliteit</div>
-      <div class="card" style="text-align:center;">Gezondheidszorg</div>
-      <div class="card" style="text-align:center;">Economie</div>
-      <div class="card" style="text-align:center;">Welzijn</div>
-      <div class="card" style="text-align:center;">Cultuur</div>
-      <div class="card" style="text-align:center;">Sport</div>
+<!-- INFO -->
+<section style="background-color:#f9fafb; padding:1.5rem 0;">
+  <div style="max-width:800px; margin:auto; text-align:center; color:#374151;">
+    <h2 style="font-size:1.3rem; font-weight:600;">Trends van de maand</h2>
+    <p>
+      De cijfers tonen het aantal vragen per thema in de laatste 30 dagen, 
+      met vergelijking ten opzichte van de maand ervoor.
+    </p>
   </div>
+</section>
+
+<!-- TABEL -->
+<section style="padding:2rem;">
+  <table style="width:100%; border-collapse:collapse;">
+    <thead style="background:#f3f4f6;">
+      <tr>
+        <th style="padding:10px; text-align:left;">Thema</th>
+        <th style="padding:10px; text-align:left;">Aantal vragen (laatste 30 dagen)</th>
+        <th style="padding:10px; text-align:left;">Evolutie (t.o.v. vorige maand)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% if data %}
+        {% for d in data %}
+          <tr style="border-bottom:1px solid #e5e7eb;">
+            <td style="padding:10px;">{{ d.thema }}</td>
+            <td style="padding:10px;">{{ d.aantal }}</td>
+
+            <td style="padding:10px; font-weight:600;">
+              {% if d.nieuw %}
+                <span style="color:#1e3a8a;">Nieuw thema</span>
+              {% elif d.positief %}
+                <span style="color:green;">↑ +{{ d.pct }}%</span>
+              {% elif d.pct < 0 %}
+                <span style="color:red;">↓ {{ d.pct }}%</span>
+              {% else %}
+                <span style="color:#6b7280;">→ 0%</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      {% else %}
+        <tr>
+          <td colspan="3" style="text-align:center; padding:1rem;">
+            Geen recente thema’s gevonden.
+          </td>
+        </tr>
+      {% endif %}
+    </tbody>
+  </table>
 </section>
 {% endblock %}

@@ -421,9 +421,9 @@ def zoeken():
 
 
 # --- ACTIEVE THEMA'S PAGINA ---
-@main.route('/actieve_themas')
-def actieve_themas():
-    return render_template("actieve_themas.html")
+#@main.route('/actieve_themas')
+#def actieve_themas():
+#    return render_template("actieve_themas.html")
 
 # --- SCHRIFTELIJKE VRAGEN PAGINA ---
 @main.route('/schriftelijke_vragen')
@@ -486,3 +486,70 @@ def thema_detail(thema_id):
     actieve = actieve_politici_for_thema(thema_id)
 
     return render_template("thema_detail.html", thema=thema, actieve=actieve)
+
+
+
+from datetime import timedelta
+
+@main.route('/actieve_themas')
+def actieve_themas():
+    try:
+        # 🔹 Bepaal de meest recente datum van indiening
+        laatste_vraag_datum = db.session.query(func.max(SchriftelijkeVragen.ingediend)).scalar()
+
+        if not laatste_vraag_datum:
+            print("⚠️ Geen data gevonden in SchriftelijkeVragen.")
+            return render_template("actieve_themas.html", data=[])
+
+        # 🔹 Bereken het 30-dagenvenster vanaf die laatste vraag
+        maand_geleden = laatste_vraag_datum - timedelta(days=30)
+        vorige_maand_start = maand_geleden - timedelta(days=30)
+
+        # 🔹 Vragen per thema in de 'laatste 30 dagen'
+        recent = (
+            db.session.query(Thema.naam, func.count(SchriftelijkeVragen.id).label("aantal"))
+            .join(ThemaKoppeling, Thema.id == ThemaKoppeling.id_thm)
+            .join(SchriftelijkeVragen, SchriftelijkeVragen.id == ThemaKoppeling.id_schv)
+            .filter(SchriftelijkeVragen.ingediend.between(maand_geleden, laatste_vraag_datum))
+            .group_by(Thema.naam)
+            .order_by(func.count(SchriftelijkeVragen.id).desc())
+            .limit(10)
+            .all()
+        )
+
+        # 🔹 Zelfde thema’s maar vorige maand
+        vorige = dict(
+            db.session.query(Thema.naam, func.count(SchriftelijkeVragen.id))
+            .join(ThemaKoppeling, Thema.id == ThemaKoppeling.id_thm)
+            .join(SchriftelijkeVragen, SchriftelijkeVragen.id == ThemaKoppeling.id_schv)
+            .filter(SchriftelijkeVragen.ingediend.between(vorige_maand_start, maand_geleden))
+            .group_by(Thema.naam)
+            .all()
+        )
+
+        data = []
+        for naam, aantal in recent:
+            oud = vorige.get(naam, 0)
+            verschil = aantal - oud
+
+            if oud == 0:
+                pct = 0
+                nieuw = True
+            else:
+                pct = round((verschil / oud * 100), 1)
+                nieuw = False
+
+            positief = pct >= 0
+            data.append({
+                "thema": naam,
+                "aantal": aantal,
+                "pct": pct,
+                "positief": positief,
+                "nieuw": nieuw
+            })
+
+    except Exception as e:
+        print("⚠️ Fout in actieve_themas:", e)
+        data = []
+
+    return render_template("actieve_themas.html", data=data)
