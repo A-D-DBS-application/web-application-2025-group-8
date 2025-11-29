@@ -446,7 +446,7 @@ def zoeken():
 
         if trefwoord:
             # 🔹 Fuzzy + LIKE search gecombineerd
-            resultaten = (
+            vragen = (
                 db.session.query(SchriftelijkeVragen)
                 .filter(
                     (func.similarity(SchriftelijkeVragen.onderwerp, trefwoord) > 0.1) |
@@ -461,15 +461,35 @@ def zoeken():
                     ).desc(),
                     SchriftelijkeVragen.ingediend.desc()
                 )
-                .limit(100)  # ⏩ maximaal 100 resultaten voor snelheid
+                .limit(100)
                 .all()
             )
-        else:
-            # Geen trefwoord → geen resultaten (leeg)
-            resultaten = []
 
-    # GET-verzoek toont enkel de zoekbalk
+            from app.models import Persoonfunctie, Persoon, Fractie
+
+            # 🔹 Verrijk met indiener + fractie + link
+            for v in vragen:
+                pf = db.session.query(Persoonfunctie).get(v.id_prsfnc_vs)
+                indiener = "-"
+                fractie = "-"
+                if pf:
+                    persoon = db.session.query(Persoon).get(pf.id_prs)
+                    fractie_obj = db.session.query(Fractie).get(pf.id_frc)
+                    if persoon:
+                        indiener = f"{persoon.voornaam} {persoon.naam}"
+                    if fractie_obj:
+                        fractie = fractie_obj.naam
+
+                resultaten.append({
+                    "onderwerp": v.onderwerp,
+                    "indiener": indiener,
+                    "fractie": fractie,
+                    "datum": v.ingediend.strftime("%Y-%m-%d") if v.ingediend else "-",
+                    "link": v.tekst if v.tekst and v.tekst.startswith("http") else None
+                })
+
     return render_template('zoeken.html', resultaten=resultaten, trefwoord=trefwoord)
+
 
 
 # --- ACTIEVE THEMA'S PAGINA ---
