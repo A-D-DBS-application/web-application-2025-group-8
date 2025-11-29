@@ -502,11 +502,15 @@ def schriftelijke_vragen():
                 if fractie_obj:
                     fractie = fractie_obj.naam
 
+            # ✅ Nieuw: link toevoegen als het een echte URL is
+            link = v.tekst if v.tekst and v.tekst.startswith("http") else None
+
             data.append({
                 "onderwerp": v.onderwerp,
                 "indiener": indiener,
                 "fractie": fractie,
-                "datum": v.ingediend.strftime("%Y-%m-%d") if v.ingediend else "-"
+                "datum": v.ingediend.strftime("%Y-%m-%d") if v.ingediend else "-",
+                "link": link
             })
 
         data.sort(key=lambda x: x["datum"], reverse=True)
@@ -516,7 +520,6 @@ def schriftelijke_vragen():
         data = []
 
     return render_template("schriftelijke_vragen.html", vragen=data)
-
 
 
 
