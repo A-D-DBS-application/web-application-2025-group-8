@@ -1,25 +1,199 @@
 {% extends "base.html" %}
-
-{% block content %}
-<section class="section">
-    <h1 class="section-title">Grafieken</h1>
-
-    <img src="{{ url_for('static', filename='grafiek.png') }}" 
-         alt="Grafiek" 
-         style="max-width:600px; border: 1px solid #ccc; border-radius: 8px;">
-</section>
-{% endblock %}
-
-{% extends "base.html" %}
 {% block content %}
 
-<section class="section">
-    <h1>Grafieken</h1>
-
-    <canvas id="themaChart"></canvas>
-    <canvas id="fractieChart"></canvas>
-    <canvas id="personenChart"></canvas>
-    <canvas id="maandChart"></canvas>
+<!-- HERO -->
+<section class="hero" style="background:#facc15; color:#111;">
+  <h1 class="hero-title">Evolutie van Schriftelijke Vragen</h1>
+  <p class="hero-subtitle">
+    Bekijk de evolutie per <strong>thema</strong> of per <strong>volksvertegenwoordiger</strong> over de laatste 12 maanden.
+  </p>
 </section>
 
+<!-- KEUZE & GRAFIEKEN -->
+<section style="padding:2rem; text-align:center;">
+
+  <!-- Tabs -->
+  <div style="margin-bottom:2rem;">
+    <button id="tabThema" 
+            style="padding:0.5rem 1rem; border:none; border-radius:6px 0 0 6px; background:#e5e7eb; cursor:pointer;">
+      Per Thema
+    </button>
+    <button id="tabVV"
+            style="padding:0.5rem 1rem; border:none; border-radius:0 6px 6px 0; background:#2563eb; color:white; cursor:pointer;">
+      Per Volksvertegenwoordiger
+    </button>
+  </div>
+
+  <!-- PER THEMA -->
+  <div id="themaDiv" style="display:none;">
+    <label for="themaSelect" style="font-weight:600; margin-right:10px;">Kies een thema:</label>
+    <select id="themaSelect" style="padding:0.5rem 1rem; border:1px solid #ccc; border-radius:6px;">
+      <option value="">-- Selecteer een thema --</option>
+      {% for t in themas %}
+        <option value="{{ t.id }}">{{ t.naam }}</option>
+      {% endfor %}
+    </select>
+
+    <button id="toonGrafiek" 
+            style="margin-left:1rem; padding:0.5rem 1rem; background:#2563eb; color:white; border:none; border-radius:6px; cursor:pointer;">
+      Toon grafiek
+    </button>
+
+    <div style="max-width:800px; margin:2rem auto;">
+      <canvas id="evolutieChart"></canvas>
+    </div>
+  </div>
+
+  <!-- PER VOLKSVERTEGENWOORDIGER -->
+  <div id="vvDiv">
+    <label style="font-weight:600; margin-right:10px;">Zoek volksvertegenwoordiger:</label>
+    <input type="text" id="vvInput" placeholder="Typ een naam..." 
+           style="padding:0.5rem 1rem; border:1px solid #ccc; border-radius:6px; width:250px;" autocomplete="off">
+    <div id="vvSuggesties" class="suggesties" 
+         style="position:relative; max-width:260px; margin:0 auto; background:white; border-radius:4px; text-align:left;"></div>
+
+    <button id="toonVV" 
+            style="margin-left:1rem; padding:0.5rem 1rem; background:#2563eb; color:white; border:none; border-radius:6px; cursor:pointer;">
+      Toon grafiek
+    </button>
+
+    <div style="max-width:800px; margin:2rem auto;">
+      <canvas id="vvChart"></canvas>
+    </div>
+  </div>
+
+</section>
+
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+let chart;
+let vvChart;
+
+// TAB-functionaliteit
+const tabThema = document.getElementById("tabThema");
+const tabVV = document.getElementById("tabVV");
+const themaDiv = document.getElementById("themaDiv");
+const vvDiv = document.getElementById("vvDiv");
+
+tabThema.addEventListener("click", () => {
+  tabThema.style.background = "#2563eb";
+  tabThema.style.color = "white";
+  tabVV.style.background = "#e5e7eb";
+  tabVV.style.color = "black";
+  themaDiv.style.display = "block";
+  vvDiv.style.display = "none";
+});
+
+tabVV.addEventListener("click", () => {
+  tabVV.style.background = "#2563eb";
+  tabVV.style.color = "white";
+  tabThema.style.background = "#e5e7eb";
+  tabThema.style.color = "black";
+  vvDiv.style.display = "block";
+  themaDiv.style.display = "none";
+});
+
+// --- GRAFIEK PER THEMA ---
+document.getElementById("toonGrafiek").addEventListener("click", async () => {
+  const themaId = document.getElementById("themaSelect").value;
+  if (!themaId) {
+    alert("Selecteer eerst een thema.");
+    return;
+  }
+
+  const response = await fetch(`/grafieken/data/${themaId}`);
+  if (!response.ok) {
+    alert("Kon geen data ophalen voor dit thema.");
+    return;
+  }
+
+  const data = await response.json();
+
+  const ctx = document.getElementById("evolutieChart").getContext("2d");
+  if (chart) chart.destroy();
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.labels,
+      datasets: [{
+        label: 'Aantal vragen per maand',
+        data: data.values,
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(37,99,235,0.2)',
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {
+      scales: {
+        y: { beginAtZero: true }
+      },
+      plugins: {
+        legend: { display: true, position: 'bottom' }
+      }
+    }
+  });
+});
+
+
+// --- GRAFIEK PER VOLKSVERTEGENWOORDIGER ---
+let gekozenVV = null;
+const input = document.getElementById('vvInput');
+const suggestiesDiv = document.getElementById('vvSuggesties');
+
+input.addEventListener('input', async () => {
+  const q = input.value.trim();
+  if (q.length < 2) { suggestiesDiv.innerHTML = ''; gekozenVV = null; return; }
+
+  const resp = await fetch(`/grafieken/vv_suggesties?q=${encodeURIComponent(q)}`);
+  const data = await resp.json();
+
+  suggestiesDiv.innerHTML = data.map(v =>
+    `<div class="suggestie" data-id="${v.id}" style="padding:5px; cursor:pointer; border-bottom:1px solid #ddd;">${v.naam}</div>`
+  ).join('');
+});
+
+suggestiesDiv.addEventListener('click', e => {
+  if (!e.target.dataset.id) return;
+  gekozenVV = e.target.dataset.id;
+  input.value = e.target.innerText;
+  suggestiesDiv.innerHTML = '';
+});
+
+document.getElementById("toonVV").addEventListener("click", async () => {
+  if (!gekozenVV) {
+    alert("Selecteer eerst een volksvertegenwoordiger uit de lijst.");
+    return;
+  }
+
+  const resp = await fetch(`/grafieken/vv_data/${gekozenVV}`);
+  const data = await resp.json();
+
+  const ctx = document.getElementById("vvChart").getContext("2d");
+  if (vvChart) vvChart.destroy();
+
+  vvChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.labels,
+      datasets: [{
+        label: 'Aantal vragen per maand',
+        data: data.values,
+        borderColor: '#ef4444',
+        backgroundColor: 'rgba(239,68,68,0.2)',
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {
+      scales: { y: { beginAtZero: true } },
+      plugins: { legend: { display: true, position: 'bottom' } }
+    }
+  });
+});
+</script>
+
+{% endblock %}

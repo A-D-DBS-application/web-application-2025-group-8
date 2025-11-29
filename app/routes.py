@@ -553,33 +553,98 @@ def actieve_themas():
         data = []
 
     return render_template("actieve_themas.html", data=data)
+
 #grafieken 
-@main.route('/grafieken')
+from flask import render_template, jsonify
+from datetime import date
+from dateutil.relativedelta import relativedelta
+from sqlalchemy import func
+from app import db
+from app.models import Thema, SchriftelijkeVragen, ThemaKoppeling
+
+
+@main.route("/grafieken")
 def grafieken():
-    import matplotlib.pyplot as plt
-    import os
-    from flask import current_app
-
-    labels = ["Klimaat", "Economie", "Onderwijs", "Mobiliteit"]
-    values = [45, 30, 25, 15]
-
-    # Pad naar static folder + bestandsnaam
-    image_path = os.path.join(current_app.static_folder, "grafiek.png")
-
-    # ❗ ZORGT DAT DE MAP BESTAAT
-    os.makedirs(current_app.static_folder, exist_ok=True)
-
-    # Grafiek maken
-    plt.figure(figsize=(6,4))
-    plt.bar(labels, values)
-    plt.title("Aantal vragen per thema")
-    plt.xlabel("Thema")
-    plt.ylabel("Aantal vragen")
-
-    # Opslaan
-    plt.savefig(image_path)
-    plt.close()
-
-    return render_template("grafieken.html")
+    """Toont dropdown met alle thema’s."""
+    themas = db.session.query(Thema).order_by(Thema.naam.asc()).all()
+    return render_template("grafieken.html", themas=themas)
 
 
+@main.route("/grafieken/data/<uuid:thema_id>")
+def grafieken_data(thema_id):
+    """Levert JSON met evolutie van vragen per maand voor gekozen thema."""
+    eind_datum = date.today()
+    begin_datum = eind_datum - relativedelta(months=12)
+
+    # Aantal vragen per maand voor dit thema (laatste 12 maanden)
+    results = (
+        db.session.query(
+            func.date_trunc("month", SchriftelijkeVragen.ingediend).label("maand"),
+            func.count(SchriftelijkeVragen.id)
+        )
+        .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
+        .filter(ThemaKoppeling.id_thm == thema_id)
+        .filter(SchriftelijkeVragen.ingediend >= begin_datum)
+        .group_by(func.date_trunc("month", SchriftelijkeVragen.ingediend))
+        .order_by(func.date_trunc("month", SchriftelijkeVragen.ingediend))
+        .all()
+    )
+
+    # Zet resultaten om in labels + waarden
+    labels = [r[0].strftime("%b %Y") for r in results]
+    values = [r[1] for r in results]
+
+    return jsonify({"labels": labels, "values": values})
+
+
+
+# --- AUTOCOMPLETE VOOR VOLKSVERTEGENWOORDIGERS ---
+@main.route("/grafieken/vv_suggesties")
+def vv_suggesties():
+    """Zoekt volksvertegenwoordigers bij naam (voornaam + achternaam)."""
+    from app.models import Persoon
+    from flask import request
+
+    term = request.args.get("q", "").strip().lower()
+    if not term:
+        return jsonify([])
+
+    suggesties = (
+        db.session.query(Persoon)
+        .filter(func.lower(Persoon.voornaam + ' ' + Persoon.naam).like(f"%{term}%"))
+        .order_by(Persoon.naam.asc())
+        .limit(10)
+        .all()
+    )
+
+    return jsonify([
+        {"id": str(p.id), "naam": f"{p.voornaam} {p.naam}"} for p in suggesties
+    ])
+
+
+# --- GRAFIEKDATA VOOR VOLKSVERTEGENWOORDIGER ---
+@main.route("/grafieken/vv_data/<uuid:vv_id>")
+def vv_data(vv_id):
+    """Aantal schriftelijke vragen per maand voor gekozen volksvertegenwoordiger."""
+    from app.models import Persoonfunctie  # importeren binnen de functie om circular import te vermijden
+
+    eind_datum = date.today()
+    begin_datum = eind_datum - relativedelta(months=12)
+
+    results = (
+        db.session.query(
+            func.date_trunc("month", SchriftelijkeVragen.ingediend).label("maand"),
+            func.count(SchriftelijkeVragen.id)
+        )
+        .join(Persoonfunctie, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
+        .filter(Persoonfunctie.id_prs == vv_id)
+        .filter(SchriftelijkeVragen.ingediend >= begin_datum)
+        .group_by(func.date_trunc("month", SchriftelijkeVragen.ingediend))
+        .order_by(func.date_trunc("month", SchriftelijkeVragen.ingediend))
+        .all()
+    )
+
+    labels = [r[0].strftime("%b %Y") for r in results]
+    values = [r[1] for r in results]
+
+    return jsonify({"labels": labels, "values": values})
