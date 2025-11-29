@@ -648,3 +648,72 @@ def vv_data(vv_id):
     values = [r[1] for r in results]
 
     return jsonify({"labels": labels, "values": values})
+
+
+# --- DETAILVRAGEN VOOR EEN VOLKSVERTEGENWOORDIGER IN EEN MAAND ---
+@main.route("/grafieken/vv_vragen/<uuid:vv_id>/<int:jaar>/<int:maand>")
+def vv_vragen_maand(vv_id, jaar, maand):
+    """Geeft de lijst schriftelijke vragen van één VV in een specifieke maand."""
+    from app.models import Persoonfunctie  # vermijden van circular import
+
+    # Start- en einddatum van de maand bepalen
+    van = date(jaar, maand, 1)
+    if maand == 12:
+        tot = date(jaar + 1, 1, 1)
+    else:
+        tot = date(jaar, maand + 1, 1)
+
+    # Query: alle vragen in die maand van die persoon
+    vragen = (
+        db.session.query(SchriftelijkeVragen)
+        .join(Persoonfunctie, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
+        .filter(Persoonfunctie.id_prs == vv_id)
+        .filter(SchriftelijkeVragen.ingediend >= van)
+        .filter(SchriftelijkeVragen.ingediend < tot)
+        .order_by(SchriftelijkeVragen.ingediend.desc())
+        .all()
+    )
+
+    data = [
+        {
+            "datum": v.ingediend.strftime("%d/%m/%Y"),
+            "onderwerp": v.onderwerp,
+            "tekst": (v.tekst[:200] + "...") if v.tekst and len(v.tekst) > 200 else v.tekst
+        }
+        for v in vragen
+    ]
+
+    return jsonify(data)
+
+# --- DETAILVRAGEN VOOR EEN THEMA IN EEN MAAND ---
+@main.route("/grafieken/thema_vragen/<uuid:thema_id>/<int:jaar>/<int:maand>")
+def thema_vragen_maand(thema_id, jaar, maand):
+    """Geeft de lijst schriftelijke vragen binnen één thema in een specifieke maand."""
+    # Start- en einddatum van de maand bepalen
+    van = date(jaar, maand, 1)
+    if maand == 12:
+        tot = date(jaar + 1, 1, 1)
+    else:
+        tot = date(jaar, maand + 1, 1)
+
+    # Query: alle vragen van dat thema in die maand
+    vragen = (
+        db.session.query(SchriftelijkeVragen)
+        .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
+        .filter(ThemaKoppeling.id_thm == thema_id)
+        .filter(SchriftelijkeVragen.ingediend >= van)
+        .filter(SchriftelijkeVragen.ingediend < tot)
+        .order_by(SchriftelijkeVragen.ingediend.desc())
+        .all()
+    )
+
+    data = [
+        {
+            "datum": v.ingediend.strftime("%d/%m/%Y"),
+            "onderwerp": v.onderwerp,
+            "tekst": (v.tekst[:200] + "...") if v.tekst and len(v.tekst) > 200 else v.tekst
+        }
+        for v in vragen
+    ]
+
+    return jsonify(data)

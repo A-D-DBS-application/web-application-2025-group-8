@@ -5,7 +5,10 @@
 <section class="hero" style="background:#facc15; color:#111;">
   <h1 class="hero-title">Evolutie van Schriftelijke Vragen</h1>
   <p class="hero-subtitle">
-    Bekijk de evolutie per <strong>thema</strong> of per <strong>volksvertegenwoordiger</strong> over de laatste 12 maanden.
+    Bekijk de evolutie per <strong>thema</strong> of per <strong>volksvertegenwoordiger</strong> over de laatste 12 maanden.<br>
+    <span style="font-size:0.95em; color:#444;">
+      💡 Klik op de <strong>bolletjes</strong> in de grafiek om de vragen van die maand te bekijken.
+    </span>
   </p>
 </section>
 
@@ -15,17 +18,17 @@
   <!-- Tabs -->
   <div style="margin-bottom:2rem;">
     <button id="tabThema" 
-            style="padding:0.5rem 1rem; border:none; border-radius:6px 0 0 6px; background:#e5e7eb; cursor:pointer;">
+            style="padding:0.5rem 1rem; border:none; border-radius:6px 0 0 6px; background:#2563eb; color:white; cursor:pointer;">
       Per Thema
     </button>
     <button id="tabVV"
-            style="padding:0.5rem 1rem; border:none; border-radius:0 6px 6px 0; background:#2563eb; color:white; cursor:pointer;">
+            style="padding:0.5rem 1rem; border:none; border-radius:0 6px 6px 0; background:#e5e7eb; cursor:pointer;">
       Per Volksvertegenwoordiger
     </button>
   </div>
 
   <!-- PER THEMA -->
-  <div id="themaDiv" style="display:none;">
+  <div id="themaDiv">
     <label for="themaSelect" style="font-weight:600; margin-right:10px;">Kies een thema:</label>
     <select id="themaSelect" style="padding:0.5rem 1rem; border:1px solid #ccc; border-radius:6px;">
       <option value="">-- Selecteer een thema --</option>
@@ -45,7 +48,7 @@
   </div>
 
   <!-- PER VOLKSVERTEGENWOORDIGER -->
-  <div id="vvDiv">
+  <div id="vvDiv" style="display:none;">
     <label style="font-weight:600; margin-right:10px;">Zoek volksvertegenwoordiger:</label>
     <input type="text" id="vvInput" placeholder="Typ een naam..." 
            style="padding:0.5rem 1rem; border:1px solid #ccc; border-radius:6px; width:250px;" autocomplete="off">
@@ -70,8 +73,9 @@
 <script>
 let chart;
 let vvChart;
+let selectedVV = null;
 
-// TAB-functionaliteit
+// Tabs
 const tabThema = document.getElementById("tabThema");
 const tabVV = document.getElementById("tabVV");
 const themaDiv = document.getElementById("themaDiv");
@@ -98,17 +102,9 @@ tabVV.addEventListener("click", () => {
 // --- GRAFIEK PER THEMA ---
 document.getElementById("toonGrafiek").addEventListener("click", async () => {
   const themaId = document.getElementById("themaSelect").value;
-  if (!themaId) {
-    alert("Selecteer eerst een thema.");
-    return;
-  }
+  if (!themaId) return alert("Selecteer eerst een thema.");
 
   const response = await fetch(`/grafieken/data/${themaId}`);
-  if (!response.ok) {
-    alert("Kon geen data ophalen voor dit thema.");
-    return;
-  }
-
   const data = await response.json();
 
   const ctx = document.getElementById("evolutieChart").getContext("2d");
@@ -124,29 +120,60 @@ document.getElementById("toonGrafiek").addEventListener("click", async () => {
         borderColor: '#2563eb',
         backgroundColor: 'rgba(37,99,235,0.2)',
         tension: 0.3,
-        fill: true
+        fill: true,
+        pointBackgroundColor: '#2563eb',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        pointRadius: 6,
+        pointHoverRadius: 9,
+        pointHoverBackgroundColor: '#1d4ed8'
       }]
     },
     options: {
-      scales: {
-        y: { beginAtZero: true }
-      },
-      plugins: {
-        legend: { display: true, position: 'bottom' }
-      }
+      scales: { y: { beginAtZero: true } },
+      plugins: { legend: { display: true, position: 'bottom' } }
     }
   });
+
+  // Klik op een datapunt in THEMA-grafiek
+  document.getElementById("evolutieChart").onclick = async (evt) => {
+    if (!chart) return;
+
+    const points = chart.getElementsAtEventForMode(evt, "nearest", { intersect: true }, true);
+    if (!points.length) return;
+
+    const point = points[0];
+    const label = chart.data.labels[point.index]; // bv. "May 2025"
+    const [maandStr, jaarStr] = label.split(" ");
+    const maand = new Date(Date.parse(maandStr + " 1, 2024")).getMonth() + 1;
+    const jaar = parseInt(jaarStr);
+
+    const themaId = document.getElementById("themaSelect").value;
+    if (!themaId) return;
+
+    const response = await fetch(`/grafieken/thema_vragen/${themaId}/${jaar}/${maand}`);
+    const data = await response.json();
+
+    if (!data.length) return alert("Geen schriftelijke vragen in " + label);
+
+    let html = `<h3>Vragen van ${label}</h3><ul>`;
+    data.forEach(v => {
+      html += `<li><b>${v.datum}</b> — ${v.onderwerp}</li>`;
+    });
+    html += "</ul>";
+
+    const win = window.open("", "_blank", "width=600,height=600,scrollbars=yes");
+    win.document.write(`<html><body style='font-family:sans-serif;'>${html}</body></html>`);
+  };
 });
 
-
-// --- GRAFIEK PER VOLKSVERTEGENWOORDIGER ---
-let gekozenVV = null;
+// --- AUTOCOMPLETE VV ---
 const input = document.getElementById('vvInput');
 const suggestiesDiv = document.getElementById('vvSuggesties');
 
 input.addEventListener('input', async () => {
   const q = input.value.trim();
-  if (q.length < 2) { suggestiesDiv.innerHTML = ''; gekozenVV = null; return; }
+  if (q.length < 2) { suggestiesDiv.innerHTML = ''; selectedVV = null; return; }
 
   const resp = await fetch(`/grafieken/vv_suggesties?q=${encodeURIComponent(q)}`);
   const data = await resp.json();
@@ -158,18 +185,16 @@ input.addEventListener('input', async () => {
 
 suggestiesDiv.addEventListener('click', e => {
   if (!e.target.dataset.id) return;
-  gekozenVV = e.target.dataset.id;
+  selectedVV = e.target.dataset.id;
   input.value = e.target.innerText;
   suggestiesDiv.innerHTML = '';
 });
 
+// --- GRAFIEK PER VV ---
 document.getElementById("toonVV").addEventListener("click", async () => {
-  if (!gekozenVV) {
-    alert("Selecteer eerst een volksvertegenwoordiger uit de lijst.");
-    return;
-  }
+  if (!selectedVV) return alert("Selecteer eerst een volksvertegenwoordiger.");
 
-  const resp = await fetch(`/grafieken/vv_data/${gekozenVV}`);
+  const resp = await fetch(`/grafieken/vv_data/${selectedVV}`);
   const data = await resp.json();
 
   const ctx = document.getElementById("vvChart").getContext("2d");
@@ -185,7 +210,13 @@ document.getElementById("toonVV").addEventListener("click", async () => {
         borderColor: '#ef4444',
         backgroundColor: 'rgba(239,68,68,0.2)',
         tension: 0.3,
-        fill: true
+        fill: true,
+        pointBackgroundColor: '#ef4444',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        pointRadius: 6,
+        pointHoverRadius: 9,
+        pointHoverBackgroundColor: '#dc2626'
       }]
     },
     options: {
@@ -193,7 +224,40 @@ document.getElementById("toonVV").addEventListener("click", async () => {
       plugins: { legend: { display: true, position: 'bottom' } }
     }
   });
+
+  window.selectedVV = selectedVV; // nodig voor klik op maand
 });
+
+// --- Klik op een datapunt in VV-grafiek ---
+document.getElementById("vvChart").onclick = async (evt) => {
+  if (!vvChart) return;
+
+  const points = vvChart.getElementsAtEventForMode(evt, "nearest", { intersect: true }, true);
+  if (!points.length) return;
+
+  const point = points[0];
+  const label = vvChart.data.labels[point.index]; // bv. "May 2025"
+  const [maandStr, jaarStr] = label.split(" ");
+  const maand = new Date(Date.parse(maandStr + " 1, 2024")).getMonth() + 1;
+  const jaar = parseInt(jaarStr);
+
+  const vvId = window.selectedVV;
+  if (!vvId) return;
+
+  const response = await fetch(`/grafieken/vv_vragen/${vvId}/${jaar}/${maand}`);
+  const data = await response.json();
+
+  if (!data.length) return alert("Geen schriftelijke vragen in " + label);
+
+  let html = `<h3>Vragen van ${label}</h3><ul>`;
+  data.forEach(v => {
+    html += `<li><b>${v.datum}</b> — ${v.onderwerp}</li>`;
+  });
+  html += "</ul>";
+
+  const win = window.open("", "_blank", "width=600,height=600,scrollbars=yes");
+  win.document.write(`<html><body style='font-family:sans-serif;'>${html}</body></html>`);
+};
 </script>
 
 {% endblock %}
