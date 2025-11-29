@@ -6,7 +6,7 @@
   <h1 class="hero-title">Evolutie van Schriftelijke Vragen</h1>
   <p class="hero-subtitle">
     Bekijk de evolutie per <strong>thema</strong> of per <strong>volksvertegenwoordiger</strong> over de laatste 12 maanden.<br>
-    <em>Klik op een bolletje in de grafiek om de schriftelijke vragen van die maand te bekijken.</em>
+    <em>Klik op een bolletje in de grafiek om de schriftelijke vragen van die maand te bekijken (en pdf te downloaden).</em>
   </p>
 </section>
 
@@ -156,7 +156,7 @@ document.getElementById("evolutieChart").onclick = async (evt) => {
   let html = `<h3>Vragen van ${label}</h3><ul>`;
   data.forEach(v => {
     html += `<li><b>${v.datum}</b> — ${v.onderwerp}`;
-    if (v.link) html += ` — <a href="${v.link}" target="_blank" style="color:#2563eb;">[Bekijk vraag]</a>`;
+    if (v.link) html += ` — <a href="${v.link}" target="_blank" style="color:#2563eb;">[pdf vraag]</a>`;
     html += `</li>`;
   });
   html += "</ul>";
@@ -243,7 +243,7 @@ document.getElementById("vvChart").onclick = async (evt) => {
   let html = `<h3>Vragen van ${label}</h3><ul>`;
   data.forEach(v => {
     html += `<li><b>${v.datum}</b> — ${v.onderwerp}`;
-    if (v.link) html += ` — <a href="${v.link}" target="_blank" style="color:#2563eb;">[Bekijk vraag]</a>`;
+    if (v.link) html += ` — <a href="${v.link}" target="_blank" style="color:#2563eb;">[pdf vraag]</a>`;
     html += `</li>`;
   });
   html += "</ul>";
