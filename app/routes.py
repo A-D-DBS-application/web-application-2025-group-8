@@ -553,3 +553,33 @@ def actieve_themas():
         data = []
 
     return render_template("actieve_themas.html", data=data)
+#grafieken 
+@main.route('/grafieken')
+def grafieken():
+    import matplotlib.pyplot as plt
+    import os
+    from flask import current_app
+
+    labels = ["Klimaat", "Economie", "Onderwijs", "Mobiliteit"]
+    values = [45, 30, 25, 15]
+
+    # Pad naar static folder + bestandsnaam
+    image_path = os.path.join(current_app.static_folder, "grafiek.png")
+
+    # ❗ ZORGT DAT DE MAP BESTAAT
+    os.makedirs(current_app.static_folder, exist_ok=True)
+
+    # Grafiek maken
+    plt.figure(figsize=(6,4))
+    plt.bar(labels, values)
+    plt.title("Aantal vragen per thema")
+    plt.xlabel("Thema")
+    plt.ylabel("Aantal vragen")
+
+    # Opslaan
+    plt.savefig(image_path)
+    plt.close()
+
+    return render_template("grafieken.html")
+
+

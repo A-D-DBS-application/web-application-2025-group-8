@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section">
+    <h1 class="section-title">Grafieken</h1>
+
+    <img src="{{ url_for('static', filename='grafiek.png') }}" 
+         alt="Grafiek" 
+         style="max-width:600px; border: 1px solid #ccc; border-radius: 8px;">
+</section>
+{% endblock %}
+
+{% extends "base.html" %}
+{% block content %}
+
+<section class="section">
+    <h1>Grafieken</h1>
+
+    <canvas id="themaChart"></canvas>
+    <canvas id="fractieChart"></canvas>
+    <canvas id="personenChart"></canvas>
+    <canvas id="maandChart"></canvas>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
