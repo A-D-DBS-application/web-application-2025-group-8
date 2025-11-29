@@ -21,23 +21,19 @@
       </tr>
     </thead>
     <tbody>
-      {% if resultaten %}
-        {% for r in resultaten %}
-        <tr>
-          <td style="padding:8px;">{{ r.naam }}</td>
-          <td style="padding:8px;">{{ r.thema1 }}</td>
-          <td style="padding:8px;">{{ r.aantal1 }}</td>
-          <td style="padding:8px;">{{ r.thema2 }}</td>
-          <td style="padding:8px;">{{ r.aantal2 }}</td>
-          <td style="padding:8px;">{{ r.thema3 }}</td>
-          <td style="padding:8px;">{{ r.aantal3 }}</td>
-          <td style="padding:8px;">{{ r.laatste_vraag }}</td>
-        </tr>
-        {% endfor %}
-      {% else %}
-        <tr><td colspan="8" style="text-align:center;">Nog geen data beschikbaar</td></tr>
-      {% endif %}
-    </tbody>
+{% for p in data %}
+    <tr>
+        <td>{{ p.naam }}</td>
+        <td>{{ p.populair or "—" }}</td>
+        <td>{{ p.pop_count }}</td>
+        <td>{{ p.tweede or "—" }}</td>
+        <td>{{ p.tweede_count }}</td>
+        <td>{{ p.derde or "—" }}</td>
+        <td>{{ p.derde_count }}</td>
+        <td>{{ p.laatste_vraag or "—" }}</td>
+    </tr>
+{% endfor %}
+</tbody>
   </table>
 </section>
 {% endblock %}
