@@ -606,8 +606,10 @@ def actieve_themas():
 
     return render_template("actieve_themas.html", data=data)
 
-#grafieken 
-from flask import render_template, jsonify
+
+
+# grafieken 
+from flask import render_template, jsonify, request
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from sqlalchemy import func
@@ -622,6 +624,7 @@ def grafieken():
     return render_template("grafieken.html", themas=themas)
 
 
+# --- DATA VOOR GRAFIEK PER THEMA ---
 @main.route("/grafieken/data/<uuid:thema_id>")
 def grafieken_data(thema_id):
     """Levert JSON met evolutie van vragen per maand voor gekozen thema."""
@@ -642,12 +645,10 @@ def grafieken_data(thema_id):
         .all()
     )
 
-    # Zet resultaten om in labels + waarden
     labels = [r[0].strftime("%b %Y") for r in results]
     values = [r[1] for r in results]
 
     return jsonify({"labels": labels, "values": values})
-
 
 
 # --- AUTOCOMPLETE VOOR VOLKSVERTEGENWOORDIGERS ---
@@ -655,7 +656,6 @@ def grafieken_data(thema_id):
 def vv_suggesties():
     """Zoekt volksvertegenwoordigers bij naam (voornaam + achternaam)."""
     from app.models import Persoon
-    from flask import request
 
     term = request.args.get("q", "").strip().lower()
     if not term:
@@ -674,7 +674,7 @@ def vv_suggesties():
     ])
 
 
-# --- GRAFIEKDATA VOOR VOLKSVERTEGENWOORDIGER ---
+# --- DATA VOOR GRAFIEK PER VOLKSVERTEGENWOORDIGER ---
 @main.route("/grafieken/vv_data/<uuid:vv_id>")
 def vv_data(vv_id):
     """Aantal schriftelijke vragen per maand voor gekozen volksvertegenwoordiger."""
@@ -710,10 +710,7 @@ def vv_vragen_maand(vv_id, jaar, maand):
 
     # Start- en einddatum van de maand bepalen
     van = date(jaar, maand, 1)
-    if maand == 12:
-        tot = date(jaar + 1, 1, 1)
-    else:
-        tot = date(jaar, maand + 1, 1)
+    tot = date(jaar + (maand // 12), (maand % 12) + 1, 1)
 
     # Query: alle vragen in die maand van die persoon
     vragen = (
@@ -726,27 +723,25 @@ def vv_vragen_maand(vv_id, jaar, maand):
         .all()
     )
 
+    # ✅ Link naar PDF toevoegen (v.tekst bevat de URL)
     data = [
         {
             "datum": v.ingediend.strftime("%d/%m/%Y"),
             "onderwerp": v.onderwerp,
-            "tekst": (v.tekst[:200] + "...") if v.tekst and len(v.tekst) > 200 else v.tekst
+            "link": v.tekst if v.tekst and v.tekst.startswith("http") else None
         }
         for v in vragen
     ]
 
     return jsonify(data)
 
+
 # --- DETAILVRAGEN VOOR EEN THEMA IN EEN MAAND ---
 @main.route("/grafieken/thema_vragen/<uuid:thema_id>/<int:jaar>/<int:maand>")
 def thema_vragen_maand(thema_id, jaar, maand):
     """Geeft de lijst schriftelijke vragen binnen één thema in een specifieke maand."""
-    # Start- en einddatum van de maand bepalen
     van = date(jaar, maand, 1)
-    if maand == 12:
-        tot = date(jaar + 1, 1, 1)
-    else:
-        tot = date(jaar, maand + 1, 1)
+    tot = date(jaar + (maand // 12), (maand % 12) + 1, 1)
 
     # Query: alle vragen van dat thema in die maand
     vragen = (
@@ -759,11 +754,12 @@ def thema_vragen_maand(thema_id, jaar, maand):
         .all()
     )
 
+    # ✅ Link naar PDF toevoegen (v.tekst bevat de URL)
     data = [
         {
             "datum": v.ingediend.strftime("%d/%m/%Y"),
             "onderwerp": v.onderwerp,
-            "tekst": (v.tekst[:200] + "...") if v.tekst and len(v.tekst) > 200 else v.tekst
+            "link": v.tekst if v.tekst and v.tekst.startswith("http") else None
         }
         for v in vragen
     ]
