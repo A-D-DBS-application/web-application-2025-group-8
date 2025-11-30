@@ -396,11 +396,14 @@ def actiefste_per_thema_en_kieskring():
 # cache = Cache(config={'CACHE_TYPE': 'simple'})
 # cache.init_app(app)
 
+
+# --- STATISTIEKEN PRIORITY SCORE SCHRIFTELIJKE VRAGEN ---
+#merk op we beginnen hier te tellen vanaf 2025-10-15. Dit is omdat tot dan de data loopt. 
+#Dit is makkelijk aan te passen in de toekomst indien nodig, wanneer er nieuwe data wordt ingeladen.
 @main.route('/statistieken/priority')
-@cache.cached(timeout=1800)  # cache 30 minuten
+@cache.cached(timeout=1800)
 def statistieken_priority():
     try:
-        # 🔹 Eén query die alles in één keer ophaalt
         rows = (
             db.session.query(
                 SchriftelijkeVragen.id,
@@ -415,45 +418,52 @@ def statistieken_priority():
         )
 
         data = []
-        vandaag = date.today()
+        referentie = date(2025, 10, 15)  # <<< eventueel aanpassen bij nieuwe dataset
 
         for r in rows:
-            # --- Actualiteitsscore (laatste 100 dagen) ---
+            # --- RECENCY SCORE (max 90) ---
             if r.ingediend:
-                dagen_verschil = (vandaag - r.ingediend).days
-                # Enkel laatste 100 dagen tellen mee, daarna score = 0
-                if dagen_verschil <= 100:
-                    # Lineair afnemen: 100 → 0 over 100 dagen
-                    recency_score = max(0, 100 - dagen_verschil)
+                dagen_verschil = (referentie - r.ingediend).days
+                if dagen_verschil <= 0:
+                    recency_score = 90
+                elif dagen_verschil <= 60:
+                    recency_score = max(20, 90 - (dagen_verschil * 1.1))
                 else:
-                    recency_score = 0
+                    recency_score = 20
             else:
                 recency_score = 0
 
-            # --- Themascore ---
-            thema_score = min(50, r.aantal_themas * 12)
+            # --- THEMA SCORE (max 30) ---
+            thema_score = min(30, r.aantal_themas * 6)
 
-            # --- Bonus of straf ---
-            antwoord_bonus = -20 if r.beantwoord else 0
+            # --- BONUS/STRAF ---
+            antwoord_bonus = -10 if r.beantwoord else 0
 
-            # --- Totale prioriteit ---
-            total_score = max(0, recency_score + thema_score + antwoord_bonus)
+            # --- TOTAAL ---
+            total_score = round(max(0, recency_score + thema_score + antwoord_bonus), 1)
+            if total_score > 100:
+                total_score = 100
 
             data.append({
                 "onderwerp": r.onderwerp,
                 "ingediend": r.ingediend.strftime("%Y-%m-%d") if r.ingediend else "-",
-                "beantwoord": "Ja" if r.beantwoord else "Nee",
                 "aantal_themas": r.aantal_themas,
-                "priority_score": round(total_score, 1),
+                "priority_score": total_score,
             })
 
-        # 🔹 Sorteer op hoogste prioriteit
+        # sorteer op hoogste score en toon enkel top 100
         data.sort(key=lambda x: x["priority_score"], reverse=True)
+        data = data[:200]
 
     except OperationalError:
         data = []
 
     return render_template("statistieken_priority.html", data=data)
+
+
+
+
+
 
 @main.route('/volksvertegenwoordigers')
 def volksvertegenwoordigers():
