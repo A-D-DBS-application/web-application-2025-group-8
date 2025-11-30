@@ -5,73 +5,67 @@
 <section class="hero" style="background:#facc15; color:#111;">
   <h1 class="hero-title">Actualiteit van Schriftelijke Vragen</h1>
   <p class="hero-subtitle">
-    Ontdek welke vragen momenteel het meest relevant zijn op basis van recentheid en thematische breedte.
+    Bekijk welke schriftelijke vragen momenteel de hoogste prioriteit hebben op basis van recentheid en thematische breedte.
   </p>
 </section>
 
-<!-- INFO-BOX NET ONDER HEADER -->
+<!-- INFO-BOX -->
 <section style="background-color:#f9fafb; padding:1.5rem 0;">
   <div style="max-width:800px; margin:auto; text-align:center; color:#374151;">
-    <h2 style="font-size:1.3rem; font-weight:600;">Over dit overzicht</h2>
-    <p>
-      Hieronder vind je de <strong>100 meest actuele schriftelijke vragen</strong>,
-      berekend op basis van hun recentheid en het aantal gekoppelde thema’s.
-    </p>
-    <p style="margin-top:0.5rem;">
+    <h2 style="font-size:1.3rem; font-weight:600;">Hoe wordt de prioriteit berekend?</h2>
+    <p>De prioriteitsscore combineert <strong>recentheid</strong> en <strong>thematische breedte</strong> tot één totaalscore:</p>
+    <ul style="list-style:none; padding:0; margin-top:1rem; text-align:left; max-width:600px; margin:auto; line-height:1.6;">
+      <li><strong>Recente vragen</strong> scoren hoger: vragen ingediend kort vóór de <strong>laatste data-update</strong> krijgen de meeste punten.</li>
+      <li><strong>Meer thema’s</strong> gekoppeld aan een vraag leveren extra punten op (ongeveer <strong>6 punten per thema</strong>, tot een maximum van <strong>30</strong>).</li>
+      <li>De totale score wordt afgerond en beperkt tot <strong>100 punten</strong>.</li>
+    </ul>
+    <p style="margin-top:1rem;">
       <span style="color:#16a34a; font-weight:600;">● Hoog (≥ 85)</span> &nbsp;|&nbsp;
-      <span style="color:#ca8a04; font-weight:600;">● Gemiddeld (71 – 84)</span> &nbsp;|&nbsp;
-      <span style="color:#dc2626; font-weight:600;">● Laag (≤ 70)</span>
+      <span style="color:#ca8a04; font-weight:600;">● Gemiddeld (76 – 84)</span> &nbsp;|&nbsp;
+      <span style="color:#dc2626; font-weight:600;">● Laag (≤ 75)</span>
     </p>
   </div>
 </section>
 
-<!-- CSS voor afwisselende rijen -->
-<style>
-  .row-light { background-color: #ffffff; }
-  .row-dark { background-color: #f9fafb; }
-</style>
-
 <!-- TABEL -->
-<section style="padding:2rem;">
-  <h2 style="text-align:center; font-size:1.4rem; font-weight:700; margin-bottom:1.5rem;">
-    Top 100 Meest Actuele Schriftelijke Vragen
-  </h2>
-
-  <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
-    <thead style="background:#f3f4f6;">
-      <tr>
-        <th style="padding:10px; text-align:left;">Onderwerp</th>
-        <th style="padding:10px; text-align:left;">Ingediend</th>
-        <th style="padding:10px; text-align:center;"># Thema’s</th>
-        <th style="padding:10px; text-align:left;">Score</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% if data %}
-        {% for item in data %}
-          <tr class="{{ 'row-dark' if loop.index is even else 'row-light' }}" style="border-bottom:1px solid #e5e7eb;">
-            <td style="padding:10px;">{{ item.onderwerp }}</td>
-            <td style="padding:10px;">{{ item.ingediend }}</td>
-            <td style="padding:10px; text-align:center;">{{ item.aantal_themas }}</td>
-            <td style="padding:10px; font-weight:600;">
-              {% if item.priority_score >= 85 %}
-                <span style="color:#16a34a;">{{ item.priority_score }}</span>
-              {% elif item.priority_score >= 71 %}
-                <span style="color:#ca8a04;">{{ item.priority_score }}</span>
-              {% else %}
-                <span style="color:#dc2626;">{{ item.priority_score }}</span>
-              {% endif %}
+<section style="padding:2rem; background-color:#fff;">
+  <div style="max-width:1200px; margin:auto;">
+    <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
+      <thead>
+        <tr style="background-color:#fff; border-bottom:2px solid #e5e7eb;">
+          <th style="padding:12px; text-align:left;">Onderwerp</th>
+          <th style="padding:12px; text-align:left;">Ingediend</th>
+          <th style="padding:12px; text-align:center;"># Thema’s</th>
+          <th style="padding:12px; text-align:left;">Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if data %}
+          {% for item in data %}
+            <tr style="border-bottom:1px solid #e5e7eb;">
+              <td style="padding:14px;">{{ item.onderwerp }}</td>
+              <td style="padding:14px;">{{ item.ingediend }}</td>
+              <td style="padding:14px; text-align:center;">{{ item.aantal_themas }}</td>
+              <td style="padding:14px; font-weight:600;">
+                {% if item.priority_score >= 85 %}
+                  <span style="color:#16a34a;">{{ item.priority_score }}</span>
+                {% elif item.priority_score >= 76 %}
+                  <span style="color:#ca8a04;">{{ item.priority_score }}</span>
+                {% else %}
+                  <span style="color:#dc2626;">{{ item.priority_score }}</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="4" style="text-align:center; padding:1rem;">
+              Nog geen data beschikbaar.
             </td>
           </tr>
-        {% endfor %}
-      {% else %}
-        <tr>
-          <td colspan="4" style="text-align:center; padding:1rem;">
-            Nog geen data beschikbaar.
-          </td>
-        </tr>
-      {% endif %}
-    </tbody>
-  </table>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
 </section>
 {% endblock %}
