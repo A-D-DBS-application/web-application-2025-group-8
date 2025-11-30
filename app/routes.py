@@ -143,27 +143,57 @@ def statistieken_themas():
 
 
 # --- STATISTIEKEN PER FRACTIE ---
-@main.route('/statistieken/fracties')
-def statistieken_fracties():
-    try:
-        fracties = db.session.query(Fractie).all()
-        data = []
+@main.route('/statistieken/fractie')
+def statistieken_fractie():
+    """Toont dropdowns om fractie en thema te kiezen."""
+    from app.models import Fractie, Thema
+    fracties = db.session.query(Fractie).order_by(Fractie.naam.asc()).all()
+    themas = db.session.query(Thema).order_by(Thema.naam.asc()).all()
+    return render_template('statistieken_fracties.html', fracties=fracties, themas=themas)
 
-        for fractie in fracties:
-            vragen = (
-                db.session.query(SchriftelijkeVragen)
-                .join(Persoonfunctie, Persoonfunctie.id == SchriftelijkeVragen.id_prsfnc_vs)
-                .filter(Persoonfunctie.id_frc == fractie.id)
-                .all()
-            )
-            data.append({
-                "fractie": fractie.naam,
-                "aantal_vragen": len(vragen),
-            })
-    except OperationalError:
-        data = []
 
-    return render_template("statistieken_fracties.html", data=data)
+@main.route("/statistieken/fractie/data/<uuid:fractie_id>/<uuid:thema_id>")
+def statistieken_fractie_data(fractie_id, thema_id):
+    """Geeft statistieken over 1 fractie en 1 thema."""
+    from app.models import Persoonfunctie  # om circular import te vermijden
+
+    # 1️⃣ Totaal aantal vragen van de fractie
+    totaal_vragen_fractie = (
+        db.session.query(SchriftelijkeVragen)
+        .join(Persoonfunctie, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
+        .filter(Persoonfunctie.id_frc == fractie_id)
+        .count()
+    )
+
+    # 2️⃣ Aantal vragen van deze fractie over dit thema
+    thema_vragen_fractie = (
+        db.session.query(SchriftelijkeVragen)
+        .join(Persoonfunctie, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
+        .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
+        .filter(Persoonfunctie.id_frc == fractie_id)
+        .filter(ThemaKoppeling.id_thm == thema_id)
+        .count()
+    )
+
+    # 3️⃣ Totaal aantal vragen over dit thema (alle fracties samen)
+    totaal_vragen_thema = (
+        db.session.query(SchriftelijkeVragen)
+        .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
+        .filter(ThemaKoppeling.id_thm == thema_id)
+        .count()
+    )
+
+    # Berekeningen
+    perc_van_fractie = round((thema_vragen_fractie / totaal_vragen_fractie) * 100, 2) if totaal_vragen_fractie else 0
+    perc_van_thema = round((thema_vragen_fractie / totaal_vragen_thema) * 100, 2) if totaal_vragen_thema else 0
+
+    return jsonify({
+        "totaal_vragen_fractie": totaal_vragen_fractie,
+        "thema_vragen_fractie": thema_vragen_fractie,
+        "perc_van_fractie": perc_van_fractie,
+        "totaal_vragen_thema": totaal_vragen_thema,
+        "perc_van_thema": perc_van_thema
+    })
 
 
 # --- STATISTIEKEN PER PERSOON ---

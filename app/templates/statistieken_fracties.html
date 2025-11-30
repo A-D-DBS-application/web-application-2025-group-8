@@ -1,35 +1,66 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="hero">
+<section class="hero" style="background:#facc15; color:#111;">
   <h1 class="hero-title">Statistieken per Fractie</h1>
-  <p class="hero-subtitle">Ontdek hoeveel vragen elke partij heeft gesteld per thema</p>
+  <p class="hero-subtitle">
+    Bekijk hoeveel vragen een fractie stelde over een bepaald thema, in verhouding tot hun totale activiteit én tot het totale aantal vragen binnen dat thema.
+  </p>
 </section>
 
-<section style="padding:2rem;">
-  <table style="width:100%; border-collapse:collapse;">
-    <thead style="background:#f3f4f6;">
-      <tr>
-        <th style="padding:8px; text-align:left;">Fractie</th>
-        <th style="padding:8px; text-align:left;">Thema</th>
-        <th style="padding:8px; text-align:left;">Aantal Vragen</th>
-        <th style="padding:8px; text-align:left;">% van Totaal</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% if resultaten %}
-        {% for r in resultaten %}
-        <tr>
-          <td style="padding:8px;">{{ r.fractie }}</td>
-          <td style="padding:8px;">{{ r.thema }}</td>
-          <td style="padding:8px;">{{ r.aantal_vragen }}</td>
-          <td style="padding:8px;">{{ r.percentage }}%</td>
-        </tr>
-        {% endfor %}
-      {% else %}
-        <tr><td colspan="4" style="text-align:center;">Nog geen data beschikbaar</td></tr>
-      {% endif %}
-    </tbody>
-  </table>
+<section style="padding:2rem; text-align:center;">
+  <label style="font-weight:600;">Kies een fractie:</label>
+  <select id="fractieSelect" style="padding:0.5rem 1rem; border:1px solid #ccc; border-radius:6px; margin:0 10px;">
+    <option value="">-- Selecteer fractie --</option>
+    {% for f in fracties %}
+      <option value="{{ f.id }}">{{ f.naam }}</option>
+    {% endfor %}
+  </select>
+
+  <label style="font-weight:600;">Kies een thema:</label>
+  <select id="themaSelect" style="padding:0.5rem 1rem; border:1px solid #ccc; border-radius:6px; margin:0 10px;">
+    <option value="">-- Selecteer thema --</option>
+    {% for t in themas %}
+      <option value="{{ t.id }}">{{ t.naam }}</option>
+    {% endfor %}
+  </select>
+
+  <button id="toonBtn" 
+          style="background:#2563eb; color:white; padding:0.6rem 1.2rem; border:none; border-radius:6px; cursor:pointer;">
+    Toon statistieken
+  </button>
+
+  <div id="resultaat" style="margin-top:2rem; font-size:1.1rem; text-align:left; display:inline-block;"></div>
 </section>
+
+<script>
+document.getElementById("toonBtn").addEventListener("click", async () => {
+  const fractieId = document.getElementById("fractieSelect").value;
+  const themaId = document.getElementById("themaSelect").value;
+
+  if (!fractieId || !themaId) {
+    alert("Selecteer zowel een fractie als een thema.");
+    return;
+  }
+
+  const resp = await fetch(`/statistieken/fractie/data/${fractieId}/${themaId}`);
+  const data = await resp.json();
+
+  document.getElementById("resultaat").innerHTML = `
+    <h3 style="margin-bottom:1rem;">Resultaten</h3>
+    <ul style="list-style:none; padding-left:0;">
+      <li><strong>Aantal vragen van deze fractie over dit thema:</strong> ${data.thema_vragen_fractie}</li>
+      <li><strong>% van totale vragen van deze fractie:</strong> ${data.perc_van_fractie}%</li>
+    </ul>
+
+    <br> <!-- witregel -->
+
+    <ul style="list-style:none; padding-left:0;">
+      <li><strong>Totaal aantal vragen over dit thema:</strong> ${data.totaal_vragen_thema}</li>
+      <li><strong>% van alle themavragen door deze fractie:</strong> ${data.perc_van_thema}%</li>
+    </ul>
+  `;
+});
+</script>
+
 {% endblock %}
