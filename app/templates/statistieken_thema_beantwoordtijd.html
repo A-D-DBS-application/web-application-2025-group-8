@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+  <h1 class="hero-title">Gemiddelde Beantwoordingssnelheid per Thema</h1>
+  <p class="hero-subtitle">
+    Bekijk hoe snel schriftelijke vragen gemiddeld worden beantwoord binnen elk thema.
+  </p>
+</section>
+
+<section style="padding:2rem; max-width:1100px; margin:auto;">
+  <h2 style="text-align:center; margin-bottom:1.5rem;">⏱️ Beantwoordtijd per Thema</h2>
+
+  <!-- Legenda -->
+  <div style="text-align:center; margin-bottom:1.5rem; font-size:0.95rem;">
+    <span style="color:green; font-weight:600;">● Snel (≤ 35 dagen)</span> &nbsp;|&nbsp;
+    <span style="color:orange; font-weight:600;">● Gemiddeld (36–45 dagen)</span> &nbsp;|&nbsp;
+    <span style="color:red; font-weight:600;">● Traag (> 45 dagen)</span>
+  </div>
+
+  <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
+    <thead style="background:#111827; color:white;">
+      <tr>
+        <th style="padding:10px; text-align:left;">Thema</th>
+        <th style="padding:10px; text-align:left;">Gemiddelde Beantwoordtijd (dagen)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in resultaten %}
+        {% if r.gem_dagen and r.gem_dagen <= 35 %}
+          {% set kleur = 'text-success' %}
+        {% elif r.gem_dagen and r.gem_dagen <= 45 %}
+          {% set kleur = 'text-warning' %}
+        {% else %}
+          {% set kleur = 'text-danger' %}
+        {% endif %}
+
+        <tr style="border-bottom:1px solid #e5e7eb; background-color: {{ loop.cycle('#fff','#f9fafb') }};">
+          <td style="padding:10px;">{{ r.thema }}</td>
+          <td class="{{ kleur }}" style="padding:10px; font-weight:600;">
+            {{ r.gem_dagen }}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if not resultaten %}
+  <p style="text-align:center; color:#555; margin-top:2rem;">
+    Geen gegevens beschikbaar over beantwoordingstijd.
+  </p>
+  {% endif %}
+</section>
+{% endblock %}

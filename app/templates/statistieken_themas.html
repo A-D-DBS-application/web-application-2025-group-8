@@ -3,37 +3,24 @@
 {% block content %}
 <section class="hero">
   <h1 class="hero-title">Statistieken per Thema</h1>
-  <p class="hero-subtitle">Bekijk welke fracties het actiefst zijn binnen elk thema</p>
+  <p class="hero-subtitle">
+    Analyseer politieke thema’s: ontdek hoe ze samenhangen en hoe snel vragen binnen elk thema worden beantwoord.
+  </p>
+
+  <div class="hero-buttons" style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-top:1.5rem;">
+    <a href="{{ url_for('main.statistieken_thema_netwerk') }}" class="btn">
+      Verwante Thema’s
+    </a>
+    <a href="{{ url_for('main.statistieken_thema_beantwoordtijd') }}" class="btn">
+      Beantwoordingssnelheid per Thema
+    </a>
+  </div>
 </section>
 
-<section style="padding:2rem;">
-  <table style="width:100%; border-collapse:collapse;">
-    <thead style="background:#f3f4f6;">
-      <tr>
-        <th style="padding:8px; text-align:left;">Thema</th>
-        <th style="padding:8px; text-align:left;">Meest Actieve Fractie</th>
-        <th style="padding:8px; text-align:left;">Actiefste Volksvertegenwoordiger</th>
-        <th style="padding:8px; text-align:left;">Laatste Vraag</th>
-        <th style="padding:8px; text-align:left;">% Vrouwen (hoogste aandeel)</th>
-        <th style="padding:8px; text-align:left;">Totaal Aantal Vragen</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% if resultaten %}
-        {% for r in resultaten %}
-        <tr>
-          <td style="padding:8px;">{{ r.thema }}</td>
-          <td style="padding:8px;">{{ r.fractie }}</td>
-          <td style="padding:8px;">{{ r.persoon }}</td>
-          <td style="padding:8px;">{{ r.laatste_vraag or "-" }}</td>
-          <td style="padding:8px;">{{ r.percentage_vrouwen }}%</td>
-          <td style="padding:8px;">{{ r.aantal_vragen }}</td>
-        </tr>
-        {% endfor %}
-      {% else %}
-        <tr><td colspan="6" style="text-align:center;">Nog geen data beschikbaar</td></tr>
-      {% endif %}
-    </tbody>
-  </table>
+<section style="padding:2rem; text-align:center;">
+  <h2 class="section-title">Kies een analyse</h2>
+  <p style="color:#374151; font-size:1.05rem; max-width:700px; margin:auto;">
+    Klik op een van de bovenstaande opties om inzicht te krijgen in de samenhang tussen thema’s of om te zien hoe efficiënt vragen per thema worden beantwoord.
+  </p>
 </section>
 {% endblock %}

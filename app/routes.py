@@ -74,72 +74,95 @@ def index():
 def statistieken_overzicht():
     return render_template('statistieken_overzicht.html')
 
-
 # --- STATISTIEKEN PER THEMA ---
+
 @main.route('/statistieken/themas')
 def statistieken_themas():
-    try:
-        themas = db.session.query(Thema).all()
-        data = []
+    """Toont de keuze tussen de 2 thematische analyses."""
+    return render_template('statistieken_themas.html')
 
-        for thema in themas:
-            vragen = (
-                db.session.query(SchriftelijkeVragen)
-                .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
-                .filter(ThemaKoppeling.id_thm == thema.id)
-                .all()
-            )
-            if not vragen:
-                continue
 
-            totaal_vragen = len(vragen)
-            fractie_telling, persoon_telling = {}, {}
-            geslacht_telling = {"M": 0, "V": 0, "X": 0}
-            laatste_vraag = max((v.ingediend for v in vragen if v.ingediend), default=None)
+# --- GEMIDDELDE BEANTWOORDINGSSNELHEID PER THEMA ---
+from datetime import datetime
 
-            for vraag in vragen:
-                pf = db.session.query(Persoonfunctie).get(vraag.id_prsfnc_vs)
-                if not pf:
-                    continue
+@main.route("/statistieken/thema_beantwoordtijd")
+def statistieken_thema_beantwoordtijd():
+    """Bereken gemiddelde beantwoordingstijd (in dagen) per thema."""
+    data = (
+        db.session.query(
+            Thema.naam,
+            SchriftelijkeVragen.ingediend,
+            SchriftelijkeVragen.beantwoord
+        )
+        .join(ThemaKoppeling, ThemaKoppeling.id_thm == Thema.id)
+        .join(SchriftelijkeVragen, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
+        .filter(SchriftelijkeVragen.ingediend.isnot(None))
+        .filter(SchriftelijkeVragen.beantwoord.isnot(None))
+        .all()
+    )
 
-                fractie = db.session.query(Fractie).get(pf.id_frc)
-                persoon = db.session.query(Persoon).get(pf.id_prs)
-
-                if fractie:
-                    fractie_telling[fractie.naam] = fractie_telling.get(fractie.naam, 0) + 1
-                if persoon:
-                    naam = f"{persoon.voornaam} {persoon.naam}"
-                    persoon_telling[naam] = persoon_telling.get(naam, 0) + 1
-                    if persoon.geslacht in geslacht_telling:
-                        geslacht_telling[persoon.geslacht] += 1
-
-            actiefste_fractie = max(fractie_telling, key=fractie_telling.get, default="-")
-            actiefste_persoon = max(persoon_telling, key=persoon_telling.get, default="-")
-
-            totaal_geslacht = sum(geslacht_telling.values())
-            if totaal_geslacht > 0:
-                geslacht_procenten = {
-                    k: round(v * 100 / totaal_geslacht, 1)
-                    for k, v in geslacht_telling.items()
-                }
-                dominant = max(geslacht_procenten, key=geslacht_procenten.get)
-                dominant_geslacht = f"{geslacht_procenten[dominant]}% {dominant}"
+    resultaten = {}
+    for naam, ingediend, beantwoord in data:
+        try:
+            # Zorg dat ook datetime.date objecten werken (niet enkel strings)
+            if isinstance(ingediend, datetime):
+                d1 = ingediend.date()
             else:
-                dominant_geslacht = "-"
+                d1 = datetime.strptime(str(ingediend), "%Y-%m-%d").date()
 
-            data.append({
-                "thema_naam": thema.naam,
-                "actiefste_fractie": actiefste_fractie,
-                "actiefste_persoon": actiefste_persoon,
-                "laatste_vraag": laatste_vraag.strftime("%Y-%m-%d") if laatste_vraag else "-",
-                "dominant_geslacht": dominant_geslacht,
-                "totaal_vragen": totaal_vragen,
-            })
-    except OperationalError:
-        # DB niet bereikbaar -> toon lege lijst i.p.v. 500-error
-        data = []
+            if isinstance(beantwoord, datetime):
+                d2 = beantwoord.date()
+            else:
+                d2 = datetime.strptime(str(beantwoord), "%Y-%m-%d").date()
 
-    return render_template("statistieken_themas.html", data=data)
+            dagen = (d2 - d1).days
+            if dagen >= 0:  # geen negatieve waarden
+                resultaten.setdefault(naam, []).append(dagen)
+        except Exception:
+            continue
+
+    resultaten = [
+        {"thema": k, "gem_dagen": round(sum(v) / len(v), 1)}
+        for k, v in resultaten.items()
+        if len(v) > 0
+    ]
+
+    # Sorteer van snelst naar traagst
+    resultaten.sort(key=lambda x: x["gem_dagen"])
+
+    return render_template("statistieken_thema_beantwoordtijd.html", resultaten=resultaten)
+
+
+
+# --- NETWERK VAN SAMENHANGENDE THEMA’S ---
+@main.route("/statistieken/thema_netwerk")
+def statistieken_thema_netwerk():
+    """Berekent hoe vaak thema’s samen in dezelfde vraag voorkomen."""
+    from app.models import Thema, ThemaKoppeling
+
+    koppelingen = (
+        db.session.query(ThemaKoppeling.id_schv, func.array_agg(ThemaKoppeling.id_thm))
+        .group_by(ThemaKoppeling.id_schv)
+        .all()
+    )
+
+    combinaties = {}
+    for _, ids in koppelingen:
+        ids = list(set(ids))
+        if len(ids) > 1:
+            for i in range(len(ids)):
+                for j in range(i + 1, len(ids)):
+                    paar = tuple(sorted([ids[i], ids[j]]))
+                    combinaties[paar] = combinaties.get(paar, 0) + 1
+
+    id_to_naam = {t.id: t.naam for t in db.session.query(Thema).all()}
+    resultaten = [
+        {"thema1": id_to_naam.get(a, "?"), "thema2": id_to_naam.get(b, "?"), "aantal": n}
+        for (a, b), n in sorted(combinaties.items(), key=lambda x: x[1], reverse=True)
+    ]
+
+    return render_template("statistieken_thema_netwerk.html", resultaten=resultaten)
+
 
 
 # --- STATISTIEKEN PER FRACTIE ---

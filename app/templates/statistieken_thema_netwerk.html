@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1 class="hero-title">Verwante Thema’s</h1>
+  <p class="hero-subtitle">Thema’s die vaak samen voorkomen in schriftelijke vragen</p>
+</section>
+
+<section style="padding:2rem;">
+  <table class="table table-bordered table-hover">
+    <thead>
+      <tr><th>Thema A</th><th>Thema B</th><th>Aantal keer samen</th></tr>
+    </thead>
+    <tbody>
+      {% for r in resultaten %}
+      <tr>
+        <td>{{ r.thema1 }}</td>
+        <td>{{ r.thema2 }}</td>
+        <td>{{ r.aantal }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
