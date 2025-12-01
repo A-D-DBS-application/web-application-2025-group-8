@@ -161,6 +161,35 @@
       text-align: center;
     }
   }
+
+  /* ---- Partijkleuren voor de bolletjes (#-rank) ---- */
+  .vv-rank[data-fractie="N-VA"] {
+    background: #fcbd1f;
+  }
+  .vv-rank[data-fractie="Vooruit"] {
+    background: #dc2626;
+  }
+  .vv-rank[data-fractie="cd&v"] {
+    background: #ee7433;
+  }
+  .vv-rank[data-fractie="Vlaams Belang"] {
+    background: #e7d12a;
+  }
+  .vv-rank[data-fractie="Groen"] {
+    background: #16a34a;
+  }
+  .vv-rank[data-fractie="PVDA"] {
+    background: #b91c1c;
+  }
+  .vv-rank[data-fractie="Open Vld"] {
+    background: #2563eb;
+  }
+  .vv-rank[data-fractie="Team Fouad Ahidar"] {
+    background: #9333ea;
+  }
+  .vv-rank[data-fractie="Onafhankelijke"] {
+    background: #6b7280;
+  }
 </style>
 
 <!-- HERO -->
@@ -230,7 +259,7 @@
     <div class="cards-grid">
       {% for r in data %}
         <div class="card vv-card">
-          <div class="vv-rank">#{{ r.rang }}</div>
+          <div class="vv-rank" data-fractie="{{ r.fractie }}">#{{ r.rang }}</div>
           <div class="vv-content">
             <h3 class="vv-name">{{ r.naam }}</h3>
             <p class="vv-fraction">{{ r.fractie }}</p>
