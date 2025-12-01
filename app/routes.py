@@ -856,14 +856,13 @@ def thema_vragen_maand(thema_id, jaar, maand):
 
 @main.route("/statistieken/centrale_themas")
 def centrale_themas():
-    """
-    Berekent de centraliteit van thema's op basis van hun samen voorkomen
-    in schriftelijke vragen (hoe vaak een thema met andere thema's voorkomt).
-    """
+    """Berekent de centraliteit van thema’s op basis van hoe vaak ze samen voorkomen in vragen."""
     try:
         from app.models import Thema, ThemaKoppeling
         import networkx as nx
+        from sqlalchemy import func
 
+        # 🔹 Zelfde manier als in jouw statistieken_thema_netwerk
         koppelingen = (
             db.session.query(ThemaKoppeling.id_schv, func.array_agg(ThemaKoppeling.id_thm))
             .group_by(ThemaKoppeling.id_schv)
@@ -872,6 +871,8 @@ def centrale_themas():
 
         combinaties = {}
         for _, ids in koppelingen:
+            if not ids:
+                continue
             ids = list(set(ids))
             if len(ids) > 1:
                 for i in range(len(ids)):
@@ -881,16 +882,13 @@ def centrale_themas():
 
         themas = {t.id: t.naam for t in Thema.query.all()}
 
-        edges = []
+        G = nx.Graph()
         for (id1, id2), aantal in combinaties.items():
             thema1, thema2 = themas.get(id1), themas.get(id2)
             if thema1 and thema2:
-                edges.append((thema1, thema2, aantal))
+                G.add_edge(thema1, thema2, weight=aantal)
 
-        G = nx.Graph()
-        for a, b, gewicht in edges:
-            G.add_edge(a, b, weight=gewicht)
-
+        # 🔹 Bereken centraliteitsscore
         centrality = nx.degree_centrality(G)
 
         data = [
@@ -899,8 +897,7 @@ def centrale_themas():
         ][:10]
 
     except Exception as e:
-        print("Fout bij berekening centraliteit:", e)
+        print("⚠️ Fout bij berekening centraliteit:", e)
         data = []
 
     return render_template("statistieken_centrale_themas.html", data=data)
-
