@@ -14,59 +14,37 @@ main = Blueprint('main', __name__)
 @main.route('/')
 def index():
     try:
-        # Statistieken
+        # Korte statistieken
         aantal_vragen = db.session.query(func.count(SchriftelijkeVragen.id)).scalar() or 0
         aantal_themas = db.session.query(func.count(Thema.id)).scalar() or 0
         aantal_personen = db.session.query(func.count(Persoon.id)).scalar() or 0
-        aantal_fracties = db.session.query(func.count(Fractie.id)).scalar() or 0
-        aantal_beantwoord = (
-            db.session.query(func.count(SchriftelijkeVragen.id))
-            .filter(SchriftelijkeVragen.beantwoord.isnot(None))
-            .scalar()
-            or 0
-        )
+        aantal_beantwoord = db.session.query(func.count(SchriftelijkeVragen.id)).filter(SchriftelijkeVragen.beantwoord.isnot(None)).scalar() or 0
 
-        # Recentste vragen
-        vragen = (
-            db.session.query(SchriftelijkeVragen)
-            .order_by(SchriftelijkeVragen.ingediend.desc())
-            .limit(5)
-            .all()
-        )
+        # Recente vragen en thema's en fracties om op de homepage te tonen
+        vragen = db.session.query(SchriftelijkeVragen).order_by(SchriftelijkeVragen.ingediend.desc()).limit(10).all()
+        themas = db.session.query(Thema).order_by(Thema.naam.asc()).limit(10).all()
+        fracties = db.session.query(Fractie).order_by(Fractie.naam.asc()).all()
 
-        # Thema’s
-        themas = Thema.query.all()
-        themes_data = [{'naam': t.naam, 'count': 0} for t in themas] #maak lijst van thema's elk krijgt voorlopig count 0
-
-        # Fracties
-        fracties_data = Fractie.query.all()
-        fracties = [{'naam': f.naam, 'zetels': 0} for f in fracties_data]
+        stats_data = [
+            {'label': 'Schriftelijke Vragen', 'value': aantal_vragen, 'icon': 'file-text'},
+            {'label': 'Actieve Thema’s', 'value': aantal_themas, 'icon': 'tag'},
+            {'label': 'Volksvertegenwoordigers', 'value': aantal_personen, 'icon': 'users'},
+            {'label': 'Beantwoorde Vragen', 'value': f"{aantal_beantwoord}/{aantal_vragen}" if aantal_vragen else "0", 'icon': 'trending-up'},
+        ]
 
     except OperationalError:
-        # Database niet bereikbaar → geen crash, maar lege data
-        aantal_vragen = 0
-        aantal_themas = 0
-        aantal_personen = 0
-        aantal_fracties = 0
-        aantal_beantwoord = 0
+        stats_data = []
         vragen = []
-        themes_data = []
+        themas = []
         fracties = []
-
-    stats_data = [
-        {'label': 'Schriftelijke Vragen', 'value': aantal_vragen, 'icon': 'file-text'},
-        {'label': 'Actieve Thema’s', 'value': aantal_themas, 'icon': 'tag'},
-        {'label': 'Volksvertegenwoordigers', 'value': aantal_personen, 'icon': 'users'},
-        {'label': 'Beantwoorde Vragen', 'value': f"{aantal_beantwoord}/{aantal_vragen}" if aantal_vragen else "0", 'icon': 'trending-up'},
-    ]
 
     return render_template(
         'index.html',
         stats=stats_data,
         questions=vragen,
-        themes=themes_data,
+        themes=themas,
         fracties=fracties
-    ) #stuurt alle data naar de pagina index.html
+    )
 
 
 # --- OVERZICHTPAGINA STATISTIEKEN ---
@@ -554,12 +532,39 @@ def vv_vragen(vv_id):
                 .all()
             )
             title = f"Beantwoorde vragen voor {persoon.voornaam} {persoon.naam}"
+            # Bepaal de fractie van de minister (indien beschikbaar)
+            minister_fractie = None
+            minister_pf_current = (
+                db.session.query(Persoonfunctie)
+                .filter(Persoonfunctie.id_prs == vv_id, Persoonfunctie.id_frc.isnot(None), Persoonfunctie.tot.is_(None))
+                .first()
+            )
+            if not minister_pf_current:
+                minister_pf_current = (
+                    db.session.query(Persoonfunctie)
+                    .filter(Persoonfunctie.id_prs == vv_id, Persoonfunctie.id_frc.isnot(None))
+                    .first()
+                )
+            if minister_pf_current and minister_pf_current.id_frc:
+                fmin = db.session.query(Fractie).get(minister_pf_current.id_frc)
+                minister_fractie = fmin.naam if fmin else None
 
             for v in vragen:
+                # Haal de indiener op via de persoonfunctie die de vraag indiende
+                indiener_naam = None
+                try:
+                    pf_sub = db.session.query(Persoonfunctie).filter(Persoonfunctie.id == v.id_prsfnc_vs).first()
+                    if pf_sub and pf_sub.id_prs:
+                        p_sub = db.session.query(Persoon).get(pf_sub.id_prs)
+                        if p_sub:
+                            indiener_naam = f"{p_sub.voornaam} {p_sub.naam}"
+                except Exception:
+                    indiener_naam = None
+
                 vragen_q.append({
                     "onderwerp": v.onderwerp,
-                    "indiener": None,
-                    "fractie": None,
+                    "indiener": indiener_naam,
+                    "fractie": minister_fractie,
                     "datum": v.beantwoord.strftime("%d/%m/%Y") if v.beantwoord else "-",
                     "link": v.tekst if v.tekst and isinstance(v.tekst, str) and v.tekst.startswith("http") else None
                 })
