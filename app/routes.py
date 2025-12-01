@@ -220,7 +220,6 @@ def statistieken_fractie_data(fractie_id, thema_id):
 
 
 # --- STATISTIEKEN PER PERSOON ---
-
 @main.route("/statistieken/personen")
 def statistieken_personen():
     # 1. Haal alle personen op
@@ -230,18 +229,25 @@ def statistieken_personen():
 
     for persoon in personen:
 
-        # ─────────────────────────────────────────────
-        # 2. Vind alle persoonfuncties van deze persoon
-        # ─────────────────────────────────────────────
-        functies = Persoonfunctie.query.filter_by(id_prs=persoon.id).all()
-        functie_ids = [f.id for f in functies]
+        # 2. Haal alle functies op + JOIN naar Functies
+        functies = (
+            db.session.query(Persoonfunctie, Functies)
+            .join(Functies, Persoonfunctie.id_fnc == Functies.id)
+            .filter(Persoonfunctie.id_prs == persoon.id)
+            .all()
+        )
 
-        if not functie_ids:
+        if not functies:
             continue
 
-        # ─────────────────────────────────────────────
-        # 3. Haal alle vragen die door deze persoon zijn ingediend
-        # ─────────────────────────────────────────────
+        # 3. ➤ FILTER: Als één van de functies "minister" bevat → skip
+        if any("minister" in f2.naam.lower() for f1, f2 in functies):
+            continue
+
+        # 4. lijst van persoonfunctie-ID's
+        functie_ids = [f1.id for f1, f2 in functies]
+
+        # 5. Haal alle vragen van deze persoon
         vragen = SchriftelijkeVragen.query.filter(
             SchriftelijkeVragen.id_prsfnc_vs.in_(functie_ids)
         ).all()
@@ -259,25 +265,20 @@ def statistieken_personen():
             })
             continue
 
-        # ─────────────────────────────────────────────
-        # 4. Tel hoeveel keer elk thema voorkomt
-        # ─────────────────────────────────────────────
-        thema_counts = db.session.query(
-            Thema.naam,
-            func.count(ThemaKoppeling.id).label("aantal")
-        ).join(ThemaKoppeling, Thema.id == ThemaKoppeling.id_thm) \
-         .join(SchriftelijkeVragen, SchriftelijkeVragen.id == ThemaKoppeling.id_schv) \
-         .filter(SchriftelijkeVragen.id_prsfnc_vs.in_(functie_ids)) \
-         .group_by(Thema.naam) \
-         .order_by(func.count(ThemaKoppeling.id).desc()) \
-         .all()
+        # 6. Thema’s tellen
+        thema_counts = (
+            db.session.query(Thema.naam, func.count(ThemaKoppeling.id))
+            .join(ThemaKoppeling, Thema.id == ThemaKoppeling.id_thm)
+            .join(SchriftelijkeVragen, SchriftelijkeVragen.id == ThemaKoppeling.id_schv)
+            .filter(SchriftelijkeVragen.id_prsfnc_vs.in_(functie_ids))
+            .group_by(Thema.naam)
+            .order_by(func.count(ThemaKoppeling.id).desc())
+            .all()
+        )
 
-        # Sorteren
         top3 = thema_counts[:3]
 
-        # ─────────────────────────────────────────────
-        # 5. Laatste vraag (nieuwste datum)
-        # ─────────────────────────────────────────────
+        # 7. Laatste vraag
         laatste = max(v.ingediend for v in vragen)
 
         resultaat.append({
@@ -292,7 +293,6 @@ def statistieken_personen():
         })
 
     return render_template("statistieken_personen.html", data=resultaat)
-
 
 
 # --- ACTIEFSTE VOLKSVERTEGENWOORDIGERS PER THEMA & KIESKRING ---
