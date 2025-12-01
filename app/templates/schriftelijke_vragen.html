@@ -3,9 +3,9 @@
 {% block content %}
 <!-- HERO -->
 <section class="hero" style="background:#facc15; color:#111;">
-  <h1 class="hero-title">Schriftelijke Vragen</h1>
+  <h1 class="hero-title">{{ title if title is defined else 'Schriftelijke Vragen' }}</h1>
   <p class="hero-subtitle">
-    Bekijk de meest recente schriftelijke vragen en ontdek wie ze heeft ingediend.
+    {{ 'Bekijk de meest recente schriftelijke vragen en ontdek wie ze heeft ingediend.' if title is not defined else '' }}
   </p>
 </section>
 

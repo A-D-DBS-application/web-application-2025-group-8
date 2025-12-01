@@ -470,8 +470,10 @@ from sqlalchemy.exc import OperationalError
 @main.route('/volksvertegenwoordigers')
 def volksvertegenwoordigers():
     try:
+        # Haal alle personen; we selecteren ook de id zodat we links kunnen maken
         rows = (
             db.session.query(
+                Persoon.id,
                 Persoon.voornaam,
                 Persoon.naam,
                 Persoon.kieskring,
@@ -482,7 +484,8 @@ def volksvertegenwoordigers():
             .join(Persoonfunctie, Persoonfunctie.id_prs == Persoon.id)
             .join(Fractie, Fractie.id == Persoonfunctie.id_frc, isouter=True)
             .join(Functies, Functies.id == Persoonfunctie.id_fnc, isouter=True)
-            .order_by(Persoon.naam)
+            .distinct(Persoon.id)
+            .order_by(Persoon.id, Persoon.naam)
             .all()
         )
 
@@ -498,6 +501,7 @@ def volksvertegenwoordigers():
 
         data = [
             {
+                "id": str(r.id),
                 "naam": f"{r.voornaam} {r.naam}",
                 "leeftijd": bereken_leeftijd(r.geboortedatum),
                 "fractie": r.fractie or "-",
@@ -511,6 +515,84 @@ def volksvertegenwoordigers():
         data = []
 
     return render_template("volksvertegenwoordigers.html", volksvertegenwoordigers=data)
+
+
+
+# --- DETAIL LIJST VAN VRAGEN VOOR EEN VOLKSVERTEGENWOORDIGER ---
+@main.route('/vv/<uuid:vv_id>/vragen')
+def vv_vragen(vv_id):
+    try:
+        # Haal persoon op
+        persoon = Persoon.query.get_or_404(vv_id)
+
+        # alle persoonfunctie ids voor deze persoon
+        prsfncs = db.session.query(Persoonfunctie).filter(Persoonfunctie.id_prs == vv_id).all()
+        prsfnc_ids = [p.id for p in prsfncs]
+
+        # Bepaal of deze persoon een minister is: check functienaam/code op 'minister' of 'min'
+        minister_functie = (
+            db.session.query(Functies)
+            .join(Persoonfunctie, Persoonfunctie.id_fnc == Functies.id)
+            .filter(Persoonfunctie.id_prs == vv_id)
+            .filter(
+                (func.lower(Functies.naam).like("%minister%")) |
+                (func.lower(Functies.code).like("%min%"))
+            )
+            .first()
+        )
+
+        vragen_q = []
+        title = f"Schriftelijke vragen van {persoon.voornaam} {persoon.naam}"
+
+        if minister_functie:
+            # Voor ministers: toon beantwoorde vragen waarvoor zij de ontvanger/minister waren
+            vragen = (
+                db.session.query(SchriftelijkeVragen)
+                .filter(SchriftelijkeVragen.id_prsfnc_min.in_(prsfnc_ids))
+                .filter(SchriftelijkeVragen.beantwoord.isnot(None))
+                .order_by(SchriftelijkeVragen.beantwoord.desc())
+                .all()
+            )
+            title = f"Beantwoorde vragen voor {persoon.voornaam} {persoon.naam}"
+
+            for v in vragen:
+                vragen_q.append({
+                    "onderwerp": v.onderwerp,
+                    "indiener": None,
+                    "fractie": None,
+                    "datum": v.beantwoord.strftime("%d/%m/%Y") if v.beantwoord else "-",
+                    "link": v.tekst if v.tekst and isinstance(v.tekst, str) and v.tekst.startswith("http") else None
+                })
+        else:
+            # Voor gewone volksvertegenwoordigers: toon vragen die zij indienden
+            vragen = (
+                db.session.query(SchriftelijkeVragen, Persoonfunctie)
+                .join(Persoonfunctie, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
+                .filter(Persoonfunctie.id_prs == vv_id)
+                .order_by(SchriftelijkeVragen.ingediend.desc())
+                .all()
+            )
+
+            for v, pf in vragen:
+                # probeer fractie-naam op te halen uit persoonfunctie (kan None zijn)
+                fractie_naam = None
+                if pf and pf.id_frc:
+                    f = db.session.query(Fractie).get(pf.id_frc)
+                    fractie_naam = f.naam if f else None
+
+                vragen_q.append({
+                    "onderwerp": v.onderwerp,
+                    "indiener": f"{persoon.voornaam} {persoon.naam}",
+                    "fractie": fractie_naam,
+                    "datum": v.ingediend.strftime("%d/%m/%Y") if v.ingediend else "-",
+                    "link": v.tekst if v.tekst and isinstance(v.tekst, str) and v.tekst.startswith("http") else None
+                })
+
+    except OperationalError:
+        vragen_q = []
+        title = "Schriftelijke vragen"
+
+    return render_template('schriftelijke_vragen.html', vragen=vragen_q, title=title)
 
 
 

@@ -23,7 +23,11 @@
       {% if volksvertegenwoordigers %}
         {% for persoon in volksvertegenwoordigers %}
         <tr style="border-bottom:1px solid #ddd;">
-          <td style="padding:8px;">{{ persoon.naam }}</td>
+          <td style="padding:8px;">
+            <a href="{{ url_for('main.vv_vragen', vv_id=persoon.id) }}" style="color:inherit; text-decoration:none;">
+              {{ persoon.naam }}
+            </a>
+          </td>
           <td style="padding:8px;">{{ persoon.leeftijd }}</td>
           <td style="padding:8px;">{{ persoon.fractie }}</td>
           <td style="padding:8px;">{{ persoon.kieskring }}</td>
