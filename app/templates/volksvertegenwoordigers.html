@@ -4,7 +4,7 @@
 <section class="hero">
   <h1 class="hero-title">Volksvertegenwoordigers</h1>
   <p class="hero-subtitle">
-    Overzicht van alle volksvertegenwoordigers met hun fractie, functie en kieskring
+    Overzicht van alle volksvertegenwoordigers met hun fractie, functie, kieskring en leeftijd.
   </p>
 </section>
 
@@ -13,9 +13,10 @@
     <thead style="background:#f3f4f6; cursor:pointer;">
       <tr>
         <th onclick="sortTable(0)" style="padding:8px; text-align:left;">Naam volksvertegenwoordiger ⬍</th>
-        <th onclick="sortTable(1)" style="padding:8px; text-align:left;">Fractie ⬍</th>
-        <th onclick="sortTable(2)" style="padding:8px; text-align:left;">Kieskring ⬍</th>
-        <th onclick="sortTable(3)" style="padding:8px; text-align:left;">Functie ⬍</th>
+        <th onclick="sortTable(1)" style="padding:8px; text-align:left;">Leeftijd ⬍</th>
+        <th onclick="sortTable(2)" style="padding:8px; text-align:left;">Fractie ⬍</th>
+        <th onclick="sortTable(3)" style="padding:8px; text-align:left;">Kieskring ⬍</th>
+        <th onclick="sortTable(4)" style="padding:8px; text-align:left;">Functie ⬍</th>
       </tr>
     </thead>
     <tbody>
@@ -23,6 +24,7 @@
         {% for persoon in volksvertegenwoordigers %}
         <tr style="border-bottom:1px solid #ddd;">
           <td style="padding:8px;">{{ persoon.naam }}</td>
+          <td style="padding:8px;">{{ persoon.leeftijd }}</td>
           <td style="padding:8px;">{{ persoon.fractie }}</td>
           <td style="padding:8px;">{{ persoon.kieskring }}</td>
           <td style="padding:8px;">{{ persoon.functie }}</td>
@@ -30,7 +32,7 @@
         {% endfor %}
       {% else %}
         <tr>
-          <td colspan="4" style="text-align:center; color:#555;">
+          <td colspan="5" style="text-align:center; color:#555;">
             Er zijn momenteel geen volksvertegenwoordigers beschikbaar.
           </td>
         </tr>
@@ -40,16 +42,20 @@
 </section>
 
 <script>
-let sortDirection = [true, true, true, true]; // bijhouden van oplopend/aflopend per kolom
+let sortDirection = [true, true, true, true, true];
 
 function sortTable(columnIndex) {
   const table = document.getElementById("vvTable");
-  const rows = Array.from(table.rows).slice(1); // oversla header
+  const rows = Array.from(table.rows).slice(1);
   const dir = sortDirection[columnIndex] ? 1 : -1;
 
   rows.sort((a, b) => {
     const A = a.cells[columnIndex].innerText.trim().toLowerCase();
     const B = b.cells[columnIndex].innerText.trim().toLowerCase();
+    // speciale sortering voor cijfers (zoals leeftijd)
+    if (!isNaN(A) && !isNaN(B)) {
+      return (parseInt(A) - parseInt(B)) * dir;
+    }
     return A.localeCompare(B) * dir;
   });
 

@@ -464,6 +464,8 @@ def statistieken_priority():
 
 
 
+from datetime import date
+from sqlalchemy.exc import OperationalError
 
 @main.route('/volksvertegenwoordigers')
 def volksvertegenwoordigers():
@@ -473,6 +475,7 @@ def volksvertegenwoordigers():
                 Persoon.voornaam,
                 Persoon.naam,
                 Persoon.kieskring,
+                Persoon.geboortedatum,
                 Fractie.naam.label("fractie"),
                 Functies.naam.label("functie")
             )
@@ -483,15 +486,27 @@ def volksvertegenwoordigers():
             .all()
         )
 
+        def bereken_leeftijd(geboortedatum):
+            if geboortedatum:
+                vandaag = date.today()
+                leeftijd = (
+                    vandaag.year - geboortedatum.year -
+                    ((vandaag.month, vandaag.day) < (geboortedatum.month, geboortedatum.day))
+                )
+                return leeftijd
+            return "-"
+
         data = [
             {
                 "naam": f"{r.voornaam} {r.naam}",
+                "leeftijd": bereken_leeftijd(r.geboortedatum),
                 "fractie": r.fractie or "-",
                 "kieskring": r.kieskring or "-",
                 "functie": r.functie or "-"
             }
             for r in rows
         ]
+
     except OperationalError:
         data = []
 
