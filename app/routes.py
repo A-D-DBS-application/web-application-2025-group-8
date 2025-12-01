@@ -746,7 +746,11 @@ def grafieken_data(thema_id):
         .all()
     )
 
-    labels = [r[0].strftime("%b %Y") for r in results]
+    maanden = ["jan", "feb", "mrt", "apr", "mei", "jun",
+           "jul", "aug", "sep", "okt", "nov", "dec"]
+
+    labels = [f"{maanden[r[0].month - 1]} {r[0].year}" for r in results]
+
     values = [r[1] for r in results]
 
     return jsonify({"labels": labels, "values": values})

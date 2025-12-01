@@ -145,7 +145,13 @@ document.getElementById("evolutieChart").onclick = async (evt) => {
   const point = points[0];
   const label = chart.data.labels[point.index];
   const [maandStr, jaarStr] = label.split(" ");
-  const maand = new Date(Date.parse(maandStr + " 1, " + jaarStr)).getMonth() + 1;
+  //maanden in het nederlands
+  const nlMaanden = {
+  "jan":1, "feb":2, "mrt":3, "apr":4, "mei":5, "jun":6,
+  "jul":7, "aug":8, "sep":9, "okt":10, "nov":11, "dec":12
+};
+
+  const maand = nlMaanden[maandStr.toLowerCase()];
   const jaar = parseInt(jaarStr);
 
   const response = await fetch(`/grafieken/thema_vragen/${gekozenThema}/${jaar}/${maand}`);
@@ -232,8 +238,14 @@ document.getElementById("vvChart").onclick = async (evt) => {
   const point = points[0];
   const label = vvChart.data.labels[point.index];
   const [maandStr, jaarStr] = label.split(" ");
-  const maand = new Date(Date.parse(maandStr + " 1, " + jaarStr)).getMonth() + 1;
-  const jaar = parseInt(jaarStr);
+  const nlMaanden = {
+  "jan":1, "feb":2, "mrt":3, "apr":4, "mei":5, "jun":6,
+  "jul":7, "aug":8, "sep":9, "okt":10, "nov":11, "dec":12
+};
+
+const maand = nlMaanden[maandStr.toLowerCase()];
+const jaar = parseInt(jaarStr);
+
 
   const response = await fetch(`/grafieken/vv_vragen/${window.selectedVV}/${jaar}/${maand}`);
   const data = await response.json();
