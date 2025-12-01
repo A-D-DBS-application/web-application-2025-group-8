@@ -15,7 +15,7 @@ class Fractie(db.Model): #database tabel met de naam fractie
 
     id = db.Column(UUID(as_uuid=True), primary_key=True)  # geen default,kolom id is primary key
     naam = db.Column(db.String, nullable=False) #mag niet leeg zijn
-    logo_url = db.Column(db.String) #mag wel leeg zijn, bevat url naar fractielogo
+    #logo_url = db.Column(db.String) #mag wel leeg zijn, bevat url naar fractielogo
 
 # ===== FUNCTIES =====
 class Functies(db.Model): #database tabel met de naam functies
