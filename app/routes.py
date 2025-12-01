@@ -180,7 +180,7 @@ def statistieken_fractie_data(fractie_id, thema_id):
     """Geeft statistieken over 1 fractie en 1 thema."""
     from app.models import Persoonfunctie  # om circular import te vermijden
 
-    # 1️⃣ Totaal aantal vragen van de fractie
+    # Totaal aantal vragen van de fractie
     totaal_vragen_fractie = (
         db.session.query(SchriftelijkeVragen)
         .join(Persoonfunctie, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
@@ -188,7 +188,7 @@ def statistieken_fractie_data(fractie_id, thema_id):
         .count()
     )
 
-    # 2️⃣ Aantal vragen van deze fractie over dit thema
+    # Aantal vragen van deze fractie over dit thema
     thema_vragen_fractie = (
         db.session.query(SchriftelijkeVragen)
         .join(Persoonfunctie, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
@@ -198,7 +198,7 @@ def statistieken_fractie_data(fractie_id, thema_id):
         .count()
     )
 
-    # 3️⃣ Totaal aantal vragen over dit thema (alle fracties samen)
+    # Totaal aantal vragen over dit thema (alle fracties samen)
     totaal_vragen_thema = (
         db.session.query(SchriftelijkeVragen)
         .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
@@ -851,3 +851,56 @@ def thema_vragen_maand(thema_id, jaar, maand):
     ]
 
     return jsonify(data)
+
+
+
+@main.route("/statistieken/centrale_themas")
+def centrale_themas():
+    """
+    Berekent de centraliteit van thema's op basis van hun samen voorkomen
+    in schriftelijke vragen (hoe vaak een thema met andere thema's voorkomt).
+    """
+    try:
+        from app.models import Thema, ThemaKoppeling
+        import networkx as nx
+
+        koppelingen = (
+            db.session.query(ThemaKoppeling.id_schv, func.array_agg(ThemaKoppeling.id_thm))
+            .group_by(ThemaKoppeling.id_schv)
+            .all()
+        )
+
+        combinaties = {}
+        for _, ids in koppelingen:
+            ids = list(set(ids))
+            if len(ids) > 1:
+                for i in range(len(ids)):
+                    for j in range(i + 1, len(ids)):
+                        paar = tuple(sorted([ids[i], ids[j]]))
+                        combinaties[paar] = combinaties.get(paar, 0) + 1
+
+        themas = {t.id: t.naam for t in Thema.query.all()}
+
+        edges = []
+        for (id1, id2), aantal in combinaties.items():
+            thema1, thema2 = themas.get(id1), themas.get(id2)
+            if thema1 and thema2:
+                edges.append((thema1, thema2, aantal))
+
+        G = nx.Graph()
+        for a, b, gewicht in edges:
+            G.add_edge(a, b, weight=gewicht)
+
+        centrality = nx.degree_centrality(G)
+
+        data = [
+            {"thema": thema, "score": round(score * 100, 1)}
+            for thema, score in sorted(centrality.items(), key=lambda x: x[1], reverse=True)
+        ][:10]
+
+    except Exception as e:
+        print("Fout bij berekening centraliteit:", e)
+        data = []
+
+    return render_template("statistieken_centrale_themas.html", data=data)
+

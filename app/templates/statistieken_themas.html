@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="hero">
+<section class="hero" style="background:#facc15; color:#111;">
   <h1 class="hero-title">Statistieken per Thema</h1>
   <p class="hero-subtitle">
-    Analyseer politieke thema’s: ontdek hoe ze samenhangen en hoe snel vragen binnen elk thema worden beantwoord.
+    Analyseer politieke thema’s: ontdek hoe ze samenhangen, hoe snel ze worden beantwoord en welke thema’s het meest centraal staan in het parlementaire debat.
   </p>
 
   <div class="hero-buttons" style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-top:1.5rem;">
@@ -14,13 +14,18 @@
     <a href="{{ url_for('main.statistieken_thema_beantwoordtijd') }}" class="btn">
       Beantwoordingssnelheid per Thema
     </a>
+    <a href="{{ url_for('main.centrale_themas') }}" class="btn">
+      Centrale Thema’s
+    </a>
   </div>
 </section>
 
 <section style="padding:2rem; text-align:center;">
   <h2 class="section-title">Kies een analyse</h2>
   <p style="color:#374151; font-size:1.05rem; max-width:700px; margin:auto;">
-    Klik op een van de bovenstaande opties om inzicht te krijgen in de samenhang tussen thema’s of om te zien hoe efficiënt vragen per thema worden beantwoord.
+    - <strong>Verwante Thema’s:</strong> ontdek welke onderwerpen vaak samen in één vraag voorkomen.<br>
+    - <strong>Beantwoordingssnelheid:</strong> zie hoe efficiënt thema’s gemiddeld worden afgehandeld.<br>
+    - <strong>Centrale Thema’s:</strong> ontdek de spilthema’s die het sterkst verbonden zijn met andere beleidsdomeinen.
   </p>
 </section>
 {% endblock %}
