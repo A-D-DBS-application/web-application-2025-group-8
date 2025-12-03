@@ -1,18 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- HERO -->
-<section class="hero" style="background:#facc15; color:#111;">
+<section class="hero">
   <h1 class="hero-title">Verwante Thema’s</h1>
   <p class="hero-subtitle">
     Ontdek welke thema’s vaak samen voorkomen in schriftelijke vragen.
   </p>
 </section>
 
-<!-- INFO-BOX -->
-<section style="background-color:#f9fafb; padding:1.5rem 0;">
-  <div style="max-width:800px; margin:auto; text-align:center; color:#374151;">
-    <h2 style="font-size:1.3rem; font-weight:600;">Over dit overzicht</h2>
+<section class="info-section">
+  <div class="info-container">
+    <h2 class="info-title">Over dit overzicht</h2>
     <p>
       Deze tabel toont <strong>combinaties van thema’s</strong> die samen voorkomen binnen één of meerdere schriftelijke vragen.
       Een hoger aantal betekent dat de thema’s inhoudelijk vaker aan elkaar gelinkt zijn.
@@ -20,35 +18,36 @@
   </div>
 </section>
 
-<!-- TABEL -->
-<section style="padding:2rem; background-color:#fff;">
-  <div style="max-width:1200px; margin:auto;">
-    <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
-      <thead>
-        <tr style="background-color:#fff; border-bottom:2px solid #e5e7eb;">
-          <th style="padding:12px; text-align:left;">Thema A</th>
-          <th style="padding:12px; text-align:left;">Thema B</th>
-          <th style="padding:12px; text-align:left;">Aantal keer samen</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% if resultaten %}
-          {% for r in resultaten %}
-            <tr style="border-bottom:1px solid #e5e7eb;">
-              <td style="padding:14px;">{{ r.thema1 }}</td>
-              <td style="padding:14px;">{{ r.thema2 }}</td>
-              <td style="padding:14px; font-weight:600;">{{ r.aantal }}</td>
-            </tr>
-          {% endfor %}
-        {% else %}
+<section class="p-4">
+  <div class="container">
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead class="table-light">
           <tr>
-            <td colspan="3" style="text-align:center; padding:1rem;">
-              Geen gegevens beschikbaar over themacombinaties.
-            </td>
+            <th>Thema A</th>
+            <th>Thema B</th>
+            <th>Aantal keer samen</th>
           </tr>
-        {% endif %}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {% if resultaten %}
+            {% for r in resultaten %}
+              <tr>
+                <td>{{ r.thema1 }}</td>
+                <td>{{ r.thema2 }}</td>
+                <td class="fw-bold">{{ r.aantal }}</td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="3" class="text-center p-3">
+                Geen gegevens beschikbaar over themacombinaties.
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
   </div>
 </section>
 {% endblock %}

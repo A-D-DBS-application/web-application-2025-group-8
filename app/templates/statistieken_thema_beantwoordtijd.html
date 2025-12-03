@@ -1,61 +1,60 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- HERO -->
-<section class="hero" style="background:#facc15; color:#111;">
+<section class="hero">
   <h1 class="hero-title">Gemiddelde Beantwoordtijd per Thema</h1>
   <p class="hero-subtitle">
     Bekijk hoe snel schriftelijke vragen gemiddeld worden beantwoord binnen elk thema.
   </p>
 </section>
 
-<!-- INFO-BOX (legenda) -->
-<section style="background-color:#f9fafb; padding:1.5rem 0;">
-  <div style="text-align:center; font-size:0.95rem; color:#374151;">
-    <h2 style="font-size:1.3rem; font-weight:600; margin-bottom:0.5rem;">Beantwoordtijd per Thema</h2>
+<section class="info-section">
+  <div class="info-container">
+    <h2 class="info-title">Legenda</h2>
     <p>
-      <span style="color:#16a34a; font-weight:600;">● Snel (≤ 35 dagen)</span> &nbsp;|&nbsp;
-      <span style="color:#ca8a04; font-weight:600;">● Gemiddeld (36–45 dagen)</span> &nbsp;|&nbsp;
-      <span style="color:#dc2626; font-weight:600;">● Traag (> 45 dagen)</span>
+      <span class="text-success-custom">● Snel (≤ 35 dagen)</span> &nbsp;|&nbsp;
+      <span class="text-warning-custom">● Gemiddeld (36–45 dagen)</span> &nbsp;|&nbsp;
+      <span class="text-danger-custom">● Traag (> 45 dagen)</span>
     </p>
   </div>
 </section>
 
-<!-- TABEL -->
-<section style="padding:2rem; background-color:#fff;">
-  <div style="max-width:1200px; margin:auto;">
-    <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
-      <thead>
-        <tr style="background-color:#fff; border-bottom:2px solid #e5e7eb;">
-          <th style="padding:12px; text-align:left;">Thema</th>
-          <th style="padding:12px; text-align:left;">Gemiddelde Beantwoordtijd (dagen)</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% if resultaten %}
-          {% for r in resultaten %}
-            <tr style="border-bottom:1px solid #e5e7eb;">
-              <td style="padding:14px;">{{ r.thema }}</td>
-              <td style="padding:14px; font-weight:600;">
-                {% if r.gem_dagen <= 35 %}
-                  <span style="color:#16a34a;">{{ "%.1f"|format(r.gem_dagen) }}</span>
-                {% elif r.gem_dagen <= 45 %}
-                  <span style="color:#ca8a04;">{{ "%.1f"|format(r.gem_dagen) }}</span>
-                {% else %}
-                  <span style="color:#dc2626;">{{ "%.1f"|format(r.gem_dagen) }}</span>
-                {% endif %}
+<section class="p-4">
+  <div class="container">
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead class="table-light">
+          <tr>
+            <th>Thema</th>
+            <th>Gemiddelde Beantwoordtijd (dagen)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if resultaten %}
+            {% for r in resultaten %}
+              <tr>
+                <td>{{ r.thema }}</td>
+                <td class="fw-bold">
+                  {% if r.gem_dagen <= 35 %}
+                    <span class="text-success-custom">{{ "%.1f"|format(r.gem_dagen) }}</span>
+                  {% elif r.gem_dagen <= 45 %}
+                    <span class="text-warning-custom">{{ "%.1f"|format(r.gem_dagen) }}</span>
+                  {% else %}
+                    <span class="text-danger-custom">{{ "%.1f"|format(r.gem_dagen) }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="2" class="text-center p-3">
+                Geen gegevens beschikbaar over beantwoordingstijd.
               </td>
             </tr>
-          {% endfor %}
-        {% else %}
-          <tr>
-            <td colspan="2" style="text-align:center; padding:1rem;">
-              Geen gegevens beschikbaar over beantwoordingstijd.
-            </td>
-          </tr>
-        {% endif %}
-      </tbody>
-    </table>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
   </div>
 </section>
 {% endblock %}

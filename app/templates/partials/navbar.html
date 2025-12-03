@@ -1,0 +1,15 @@
+<nav class="navbar bg-light px-3 py-2 mb-3">
+    <div class="d-flex gap-2">
+        
+        {% if request.endpoint != 'main.index' %}
+            <button type="button" class="btn btn-primary" onclick="window.history.back()">
+                ← Terug
+            </button>
+        {% endif %}
+
+        <a href="{{ url_for('main.index') }}" class="btn btn-primary">
+            Home
+        </a>
+        
+    </div>
+</nav>

@@ -1,0 +1,505 @@
+/* =========================================
+   0. RESET & BASIS
+   ========================================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    width: 100%;
+    overflow-x: hidden;
+}
+
+/* =========================================
+   1. GLOBAL STYLES (CONSISTENT GROOT: 1.25rem)
+   ========================================= */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background-color: #f6f8fa;
+    color: #111;
+    line-height: 1.6;
+    
+    /* DIT IS DE STANDAARD VOOR ALLE WITTE TEKST */
+    font-size: 1.25rem; 
+}
+
+.page-container {
+    min-height: 100vh;
+    padding-bottom: 2rem;
+}
+
+/* NIEUW: Utility classes voor padding zoals in je HTML (p-4) */
+.p-4 {
+    padding: 1.5rem !important;
+}
+
+/* =========================================
+   2. HERO SECTION (GEEL)
+   ========================================= */
+.hero {
+    background: linear-gradient(135deg, #FFD000, #E5BE00);
+    color: #222;
+    text-align: center;
+    padding: 6rem 1rem;
+    width: 100%;
+    
+    /* Zorg dat basis tekst in hero ook consistent is */
+    font-size: 1.25rem;
+}
+
+/* DESKTOP TITEL (Overal zelfde grootte) */
+.hero-title {
+    font-size: 3.5rem; 
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    hyphens: manual; 
+}
+
+/* DESKTOP ONDERTITEL (Overal zelfde grootte) */
+.hero-subtitle {
+    font-size: 1.5rem; 
+    opacity: 0.9;
+    max-width: 800px;
+    margin: 0 auto 2.5rem auto;
+}
+
+.hero-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+/* =========================================
+   3. BUTTONS (WIT) - OVERAL EVEN GROOT
+   ========================================= */
+.btn {
+    background: white;
+    color: #000;
+    border: none;
+    padding: 0.9rem 2rem; /* Iets ruimer voor desktop */
+    border-radius: 0.6rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.2s ease;
+    cursor: pointer;
+    display: inline-block;
+    
+    /* CONSISTENTE GROOTTE VOOR ALLE KNOPPEN */
+    font-size: 1.2rem; 
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background-color: white;
+    color: black;
+    border: 1px solid #d1d5db;
+}
+
+.btn-primary:hover {
+    background-color: #f3f4f6;
+    color: black;
+}
+
+.btn-secondary {
+    background-color: #e5e7eb;
+    color: #000;
+}
+
+/* =========================================
+   4. CARDS & LAYOUT
+   ========================================= */
+.section-title {
+    text-align: center;
+    font-size: 2.2rem; 
+    font-weight: 700;
+    margin: 4rem 0 2.5rem;
+}
+
+/* AANGEPAST: .container toegevoegd aan de layout lijst */
+.cards-grid, .fracties-grid, .stats-grid, .questions-grid, .themes-grid, .container {
+    display: block; /* Container is vaak block, grid classes overschrijven dit indien nodig */
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Specifiek herstel voor grids, omdat ik hierboven display: block heb gezet voor container */
+.cards-grid, .fracties-grid, .stats-grid, .questions-grid, .themes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+/* ALLE KAARTEN CONSISTENT */
+.card, .fractie-card, .stat-card, .question-card, .theme-card {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 2.5rem; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: 0.2s ease;
+    
+    /* Reset: gewoon de body font-size volgen (1.25rem) */
+    font-size: inherit; 
+}
+
+.card h3, .fractie-card h3, .stat-card h3, .theme-card h3 {
+    font-size: 1.6rem; /* Consistente kopjes in kaarten */
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* =========================================
+   5. TABLES (DESKTOP)
+   ========================================= */
+table {
+    width: 100%;
+    border-collapse: separate; 
+    border-spacing: 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    margin-bottom: 3rem;
+    
+    /* Tabellen ietsje kleiner dan body voor overzicht */
+    font-size: 1.2rem; 
+}
+
+table th {
+    background-color: #f3f4f6;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 1rem; 
+    letter-spacing: 0.05em;
+    color: #4b5563;
+    padding: 1.2rem 1.5rem; 
+    border-bottom: 2px solid #e5e7eb;
+    text-align: left;
+}
+
+table td {
+    padding: 1.2rem 1.5rem; 
+    border-bottom: 1px solid #f3f4f6;
+    color: #1f2937;
+    vertical-align: middle;
+}
+
+table tr:last-child td {
+    border-bottom: none;
+}
+
+/* =========================================
+   6. FOOTER
+   ========================================= */
+footer {
+    background-color: #111827;
+    color: white;
+    padding: 4rem 1rem;
+    margin-top: 4rem;
+    text-align: center;
+    font-size: 1.1rem; /* Footer mag iets subtieler blijven */
+}
+
+footer a:hover {
+    opacity: 0.85;
+}
+
+/* =========================================
+   7. COMPONENTEN
+   ========================================= */
+.info-section {
+    background-color: #f9fafb;
+    padding: 3rem 0; 
+    margin-bottom: 2rem;
+}
+
+.info-container {
+    max-width: 900px;
+    margin: auto;
+    text-align: center;
+    color: #374151;
+    padding: 0 1rem;
+    
+    /* AANGEPAST: Specifiek dit deel groter gemaakt */
+    font-size: 1.4rem; 
+    line-height: 1.8;
+}
+
+.info-title {
+    /* AANGEPAST: Titel van deze sectie ook groter */
+    font-size: 2rem; 
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+}
+
+.search-form {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 0 1rem;
+}
+
+.search-input {
+    width: 100%;
+    max-width: 600px; 
+    padding: 0.9rem;
+    font-size: 1.25rem; /* Match body tekst */
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.tabs-container { margin-bottom: 2rem; }
+.tab-btn { padding: 0.9rem 1.8rem; border: none; cursor: pointer; font-weight: 600; font-size: 1.2rem; transition: background 0.2s; }
+.tab-btn.left { border-radius: 6px 0 0 6px; }
+.tab-btn.right { border-radius: 0 6px 6px 0; }
+.tab-btn.active { background: #2563eb; color: white; }
+.tab-btn.inactive { background: #e5e7eb; color: black; }
+
+.text-success-custom { color: #16a34a; font-weight: 600; }
+.text-warning-custom { color: #ca8a04; font-weight: 600; }
+.text-danger-custom { color: #dc2626; font-weight: 600; }
+.text-muted-custom { color: #6b7280; }
+
+.btn-table-link {
+    background: #2563eb;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem; 
+}
+
+.btn-table-link:hover { background: #1d4ed8; color: white; }
+
+/* =========================================
+   8. SPECIFIEK: FRACTIES & FILTERS
+   ========================================= */
+.fractie-badge-box { 
+    color: #fff; 
+    padding: 1rem 1.5rem; 
+    border-radius: 0.5rem; 
+    font-weight: 700; 
+    min-width: 70px; 
+    text-align: center; 
+    font-size: 1.25rem; /* Match body */
+}
+
+.bg-nva { background-color: #fbbf24; }
+.bg-vooruit { background-color: #dc2626; }
+.bg-cdv { background-color: #ee7433; }
+.bg-vb { background-color: #e7d12a; }
+.bg-groen { background-color: #16a34a; }
+.bg-pvda { background-color: #b91c1c; }
+.bg-openvld { background-color: #2563eb; }
+.bg-fouad { background-color: #9333ea; }
+.bg-onafh { background-color: #6b7280; }
+
+.filters-card {
+    margin-top: -3rem;
+    padding: 2.5rem; 
+    border-radius: 1.25rem;
+    background: #ffffff;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+}
+
+/* === NIEUW TOEGEVOEGD: EMPTY STATE CARD === */
+.empty-state {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 1.25rem;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.empty-state p {
+    color: #6b7280;
+    margin-top: 0.5rem;
+}
+/* ========================================= */
+
+.filters-form, .filters-row { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-end; }
+.filter-field { display: flex; flex-direction: column; flex: 1 1 220px; } 
+.filter-field select, .filter-field input { 
+    border-radius: 0.75rem; 
+    border: 1px solid #d1d5db; 
+    padding: 0.9rem; 
+    font-size: 1.2rem; /* Consistent */
+    outline: none; 
+    width: 100%; 
+}
+
+.vv-card { display: flex; align-items: center; gap: 1.5rem; }
+.vv-rank { 
+    width: 55px; 
+    height: 55px; 
+    border-radius: 999px; 
+    background: linear-gradient(135deg, #FFD000, #E5BE00); 
+    color: #fff; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: 700; 
+    flex-shrink: 0; 
+    font-size: 1.3rem; 
+}
+.vv-rank[data-fractie="N-VA"] { background: #fcbd1f; }
+.vv-rank[data-fractie="Vooruit"] { background: #dc2626; }
+.vv-rank[data-fractie="cd&v"] { background: #ee7433; }
+.vv-rank[data-fractie="Vlaams Belang"] { background: #e7d12a; }
+.vv-rank[data-fractie="Groen"] { background: #16a34a; }
+.vv-rank[data-fractie="PVDA"] { background: #b91c1c; }
+.vv-rank[data-fractie="Open Vld"] { background: #2563eb; }
+.vv-rank[data-fractie="Team Fouad Ahidar"] { background: #9333ea; }
+.vv-rank[data-fractie="Onafhankelijke"] { background: #6b7280; }
+
+/* =========================================
+   9. ALGEMEEN: LANGE WOORDEN
+   ========================================= */
+h1, h2, h3, p, div {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: manual; 
+}
+
+/* =========================================
+   10. MOBIELE AANPASSINGEN (Max 768px)
+   ========================================= */
+@media (max-width: 768px) {
+
+    /* --- BELANGRIJK: RESET TEKSTGROOTTE NAAR STANDAARD OP GSM --- */
+    body {
+        font-size: 1rem; /* Terug naar normaal */
+    }
+    
+    .hero { font-size: 1rem; }
+
+    /* Reset specifieke aanpassing info voor mobiel */
+    .info-container { font-size: 1rem; }
+    .info-title { font-size: 1.5rem; }
+
+    /* --- 1. TITEL FIX (AANGEPAST VOOR LANGE WOORDEN) --- */
+    .hero-title {
+        font-size: 1.5rem; /* Iets kleiner om het passend te krijgen */
+        hyphens: auto; /* Zorgt voor automatische afbreking */
+        -webkit-hyphens: auto;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        word-break: break-word; /* Forceer breuk bij hele lange woorden */
+    }
+    .hero-subtitle { font-size: 1.1rem; }
+    .section-title { font-size: 1.5rem; margin-top: 2rem; }
+
+    /* Knoppen reset */
+    .btn { padding: 0.75rem 1.5rem; font-size: 1rem; }
+    .tab-btn { font-size: 1rem; padding: 0.8rem 1rem; }
+
+    /* Filters reset */
+    .filter-field select, .filter-field input { font-size: 1rem; padding: 0.8rem; }
+    .vv-rank { width: 50px; height: 50px; font-size: 1.2rem; }
+
+    /* --- 2. LAYOUT FIX (MARGIN VERGROOT) --- */
+    .filters-card {
+        margin-top: 2.5rem; /* Flinke afstand van de gele balk */
+        padding: 1.5rem 1rem;
+    }
+    
+    .cards-grid, .fracties-grid { gap: 1rem; }
+    .card { padding: 1.5rem; }
+    
+    /* AANGEPAST: Container op mobiel */
+    .container {
+        padding: 0 1rem; /* Zorg dat tekst niet tegen rand kleeft */
+    }
+
+    /* --- 3. ZOEKBALK APP STIJL --- */
+    .search-form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        text-align: left;
+    }
+
+    .search-input {
+        max-width: 100%;
+        width: 100%;
+        font-size: 1rem; 
+        padding: 0.8rem;
+    }
+
+    .search-form .btn {
+        width: 100%;
+        margin-left: 0 !important;
+        background-color: #2563eb;
+        color: white;
+        border: none;
+    }
+
+    /* --- 4. TABELLEN NAAR KAARTJES --- */
+    .table-responsive { overflow-x: visible; }
+    .table-responsive table { min-width: 0; box-shadow: none; background: transparent; border-radius: 0; font-size: 1rem; }
+    
+    table thead { display: none; }
+    table, table tbody, table tr, table td { display: block; width: 100%; }
+
+    table tr {
+        margin-bottom: 1.5rem;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        padding: 1.25rem;
+    }
+
+    table td {
+        text-align: left;
+        padding: 1rem;
+        border: none;
+        font-size: 1rem;
+        color: #374151;
+        background-color: #f9fafb;
+        border-radius: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    table td:first-child {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #111;
+        border-top: none;
+        background-color: #e5e7eb;
+    }
+
+    table td:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        background-color: transparent;
+        padding: 0;
+    }
+
+    .btn-table-link {
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding: 12px;
+        font-size: 1rem;
+        background-color: #2563eb;
+        color: white;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-top: 1rem;
+    }
+}

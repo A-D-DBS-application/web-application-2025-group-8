@@ -1,91 +1,72 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- HERO -->
 <section class="hero">
   <h1 class="hero-title">Vlaams Parlement Transparantie</h1>
   <p class="hero-subtitle">
     Ontdek schriftelijke vragen, analyseer activiteit van volksvertegenwoordigers en krijg inzicht in politieke thema’s
   </p>
   <div class="hero-buttons">
-    <a href="{{ url_for('main.zoeken') }}" class="btn">Zoek schriftelijke vragen op trefwoord</a>
+    <a href="{{ url_for('main.zoeken') }}" class="btn">Zoek op trefwoord</a>
     <a href="{{ url_for('main.statistieken_overzicht') }}" class="btn">Bekijk statistieken</a>
     <a href="{{ url_for('main.grafieken') }}" class="btn">Bekijk grafieken</a>
-
   </div>
 </section>
 
-<!-- PLATFORM OVERZICHT -->
 <section>
   <h2 class="section-title">Platform Overzicht</h2>
   <div class="cards-grid">
-
-    <a href="{{ url_for('main.schriftelijke_vragen') }}" class="btn">
-      Laatste Schriftelijke Vragen
-    </a>
-
-    <a href="{{ url_for('main.actieve_themas') }}" class="btn">
-      Actieve Thema’s
-    </a>
-
-    <a href="{{ url_for('main.volksvertegenwoordigers') }}" class="btn">
-      Volksvertegenwoordigers
-    </a>
-  
+    <a href="{{ url_for('main.schriftelijke_vragen') }}" class="btn btn-secondary">Laatste Schriftelijke Vragen</a>
+    <a href="{{ url_for('main.actieve_themas') }}" class="btn btn-secondary">Actieve Thema’s</a>
+    <a href="{{ url_for('main.volksvertegenwoordigers') }}" class="btn btn-secondary">Volksvertegenwoordigers</a>
   </div>
 </section>
 
-<!-- Fracties in het Vlaams Parlement -->
 <section style="background-color:#f6f8fa; padding-bottom:3rem;">
   <h2 class="section-title">Fracties in het Vlaams Parlement</h2>
 
-  <!-- Regering -->
-  <h3 style="text-align:center; font-size:1.3rem; margin-top:2rem; color:#111827;">Regering (Coalitie)</h3>
-  <div class="cards-grid" style="margin-top:1rem;">
-    <div class="card" style="display:flex;align-items:center;gap:1rem;">
-      <div style="background-color:#fbbf24;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">31</div>
-      <div><strong>N-VA</strong><br><span style="font-size:0.9rem;color:#555;">31 zetels</span></div>
+  <h3 class="text-center mt-5 mb-3 h5">Regering (Coalitie)</h3>
+  <div class="cards-grid">
+    <div class="card d-flex flex-row align-items-center gap-3">
+      <div class="fractie-badge-box bg-nva">31</div>
+      <div><strong>N-VA</strong><br><span class="text-muted small">31 zetels</span></div>
     </div>
-    <div class="card" style="display:flex;align-items:center;gap:1rem;">
-      <div style="background-color:#dc2626;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">18</div>
-      <div><strong>Vooruit</strong><br><span style="font-size:0.9rem;color:#555;">18 zetels</span></div>
+    <div class="card d-flex flex-row align-items-center gap-3">
+      <div class="fractie-badge-box bg-vooruit">18</div>
+      <div><strong>Vooruit</strong><br><span class="text-muted small">18 zetels</span></div>
     </div>
-    <div class="card" style="display:flex;align-items:center;gap:1rem;">
-      <div style="background-color:#ee7433;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">16</div>
-      <div><strong>CD&V</strong><br><span style="font-size:0.9rem;color:#555;">16 zetels</span></div>
+    <div class="card d-flex flex-row align-items-center gap-3">
+      <div class="fractie-badge-box bg-cdv">16</div>
+      <div><strong>CD&V</strong><br><span class="text-muted small">16 zetels</span></div>
     </div>
   </div>
 
-  <!-- Oppositie -->
-  <h3 style="text-align:center; font-size:1.3rem; margin-top:3rem; color:#111827;">Oppositie</h3>
-  <div class="cards-grid" style="margin-top:1rem;">
-    <div class="card" style="display:flex;align-items:center;gap:1rem;">
-      <div style="background-color:#e7d12a;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">31</div>
-      <div><strong>Vlaams Belang</strong><br><span style="font-size:0.9rem;color:#555;">31 zetels</span></div>
+  <h3 class="text-center mt-5 mb-3 h5">Oppositie</h3>
+  <div class="cards-grid">
+    <div class="card d-flex flex-row align-items-center gap-3">
+      <div class="fractie-badge-box bg-vb">31</div>
+      <div><strong>Vlaams Belang</strong><br><span class="text-muted small">31 zetels</span></div>
     </div>
-    <div class="card" style="display:flex;align-items:center;gap:1rem;">
-      <div style="background-color:#16a34a;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">9</div>
-      <div><strong>Groen</strong><br><span style="font-size:0.9rem;color:#555;">9 zetels</span></div>
+    <div class="card d-flex flex-row align-items-center gap-3">
+      <div class="fractie-badge-box bg-groen">9</div>
+      <div><strong>Groen</strong><br><span class="text-muted small">9 zetels</span></div>
     </div>
-    <div class="card" style="display:flex;align-items:center;gap:1rem;">
-      <div style="background-color:#b91c1c;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">9</div>
-      <div><strong>PVDA</strong><br><span style="font-size:0.9rem;color:#555;">9 zetels</span></div>
+    <div class="card d-flex flex-row align-items-center gap-3">
+      <div class="fractie-badge-box bg-pvda">9</div>
+      <div><strong>PVDA</strong><br><span class="text-muted small">9 zetels</span></div>
     </div>
-    <div class="card" style="display:flex;align-items:center;gap:1rem;">
-      <div style="background-color:#2563eb;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">8</div>
-      <div><strong>Open Vld</strong><br><span style="font-size:0.9rem;color:#555;">8 zetels</span></div>
+    <div class="card d-flex flex-row align-items-center gap-3">
+      <div class="fractie-badge-box bg-openvld">8</div>
+      <div><strong>Open Vld</strong><br><span class="text-muted small">8 zetels</span></div>
     </div>
-    <div class="card" style="display:flex;align-items:center;gap:1rem;">
-      <div style="background-color:#9333ea;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">1</div>
-      <div><strong>Team Fouad Ahidar</strong><br><span style="font-size:0.9rem;color:#555;">1 zetel</span></div>
+    <div class="card d-flex flex-row align-items-center gap-3">
+      <div class="fractie-badge-box bg-fouad">1</div>
+      <div><strong>Team Fouad Ahidar</strong><br><span class="text-muted small">1 zetel</span></div>
     </div>
-    <div class="card" style="display:flex;align-items:center;gap:1rem;">
-      <div style="background-color:#6b7280;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">1</div>
-      <div><strong>Onafhankelijke</strong><br><span style="font-size:0.9rem;color:#555;">1 zetel</span></div>
+    <div class="card d-flex flex-row align-items-center gap-3">
+      <div class="fractie-badge-box bg-onafh">1</div>
+      <div><strong>Onafhankelijke</strong><br><span class="text-muted small">1 zetel</span></div>
     </div>
   </div>
 </section>
-
 {% endblock %}
-
-

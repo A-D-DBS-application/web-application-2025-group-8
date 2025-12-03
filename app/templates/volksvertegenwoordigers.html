@@ -9,53 +9,58 @@
 </section>
 
 <section style="padding:2rem;">
-  <table id="vvTable" style="width:100%; border-collapse:collapse;">
-    <thead style="background:#f3f4f6; cursor:pointer;">
-      <tr>
-        <th onclick="sortTable(0)" style="padding:8px; text-align:left;">Naam ⬍</th>
-        <th onclick="sortTable(1)" style="padding:8px; text-align:left;">Leeftijd ⬍</th>
-        <th onclick="sortTable(2)" style="padding:8px; text-align:left;">Fractie ⬍</th>
-        <th onclick="sortTable(3)" style="padding:8px; text-align:left;">Kieskring ⬍</th>
-        <th onclick="sortTable(4)" style="padding:8px; text-align:left;">Functie ⬍</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% if volksvertegenwoordigers %}
-        {% for persoon in volksvertegenwoordigers %}
-        <tr style="border-bottom:1px solid #ddd;">
-          <td style="padding:8px;">
-            <a href="{{ url_for('main.vv_vragen', vv_id=persoon.id) }}" style="color:inherit; text-decoration:none;">
-              {{ persoon.naam }}
-            </a>
-          </td>
-          <td style="padding:8px;">{{ persoon.leeftijd }}</td>
-          <td style="padding:8px;">{{ persoon.fractie }}</td>
-          <td style="padding:8px;">{{ persoon.kieskring }}</td>
-          <td style="padding:8px;">{{ persoon.functie }}</td>
-        </tr>
-        {% endfor %}
-      {% else %}
-        <tr>
-          <td colspan="5" style="text-align:center; color:#555;">
-            Er zijn momenteel geen volksvertegenwoordigers beschikbaar.
-          </td>
-        </tr>
-      {% endif %}
-    </tbody>
-  </table>
-</section>
+  
+  <div class="table-responsive">
+      <table id="vvTable" class="table table-hover">
+        <thead class="table-light" style="cursor:pointer;">
+          <tr>
+            <th onclick="sortTable(0)">Naam ⬍</th>
+            <th onclick="sortTable(1)">Leeftijd ⬍</th>
+            <th onclick="sortTable(2)">Fractie ⬍</th>
+            <th onclick="sortTable(3)">Kieskring ⬍</th>
+            <th onclick="sortTable(4)">Functie ⬍</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if volksvertegenwoordigers %}
+            {% for persoon in volksvertegenwoordigers %}
+            <tr style="border-bottom:1px solid #ddd;">
+              <td>
+                <a href="{{ url_for('main.vv_vragen', vv_id=persoon.id) }}" style="color:inherit; text-decoration:none;">
+                  {{ persoon.naam }}
+                </a>
+              </td>
+              <td>{{ persoon.leeftijd }}</td>
+              <td>{{ persoon.fractie }}</td>
+              <td>{{ persoon.kieskring }}</td>
+              <td>{{ persoon.functie }}</td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="5" style="text-align:center; color:#555;">
+                Er zijn momenteel geen volksvertegenwoordigers beschikbaar.
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+  </div> </section>
 
 <script>
 let sortDirection = [true, true, true, true, true];
 
 function sortTable(columnIndex) {
   const table = document.getElementById("vvTable");
-  const rows = Array.from(table.rows).slice(1);
+  // Let op: we moeten nu specifiek in de tbody kijken omdat we thead gebruiken
+  const tbody = table.querySelector("tbody");
+  const rows = Array.from(tbody.rows);
   const dir = sortDirection[columnIndex] ? 1 : -1;
 
   rows.sort((a, b) => {
     const A = a.cells[columnIndex].innerText.trim().toLowerCase();
     const B = b.cells[columnIndex].innerText.trim().toLowerCase();
+    
     // speciale sortering voor cijfers (zoals leeftijd)
     if (!isNaN(A) && !isNaN(B)) {
       return (parseInt(A) - parseInt(B)) * dir;
@@ -63,7 +68,7 @@ function sortTable(columnIndex) {
     return A.localeCompare(B) * dir;
   });
 
-  rows.forEach(row => table.tBodies[0].appendChild(row));
+  rows.forEach(row => tbody.appendChild(row));
   sortDirection[columnIndex] = !sortDirection[columnIndex];
 }
 </script>
