@@ -1,7 +1,8 @@
 {% extends "base.html" %}
-
 {% block content %}
-<section class="hero" style="background:#facc15; color:#111;">
+
+<!-- HERO -->
+<section class="hero">
   <h1 class="hero-title">Statistieken per Fractie</h1>
   <p class="hero-subtitle">
     Bekijk hoeveel vragen een fractie stelde over een bepaald thema, in verhouding tot hun totale activiteit én tot het totale aantal vragen binnen dat thema.
@@ -44,7 +45,6 @@
   </div>
 </section>
 
-
 <script>
 document.getElementById("toonBtn").addEventListener("click", async () => {
   const fractieId = document.getElementById("fractieSelect").value;
@@ -58,56 +58,48 @@ document.getElementById("toonBtn").addEventListener("click", async () => {
   const resp = await fetch(`/statistieken/fractie/data/${fractieId}/${themaId}`);
   const data = await resp.json();
 
- document.getElementById("resultaat").innerHTML = `
-  <div class="card shadow-sm border-0">
-    <div class="card-body">
+  document.getElementById("resultaat").innerHTML = `
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h3 class="h4 mb-3">Resultaten</h3>
+        <div class="row g-3">
+          <!-- Linker blok -->
+          <div class="col-md-6">
+            <div class="p-3 bg-light rounded">
+              <h6 class="text-uppercase text-muted small mb-2">Deze fractie</h6>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item bg-light d-flex justify-content-between px-0">
+                  <span>Aantal vragen over dit thema</span>
+                  <strong>${data.thema_vragen_fractie}</strong>
+                </li>
+                <li class="list-group-item bg-light d-flex justify-content-between px-0">
+                  <span>% van totale vragen fractie</span>
+                  <strong>${data.perc_van_fractie}%</strong>
+                </li>
+              </ul>
+            </div>
+          </div>
 
-      <h3 class="h4 mb-3">Resultaten</h3>
-
-      <div class="row g-3">
-        <!-- Linker blok -->
-        <div class="col-md-6">
-          <div class="p-3 bg-light rounded">
-  <h6 class="text-uppercase text-muted small mb-2">Deze fractie</h6>
-
-  <ul class="list-group list-group-flush">
-    <li class="list-group-item bg-light d-flex justify-content-between px-0">
-      <span>Aantal vragen over dit thema</span>
-      <strong>${data.thema_vragen_fractie}</strong>
-    </li>
-    <li class="list-group-item bg-light d-flex justify-content-between px-0">
-      <span>% van totale vragen fractie</span>
-      <strong>${data.perc_van_fractie}%</strong>
-    </li>
-  </ul>
-</div>
-
-        </div>
-
-        <!-- Rechter blok -->
-        <div class="col-md-6">
-          <div class="p-3 bg-light rounded">
-  <h6 class="text-uppercase text-muted small mb-2">Alle fracties</h6>
-
-  <ul class="list-group list-group-flush">
-    <li class="list-group-item bg-light d-flex justify-content-between px-0">
-      <span>Totaal aantal vragen in dit thema</span>
-      <strong>${data.totaal_vragen_thema}</strong>
-    </li>
-    <li class="list-group-item bg-light d-flex justify-content-between px-0">
-      <span>% van alle themavragen</span>
-      <strong>${data.perc_van_thema}%</strong>
-    </li>
-  </ul>
-</div>
-
+          <!-- Rechter blok -->
+          <div class="col-md-6">
+            <div class="p-3 bg-light rounded">
+              <h6 class="text-uppercase text-muted small mb-2">Alle fracties</h6>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item bg-light d-flex justify-content-between px-0">
+                  <span>Totaal aantal vragen in dit thema</span>
+                  <strong>${data.totaal_vragen_thema}</strong>
+                </li>
+                <li class="list-group-item bg-light d-flex justify-content-between px-0">
+                  <span>% van alle themavragen</span>
+                  <strong>${data.perc_van_thema}%</strong>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
-
     </div>
-  </div>
-`;
-
+  `;
 });
 </script>
 

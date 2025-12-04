@@ -21,43 +21,44 @@
 </section>
 
 <!-- TABEL -->
-<section style="padding:2rem;">
-  <table style="width:100%; border-collapse:collapse;">
-    <thead style="background:#f3f4f6;">
-      <tr>
-        <th style="padding:10px; text-align:left;">Thema</th>
-        <th style="padding:10px; text-align:left;">Aantal vragen (laatste 30 dagen)</th>
-        <th style="padding:10px; text-align:left;">Evolutie (t.o.v. voorgaande periode)</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% if data %}
-        {% for d in data %}
-          <tr style="border-bottom:1px solid #e5e7eb;">
-            <td style="padding:10px;">{{ d.thema }}</td>
-            <td style="padding:10px;">{{ d.aantal }}</td>
-
-            <td style="padding:10px; font-weight:600;">
-              {% if d.nieuw %}
-                <span style="color:#1e3a8a;">Nieuw thema</span>
-              {% elif d.positief %}
-                <span style="color:green;">↑ +{{ d.pct }}%</span>
-              {% elif d.pct < 0 %}
-                <span style="color:red;">↓ {{ d.pct }}%</span>
-              {% else %}
-                <span style="color:#6b7280;">→ 0%</span>
-              {% endif %}
+<section style="padding:2rem; background-color:#fff;">
+  <div style="max-width:1200px; margin:auto;">
+    <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
+      <thead style="background:#f3f4f6;">
+        <tr>
+          <th style="padding:10px; text-align:left;">Thema</th>
+          <th style="padding:10px; text-align:left;">Aantal vragen (laatste 30 dagen)</th>
+          <th style="padding:10px; text-align:left;">Evolutie (t.o.v. voorgaande periode)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if data %}
+          {% for d in data %}
+            <tr style="border-bottom:1px solid #e5e7eb;">
+              <td style="padding:10px;">{{ d.thema }}</td>
+              <td style="padding:10px;">{{ d.aantal }}</td>
+              <td style="padding:10px; font-weight:600;">
+                {% if d.nieuw %}
+                  <span style="color:#1e3a8a;">Nieuw thema</span>
+                {% elif d.positief %}
+                  <span style="color:green;">↑ +{{ d.pct }}%</span>
+                {% elif d.pct < 0 %}
+                  <span style="color:red;">↓ {{ d.pct }}%</span>
+                {% else %}
+                  <span style="color:#6b7280;">→ 0%</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="3" style="text-align:center; padding:1rem;">
+              Geen recente thema’s gevonden.
             </td>
           </tr>
-        {% endfor %}
-      {% else %}
-        <tr>
-          <td colspan="3" style="text-align:center; padding:1rem;">
-            Geen recente thema’s gevonden.
-          </td>
-        </tr>
-      {% endif %}
-    </tbody>
-  </table>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
 </section>
 {% endblock %}

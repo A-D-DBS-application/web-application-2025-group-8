@@ -1,13 +1,16 @@
 {% extends "base.html" %}
-
 {% block content %}
 
-<!-- Pagina-specifieke CSS -->
+<!-- HERO -->
+<section class="hero">
+  <h1 class="hero-title">Actiefste Volksvertegenwoordigers</h1>
+  <p class="hero-subtitle">
+    Ontdek welke volksvertegenwoordigers het meest actief zijn per thema en kieskring.
+  </p>
+</section>
+
+<!-- CSS (blijft pagina-specifiek) -->
 <style>
-  .hero {
-    background: linear-gradient(135deg, #FFD000, #E5BE00) !important;
-    color:#222 !important;
-  }
   .stats-container {
     max-width: 1100px;
     margin: 0 auto 3rem;
@@ -59,7 +62,7 @@
   }
 
   .filter-field select:focus {
-    border-color:  #FFD000;
+    border-color: #FFD000;
     box-shadow: 0 0 0 1px #2563eb33;
   }
 
@@ -162,43 +165,17 @@
     }
   }
 
-  /* ---- Partijkleuren voor de bolletjes (#-rank) ---- */
-  .vv-rank[data-fractie="N-VA"] {
-    background: #fcbd1f;
-  }
-  .vv-rank[data-fractie="Vooruit"] {
-    background: #dc2626;
-  }
-  .vv-rank[data-fractie="cd&v"] {
-    background: #ee7433;
-  }
-  .vv-rank[data-fractie="Vlaams Belang"] {
-    background: #e7d12a;
-  }
-  .vv-rank[data-fractie="Groen"] {
-    background: #16a34a;
-  }
-  .vv-rank[data-fractie="PVDA"] {
-    background: #b91c1c;
-  }
-  .vv-rank[data-fractie="Open Vld"] {
-    background: #2563eb;
-  }
-  .vv-rank[data-fractie="Team Fouad Ahidar"] {
-    background: #9333ea;
-  }
-  .vv-rank[data-fractie="Onafhankelijke"] {
-    background: #6b7280;
-  }
+  /* ---- Partijkleuren ---- */
+  .vv-rank[data-fractie="N-VA"] { background: #fcbd1f; }
+  .vv-rank[data-fractie="Vooruit"] { background: #dc2626; }
+  .vv-rank[data-fractie="cd&v"] { background: #ee7433; }
+  .vv-rank[data-fractie="Vlaams Belang"] { background: #e7d12a; }
+  .vv-rank[data-fractie="Groen"] { background: #16a34a; }
+  .vv-rank[data-fractie="PVDA"] { background: #b91c1c; }
+  .vv-rank[data-fractie="Open Vld"] { background: #2563eb; }
+  .vv-rank[data-fractie="Team Fouad Ahidar"] { background: #9333ea; }
+  .vv-rank[data-fractie="Onafhankelijke"] { background: #6b7280; }
 </style>
-
-<!-- HERO -->
-<section class="hero">
-  <h1 class="hero-title">Actiefste Volksvertegenwoordigers</h1>
-  <p class="hero-subtitle">
-    Ontdek welke volksvertegenwoordigers het meest actief zijn per thema en kieskring.
-  </p>
-</section>
 
 <section class="stats-container">
 
@@ -217,10 +194,7 @@
           <select name="kieskring" id="kieskring">
             <option value="">Alle kieskringen</option>
             {% for k in kieskringen %}
-              <option value="{{ k }}"
-                {% if geselecteerde_kieskring == k %}selected{% endif %}>
-                {{ k }}
-              </option>
+              <option value="{{ k }}" {% if geselecteerde_kieskring == k %}selected{% endif %}>{{ k }}</option>
             {% endfor %}
           </select>
         </div>
@@ -231,19 +205,14 @@
           <select name="thema" id="thema">
             <option value="">Alle thema’s</option>
             {% for t in themas %}
-              <option value="{{ t.id }}"
-                {% if geselecteerd_thema_id == t.id|string %}selected{% endif %}>
-                {{ t.naam }}
-              </option>
+              <option value="{{ t.id }}" {% if geselecteerd_thema_id == t.id|string %}selected{% endif %}>{{ t.naam }}</option>
             {% endfor %}
           </select>
         </div>
 
         <!-- Filterknop -->
         <div class="filter-field filter-field-button">
-          <button type="submit" class="btn">
-            Filter
-          </button>
+          <button type="submit" class="btn">Filter</button>
         </div>
       </div>
     </form>
@@ -263,12 +232,8 @@
           <div class="vv-content">
             <h3 class="vv-name">{{ r.naam }}</h3>
             <p class="vv-fraction">{{ r.fractie }}</p>
-            <p class="vv-count">
-              {{ r.aantal_vragen }} schriftelijke vragen
-            </p>
-            <p class="vv-meta">
-              Kieskring: <span>{{ r.kieskring }}</span>
-            </p>
+            <p class="vv-count">{{ r.aantal_vragen }} schriftelijke vragen</p>
+            <p class="vv-meta">Kieskring: <span>{{ r.kieskring }}</span></p>
           </div>
         </div>
       {% endfor %}
@@ -276,9 +241,7 @@
 
   {% else %}
     <div class="empty-state">
-      <h2 class="section-title" style="font-size:1.3rem; margin-bottom:0.5rem;">
-        Geen resultaten gevonden
-      </h2>
+      <h2 class="section-title" style="font-size:1.3rem; margin-bottom:0.5rem;">Geen resultaten gevonden</h2>
       <p>
         Voor deze combinatie van thema en kieskring zijn geen resultaten beschikbaar.
         Probeer een andere selectie, of kies “Alle kieskringen” of “Alle thema’s”.

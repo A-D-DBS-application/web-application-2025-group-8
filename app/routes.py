@@ -10,7 +10,7 @@ from datetime import datetime, date
 
 main = Blueprint('main', __name__)
 
-# --- HOOFDPAGINA ---
+# ---- HOOFDPAGINA ----
 @main.route('/')
 def index():
     try:
