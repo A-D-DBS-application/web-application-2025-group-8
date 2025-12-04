@@ -332,6 +332,119 @@ th.sortable::after {
 }
 
 
+/* ========== VV TABEL ========== */
+.vv-table-container {
+  padding: 2rem;
+}
+
+.vv-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.vv-table thead {
+  background: #f3f4f6;
+  cursor: pointer;
+}
+
+.vv-table th {
+  padding: 8px;
+  text-align: left;
+}
+
+.vv-table tbody tr {
+  border-bottom: 1px solid #ddd;
+}
+
+.vv-table td {
+  padding: 8px;
+}
+
+.vv-table a {
+  color: #2563eb;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.vv-table a:hover {
+  text-decoration: underline;
+}
+
+.vv-table-empty {
+  text-align: center;
+  color: #555;
+}
+
+
+/* ========== SCHRIFTELIJKE VRAGEN TABEL ========== */
+.vragen-section {
+  padding: 2rem;
+}
+
+.vragen-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.vragen-table thead {
+  background: #f3f4f6;
+}
+
+.vragen-table th {
+  padding: 10px;
+  text-align: left;
+}
+
+.vragen-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.vragen-table td {
+  padding: 10px;
+}
+
+.vragen-table-empty {
+  text-align: center;
+  padding: 1rem;
+}
+
+.vragen-info-section {
+  background-color: #f9fafb;
+  padding: 1.5rem 0;
+}
+
+.vragen-info-container {
+  max-width: 800px;
+  margin: auto;
+  text-align: center;
+  color: #374151;
+}
+
+.vragen-info-container h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.vragen-pdf-link {
+  background: #2563eb;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.vragen-pdf-link:hover {
+  background: #1e40af;
+}
+
+.vragen-no-link {
+  color: #9ca3af;
+}
+
+
 /* ========== STATISTIEKEN & FILTERS ========== */
 .stats-container {
   max-width: 1100px;
