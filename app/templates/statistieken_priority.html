@@ -9,23 +9,48 @@
   </p>
 </section>
 
-<!-- INFO-BLOK -->
+<!-- INFO + FILTER -->
 <section class="info-section">
-  <div class="info-container">
-    <h2>Hoe wordt de score berekend?</h2>
-    <p>
-      De Actualiteitsscore combineert <strong>recentheid</strong> en <strong>thematische breedte</strong> tot één totaalscore:
-    </p>
-    <ul style="list-style:disc; padding-left:1.25rem; margin-top:1rem; text-align:left; max-width:600px; margin:auto; line-height:1.8;">
-      <li><strong>Recente vragen</strong> scoren hoger: vragen die kort vóór de <strong>laatste data-update</strong> zijn ingediend, krijgen de meeste punten.</li>
-      <li><strong>Meer thema’s</strong> gekoppeld aan een vraag leveren extra punten op (ongeveer <strong>6 punten per thema</strong>, tot een maximum van <strong>30</strong>).</li>
-      <li>De totale score wordt afgerond en beperkt tot <strong>100 punten</strong>.</li>
-    </ul>
-    <p style="margin-top:1rem;">
-      <span style="color:#16a34a; font-weight:600;">● Hoog (≥ 85)</span> &nbsp;|&nbsp;
-      <span style="color:#f59e0b; font-weight:600;">● Gemiddeld (76 – 84)</span> &nbsp;|&nbsp;
-      <span style="color:#dc2626; font-weight:600;">● Laag (≤ 75)</span>
-    </p>
+  <div class="info-container" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:2rem; max-width:1000px; margin:auto;">
+
+    <!-- UITLEG -->
+    <div style="flex:1; min-width:300px; text-align:left;">
+      <h2>Hoe wordt de score berekend?</h2>
+      <p>
+        De <strong>Actualiteitsscore</strong> combineert <strong>recentheid</strong> en <strong>thematische breedte</strong> tot één totaalscore:
+      </p>
+      <ul style="list-style:disc; padding-left:1.25rem; margin-top:1rem; line-height:1.8;">
+        <li><strong>Recente vragen</strong> scoren hoger: een pas ingediende vraag kan tot <strong>70 punten</strong> behalen. De score daalt geleidelijk tot een minimum van <strong>15 punten</strong> na 60 dagen.</li>
+        <li><strong>Meer thema’s</strong> gekoppeld aan een vraag leveren extra punten op: ongeveer <strong>6 punten per thema</strong>, tot een maximum van <strong>30 punten</strong>.</li>
+        <li>De totale score is dus maximaal <strong>100 punten</strong>.</li>
+      </ul>
+      <p style="margin-top:1rem;">
+        <span style="color:#16a34a; font-weight:600;">● Hoog (≥ 80)</span> &nbsp;|&nbsp;
+        <span style="color:#f59e0b; font-weight:600;">● Gemiddeld (65 – 79)</span> &nbsp;|&nbsp;
+        <span style="color:#dc2626; font-weight:600;">● Laag (&lt; 65)</span>
+      </p>
+      <p style="margin-top:0.5rem; font-style:italic; color:#555;">
+        De maximale score van 100 punten wordt enkel behaald door zeer recente vragen met meerdere thema’s.
+      </p>
+    </div>
+
+    <!-- FILTER -->
+    <div style="flex:0 0 260px;">
+      <form method="get" action="{{ url_for('main.statistieken_priority') }}" class="filters-form">
+        <div class="filter-field">
+          <label for="thema">Filter op thema</label>
+          <select id="thema" name="thema" onchange="this.form.submit()">
+            <option value="">-- Alle thema’s --</option>
+            {% for thema in themas %}
+              <option value="{{ thema.id }}" {% if geselecteerd_thema_id == thema.id|string %}selected{% endif %}>
+                {{ thema.naam }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </form>
+    </div>
+
   </div>
 </section>
 
@@ -36,9 +61,11 @@
       <thead>
         <tr>
           <th>Onderwerp</th>
+          <th>Indiener</th>
           <th>Ingediend</th>
           <th class="td-center"># Thema’s</th>
           <th>Score</th>
+          <th>PDF</th>
         </tr>
       </thead>
       <tbody>
@@ -46,22 +73,30 @@
           {% for item in data %}
           <tr>
             <td>{{ item.onderwerp }}</td>
+            <td>{{ item.indiener or '-' }}</td>
             <td>{{ item.ingediend }}</td>
             <td class="td-center">{{ item.aantal_themas }}</td>
             <td>
-              {% if item.priority_score >= 85 %}
+              {% if item.priority_score >= 80 %}
                 <span class="score-hoog">{{ item.priority_score }}</span>
-              {% elif item.priority_score >= 76 %}
+              {% elif item.priority_score >= 65 %}
                 <span class="score-gemiddeld">{{ item.priority_score }}</span>
               {% else %}
                 <span class="score-laag">{{ item.priority_score }}</span>
+              {% endif %}
+            </td>
+            <td class="td-center">
+              {% if item.pdf_url %}
+                <a href="{{ item.pdf_url }}" target="_blank" class="pdf-link">PDF</a>
+              {% else %}
+                -
               {% endif %}
             </td>
           </tr>
           {% endfor %}
         {% else %}
           <tr>
-            <td colspan="4" class="geen-data">Nog geen data beschikbaar.</td>
+            <td colspan="6" class="geen-data">Nog geen data beschikbaar.</td>
           </tr>
         {% endif %}
       </tbody>

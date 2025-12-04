@@ -396,76 +396,93 @@ def actiefste_per_thema_en_kieskring():
 # cache = Cache(config={'CACHE_TYPE': 'simple'})
 # cache.init_app(app)
 
-
 # --- STATISTIEKEN PRIORITY SCORE SCHRIFTELIJKE VRAGEN ---
 #merk op we beginnen hier te tellen vanaf 2025-10-15. Dit is omdat tot dan de data loopt. 
 #Dit is makkelijk aan te passen in de toekomst indien nodig, wanneer er nieuwe data wordt ingeladen.
 @main.route('/statistieken/priority')
-@cache.cached(timeout=1800)
+@cache.cached(timeout=1800, query_string=True)
 def statistieken_priority():
     try:
-        rows = (
+        geselecteerd_thema_id = request.args.get('thema')
+        themas = db.session.query(Thema).order_by(Thema.naam.asc()).all()
+
+        # --- Basisquery ---
+        query = (
             db.session.query(
                 SchriftelijkeVragen.id,
                 SchriftelijkeVragen.onderwerp,
                 SchriftelijkeVragen.ingediend,
-                SchriftelijkeVragen.beantwoord,
+                SchriftelijkeVragen.tekst,  # bevat eventueel pdf-link
+                Persoon.voornaam,
+                Persoon.naam,
                 func.count(ThemaKoppeling.id_thm).label("aantal_themas")
             )
             .outerjoin(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
-            .group_by(SchriftelijkeVragen.id)
-            .all()
+            .outerjoin(Persoonfunctie, Persoonfunctie.id == SchriftelijkeVragen.id_prsfnc_vs)
+            .outerjoin(Persoon, Persoon.id == Persoonfunctie.id_prs)
+            .group_by(SchriftelijkeVragen.id, Persoon.voornaam, Persoon.naam)
         )
 
+        # --- Filter op gekozen thema ---
+        if geselecteerd_thema_id:
+            query = query.filter(
+                SchriftelijkeVragen.id.in_(
+                    db.session.query(ThemaKoppeling.id_schv)
+                    .filter(ThemaKoppeling.id_thm == geselecteerd_thema_id)
+                )
+            )
+
+        rows = query.all()
         data = []
-        referentie = date(2025, 10, 15)  # <<< eventueel aanpassen bij nieuwe dataset
+        referentie = date(2025, 10, 15)  # aanpasbaar bij nieuwe dataset
 
         for r in rows:
-            # --- RECENCY SCORE (max 90) ---
+            # --- RECENCY SCORE (max 70) ---
             if r.ingediend:
                 dagen_verschil = (referentie - r.ingediend).days
                 if dagen_verschil <= 0:
-                    recency_score = 90
+                    recency_score = 70
                 elif dagen_verschil <= 60:
-                    recency_score = max(20, 90 - (dagen_verschil * 1.1))
+                    recency_score = max(15, 70 - (dagen_verschil * 0.9))
                 else:
-                    recency_score = 20
+                    recency_score = 15
             else:
                 recency_score = 0
 
             # --- THEMA SCORE (max 30) ---
             thema_score = min(30, r.aantal_themas * 6)
 
-            # --- BONUS/STRAF ---
-            antwoord_bonus = -10 if r.beantwoord else 0
-
             # --- TOTAAL ---
-            total_score = round(max(0, recency_score + thema_score + antwoord_bonus), 1)
-            if total_score > 100:
-                total_score = 100
+            total_score = round(max(0, recency_score + thema_score), 1)
+            total_score = min(total_score, 100)
+
+            # --- PDF-link ---
+            pdf_link = r.tekst if r.tekst and isinstance(r.tekst, str) and r.tekst.startswith("http") else None
 
             data.append({
                 "onderwerp": r.onderwerp,
+                "indiener": f"{r.voornaam or ''} {r.naam or ''}".strip(),
                 "ingediend": r.ingediend.strftime("%Y-%m-%d") if r.ingediend else "-",
                 "aantal_themas": r.aantal_themas,
                 "priority_score": total_score,
+                "pdf_url": pdf_link
             })
 
-        # sorteer op hoogste score en toon enkel top 100
         data.sort(key=lambda x: x["priority_score"], reverse=True)
         data = data[:200]
 
     except OperationalError:
-        data = []
+        data, themas, geselecteerd_thema_id = [], [], None
 
-    return render_template("statistieken_priority.html", data=data)
+    return render_template(
+        "statistieken_priority.html",
+        data=data,
+        themas=themas,
+        geselecteerd_thema_id=geselecteerd_thema_id
+    )
 
 
 
-
-
-from datetime import date
-from sqlalchemy.exc import OperationalError
 
 @main.route('/volksvertegenwoordigers')
 def volksvertegenwoordigers():
