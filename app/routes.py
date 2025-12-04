@@ -396,7 +396,7 @@ def actiefste_per_thema_en_kieskring():
 # cache = Cache(config={'CACHE_TYPE': 'simple'})
 # cache.init_app(app)
 
-# --- STATISTIEKEN PRIORITY SCORE SCHRIFTELIJKE VRAGEN ---
+# --- STATISTIEKEN PRIORITY SCORE SCHRIFTELIJKE VRAGEN ----
 #merk op we beginnen hier te tellen vanaf 2025-10-15. Dit is omdat tot dan de data loopt. 
 #Dit is makkelijk aan te passen in de toekomst indien nodig, wanneer er nieuwe data wordt ingeladen.
 @main.route('/statistieken/priority')

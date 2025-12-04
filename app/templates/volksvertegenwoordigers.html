@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+<!-- HERO -->
 <section class="hero">
   <h1 class="hero-title">Volksvertegenwoordigers</h1>
   <p class="hero-subtitle">
@@ -8,43 +9,47 @@
   </p>
 </section>
 
-<section class="vv-table-container">
-  <table id="vvTable" class="vv-table">
-    <thead>
-      <tr>
-        <th onclick="sortTable(0)">Naam ⬍</th>
-        <th onclick="sortTable(1)">Leeftijd ⬍</th>
-        <th onclick="sortTable(2)">Fractie ⬍</th>
-        <th onclick="sortTable(3)">Kieskring ⬍</th>
-        <th onclick="sortTable(4)">Functie ⬍</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% if volksvertegenwoordigers %}
-        {% for persoon in volksvertegenwoordigers %}
+<!-- TABEL -->
+<section class="table-section">
+  <div class="table-container">
+    <table id="vvTable">
+      <thead>
         <tr>
-          <td>
-            <a href="{{ url_for('main.vv_vragen', vv_id=persoon.id) }}">
-              {{ persoon.naam }}
-            </a>
-          </td>
-          <td>{{ persoon.leeftijd }}</td>
-          <td>{{ persoon.fractie }}</td>
-          <td>{{ persoon.kieskring }}</td>
-          <td>{{ persoon.functie }}</td>
+          <th onclick="sortTable(0)">Naam ⬍</th>
+          <th onclick="sortTable(1)">Leeftijd ⬍</th>
+          <th onclick="sortTable(2)">Fractie ⬍</th>
+          <th onclick="sortTable(3)">Kieskring ⬍</th>
+          <th onclick="sortTable(4)">Functie ⬍</th>
         </tr>
-        {% endfor %}
-      {% else %}
-        <tr>
-          <td colspan="5" class="vv-table-empty">
-            Er zijn momenteel geen volksvertegenwoordigers beschikbaar.
-          </td>
-        </tr>
-      {% endif %}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {% if volksvertegenwoordigers %}
+          {% for persoon in volksvertegenwoordigers %}
+          <tr>
+            <td>
+              <a href="{{ url_for('main.vv_vragen', vv_id=persoon.id) }}">
+                {{ persoon.naam }}
+              </a>
+            </td>
+            <td>{{ persoon.leeftijd }}</td>
+            <td>{{ persoon.fractie }}</td>
+            <td>{{ persoon.kieskring }}</td>
+            <td>{{ persoon.functie }}</td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="5" class="geen-data">
+              Er zijn momenteel geen volksvertegenwoordigers beschikbaar.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
 </section>
 
+<!-- SORT SCRIPT -->
 <script>
 let sortDirection = [true, true, true, true, true];
 
@@ -56,6 +61,7 @@ function sortTable(columnIndex) {
   rows.sort((a, b) => {
     const A = a.cells[columnIndex].innerText.trim().toLowerCase();
     const B = b.cells[columnIndex].innerText.trim().toLowerCase();
+
     // speciale sortering voor cijfers (zoals leeftijd)
     if (!isNaN(A) && !isNaN(B)) {
       return (parseInt(A) - parseInt(B)) * dir;

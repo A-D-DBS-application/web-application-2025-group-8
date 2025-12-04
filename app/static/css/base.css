@@ -22,27 +22,52 @@ body {
   color: #222;
   text-align: center;
   padding: 5rem 1rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .hero-title {
-  font-size: 3rem;
+  font-size: clamp(1.8rem, 6vw, 3rem);
   font-weight: 700;
   margin-bottom: 1rem;
+  line-height: 1.2;
+  word-break: break-word;
+  hyphens: auto;
 }
 
 .hero-subtitle {
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 3vw, 1.25rem);
   opacity: 0.9;
   max-width: 700px;
   margin: 0 auto 2rem auto;
+  line-height: 1.5;
+  word-break: break-word;
 }
 
+/* Zorg dat knoppen of andere elementen in hero ook goed schalen */
 .hero-buttons {
   display: flex;
   justify-content: center;
   gap: 1rem;
   flex-wrap: wrap;
 }
+
+/* Mobiel specifieke aanpassingen */
+@media (max-width: 480px) {
+  .hero {
+    padding: 3rem 1rem;
+  }
+
+  .hero-title {
+    font-size: 1.8rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+}
+
 
 /* ========== KNOPPEN ========== */
 .btn {

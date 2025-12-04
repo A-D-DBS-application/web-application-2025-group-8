@@ -2,61 +2,61 @@
 
 {% block content %}
 <!-- HERO -->
-<section class="hero" style="background:#facc15; color:#111;">
+<section class="hero">
   <h1 class="hero-title">{{ title if title is defined else 'Schriftelijke Vragen' }}</h1>
   <p class="hero-subtitle">
     Bekijk de meest recente schriftelijke vragen en ontdek wie ze heeft ingediend.
   </p>
 </section>
 
-<!-- INFO-BOX NET ONDER HEADER -->
-<section class="vragen-info-section">
-  <div class="vragen-info-container">
+<!-- INFO -->
+<section class="info-section">
+  <div class="info-container">
     <h2>Over dit overzicht</h2>
     <p>
       Hieronder vind je de 50 meest recente schriftelijke vragen,
-      met de naam, fractie van de indiener en een link naar de officiële fiche.
+      met de naam en fractie van de indiener en een link naar de officiële fiche.
     </p>
   </div>
 </section>
 
 <!-- TABEL -->
-<section class="vragen-section">
-  <table class="vragen-table">
-    <thead>
-      <tr>
-        <th>Onderwerp</th>
-        <th>Indiener</th>
-        <th>Fractie</th>
-        <th>Datum ingediend</th>
-        <th>PDF</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% if vragen %}
-        {% for v in vragen %}
+<section class="table-section">
+  <div class="table-container">
+    <table>
+      <thead>
         <tr>
-          <td>{{ v.onderwerp }}</td>
-          <td>{{ v.indiener }}</td>
-          <td>{{ v.fractie }}</td>
-          <td>{{ v.datum }}</td>
-          <td>
-            {% if v.link %}
-              <a href="{{ v.link }}" target="_blank" class="vragen-pdf-link">
-                Bekijk
-              </a>
-            {% else %}
-              <span class="vragen-no-link">-</span>
-            {% endif %}
-          </td>
+          <th>Onderwerp</th>
+          <th>Indiener</th>
+          <th>Fractie</th>
+          <th>Datum ingediend</th>
+          <th>PDF</th>
         </tr>
-        {% endfor %}
-      {% else %}
-        <tr>
-          <td colspan="5" class="vragen-table-empty">Nog geen schriftelijke vragen beschikbaar.</td>
-        </tr>
-      {% endif %}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {% if vragen %}
+          {% for v in vragen %}
+          <tr>
+            <td>{{ v.onderwerp }}</td>
+            <td>{{ v.indiener }}</td>
+            <td>{{ v.fractie }}</td>
+            <td>{{ v.datum }}</td>
+            <td class="td-center">
+              {% if v.link %}
+                <a href="{{ v.link }}" target="_blank" class="pdf-link">PDF</a>
+              {% else %}
+                -
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="5" class="geen-data">Nog geen schriftelijke vragen beschikbaar.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
 </section>
 {% endblock %}

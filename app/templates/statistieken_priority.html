@@ -11,31 +11,31 @@
 
 <!-- INFO + FILTER -->
 <section class="info-section">
-  <div class="info-container" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:2rem; max-width:1000px; margin:auto;">
+  <div class="info-container priority-layout">
 
     <!-- UITLEG -->
-    <div style="flex:1; min-width:300px; text-align:left;">
+    <div class="priority-uitleg">
       <h2>Hoe wordt de score berekend?</h2>
       <p>
         De <strong>Actualiteitsscore</strong> combineert <strong>recentheid</strong> en <strong>thematische breedte</strong> tot één totaalscore:
       </p>
-      <ul style="list-style:disc; padding-left:1.25rem; margin-top:1rem; line-height:1.8;">
+      <ul>
         <li><strong>Recente vragen</strong> scoren hoger: een pas ingediende vraag kan tot <strong>70 punten</strong> behalen. De score daalt geleidelijk tot een minimum van <strong>15 punten</strong> na 60 dagen.</li>
-        <li><strong>Meer thema’s</strong> gekoppeld aan een vraag leveren extra punten op: ongeveer <strong>6 punten per thema</strong>, tot een maximum van <strong>30 punten</strong>.</li>
+        <li><strong>Meer thema’s</strong> gekoppeld aan een vraag leveren extra punten op (ongeveer <strong>6 punten per thema</strong>, tot een maximum van <strong>30 punten</strong>).</li>
         <li>De totale score is dus maximaal <strong>100 punten</strong>.</li>
       </ul>
-      <p style="margin-top:1rem;">
-        <span style="color:#16a34a; font-weight:600;">● Hoog (≥ 80)</span> &nbsp;|&nbsp;
-        <span style="color:#f59e0b; font-weight:600;">● Gemiddeld (65 – 79)</span> &nbsp;|&nbsp;
-        <span style="color:#dc2626; font-weight:600;">● Laag (&lt; 65)</span>
+      <p class="priority-legende">
+        <span class="score-hoog">● Hoog (≥ 80)</span> &nbsp;|&nbsp;
+        <span class="score-gemiddeld">● Gemiddeld (65 – 79)</span> &nbsp;|&nbsp;
+        <span class="score-laag">● Laag (&lt; 65)</span>
       </p>
-      <p style="margin-top:0.5rem; font-style:italic; color:#555;">
+      <p class="priority-tip">
         De maximale score van 100 punten wordt enkel behaald door zeer recente vragen met meerdere thema’s.
       </p>
     </div>
 
     <!-- FILTER -->
-    <div style="flex:0 0 260px;">
+    <div class="priority-filter">
       <form method="get" action="{{ url_for('main.statistieken_priority') }}" class="filters-form">
         <div class="filter-field">
           <label for="thema">Filter op thema</label>
@@ -49,6 +49,10 @@
           </select>
         </div>
       </form>
+      <p class="filter-uitleg">
+        Gebruik deze filter om enkel vragen te tonen waarin een bepaald thema <strong>zeker voorkomt</strong>.  
+        Zo kan je snel zien welke recente vragen relevant zijn voor dat onderwerp.
+      </p>
     </div>
 
   </div>
