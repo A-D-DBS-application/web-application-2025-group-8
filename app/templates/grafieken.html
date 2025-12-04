@@ -1,8 +1,10 @@
+<!-- GRAFIEKEN WEL VOLLEDIG INLINE -->
+
 {% extends "base.html" %}
 {% block content %}
 
-<!-- HERO (stijl komt uit base.html) -->
-<section class="hero">
+<!-- HERO -->
+<section class="hero" style="background:#facc15; color:#111;">
   <h1 class="hero-title">Evolutie van Schriftelijke Vragen</h1>
   <p class="hero-subtitle">
     Bekijk de evolutie per <strong>thema</strong> of per <strong>volksvertegenwoordiger</strong> over de laatste maanden.<br>
@@ -27,22 +29,18 @@
 
   <!-- PER THEMA -->
   <div id="themaDiv">
+    <label for="themaSelect" style="font-weight:600; margin-right:10px;">Kies een thema:</label>
+    <select id="themaSelect" style="padding:0.5rem 1rem; border:1px solid #ccc; border-radius:6px;">
+      <option value="">-- Selecteer een thema --</option>
+      {% for t in themas %}
+        <option value="{{ t.id }}">{{ t.naam }}</option>
+      {% endfor %}
+    </select>
 
-    <div style="display:flex; align-items:center; justify-content:center; gap:1rem; flex-wrap:wrap; margin-top:1rem;">
-      <label for="themaSelect" style="font-weight:600; margin:0;">Kies een thema:</label>
-
-      <select id="themaSelect" style="padding:0.5rem 1rem; border:1px solid #ccc; border-radius:6px; min-width:320px;">
-        <option value="">-- Selecteer een thema --</option>
-        {% for t in themas %}
-          <option value="{{ t.id }}">{{ t.naam }}</option>
-        {% endfor %}
-      </select>
-
-      <button id="toonGrafiek" 
-              style="padding:0.5rem 1rem; background:#2563eb; color:white; border:none; border-radius:6px; cursor:pointer;">
-        Toon grafiek
-      </button>
-    </div>
+    <button id="toonGrafiek" 
+            style="margin-left:1rem; padding:0.5rem 1rem; background:#2563eb; color:white; border:none; border-radius:6px; cursor:pointer;">
+      Toon grafiek
+    </button>
 
     <div style="max-width:800px; margin:2rem auto;">
       <canvas id="evolutieChart"></canvas>
@@ -51,23 +49,16 @@
 
   <!-- PER VOLKSVERTEGENWOORDIGER -->
   <div id="vvDiv" style="display:none;">
+    <label style="font-weight:600; margin-right:10px;">Zoek volksvertegenwoordiger:</label>
+    <input type="text" id="vvInput" placeholder="Typ een naam..." 
+           style="padding:0.5rem 1rem; border:1px solid #ccc; border-radius:6px; width:250px;" autocomplete="off">
+    <div id="vvSuggesties" class="suggesties" 
+         style="position:relative; max-width:260px; margin:0 auto; background:white; border-radius:4px; text-align:left;"></div>
 
-    <div style="display:flex; align-items:center; justify-content:center; gap:1rem; flex-wrap:wrap; margin-top:1rem;">
-      <label style="font-weight:600; margin:0;">Zoek volksvertegenwoordiger:</label>
-
-      <div style="position:relative; width:250px;">
-        <input type="text" id="vvInput" placeholder="Typ een naam..." 
-               style="padding:0.5rem 1rem; border:1px solid #ccc; border-radius:6px; width:100%;" 
-               autocomplete="off">
-        <div id="vvSuggesties" class="suggesties"
-             style="position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #ddd; border-radius:4px; text-align:left; z-index:10;"></div>
-      </div>
-
-      <button id="toonVV" 
-              style="padding:0.5rem 1rem; background:#2563eb; color:white; border:none; border-radius:6px; cursor:pointer;">
-        Toon grafiek
-      </button>
-    </div>
+    <button id="toonVV" 
+            style="margin-left:1rem; padding:0.5rem 1rem; background:#2563eb; color:white; border:none; border-radius:6px; cursor:pointer;">
+      Toon grafiek
+    </button>
 
     <div style="max-width:800px; margin:2rem auto;">
       <canvas id="vvChart"></canvas>
@@ -108,6 +99,7 @@ tabVV.addEventListener("click", () => {
   themaDiv.style.display = "none";
 });
 
+
 // === GRAFIEK PER THEMA ===
 document.getElementById("toonGrafiek").addEventListener("click", async () => {
   const themaId = document.getElementById("themaSelect").value;
@@ -145,6 +137,7 @@ document.getElementById("toonGrafiek").addEventListener("click", async () => {
   });
 });
 
+
 // === KLIK OP PUNT IN GRAFIEK PER THEMA ===
 document.getElementById("evolutieChart").onclick = async (evt) => {
   if (!chart || !gekozenThema) return;
@@ -154,13 +147,7 @@ document.getElementById("evolutieChart").onclick = async (evt) => {
   const point = points[0];
   const label = chart.data.labels[point.index];
   const [maandStr, jaarStr] = label.split(" ");
-
-  const nlMaanden = {
-    "jan":1, "feb":2, "mrt":3, "apr":4, "mei":5, "jun":6,
-    "jul":7, "aug":8, "sep":9, "okt":10, "nov":11, "dec":12
-  };
-
-  const maand = nlMaanden[maandStr.toLowerCase()];
+  const maand = new Date(Date.parse(maandStr + " 1, " + jaarStr)).getMonth() + 1;
   const jaar = parseInt(jaarStr);
 
   const response = await fetch(`/grafieken/thema_vragen/${gekozenThema}/${jaar}/${maand}`);
@@ -179,6 +166,7 @@ document.getElementById("evolutieChart").onclick = async (evt) => {
   const win = window.open("", "_blank", "width=600,height=600,scrollbars=yes");
   win.document.write(`<html><body style='font-family:sans-serif;'>${html}</body></html>`);
 };
+
 
 // === AUTOCOMPLETE VOOR VV ===
 const input = document.getElementById('vvInput');
@@ -202,6 +190,7 @@ suggestiesDiv.addEventListener('click', e => {
   input.value = e.target.innerText;
   suggestiesDiv.innerHTML = '';
 });
+
 
 // === GRAFIEK PER VV ===
 document.getElementById("toonVV").addEventListener("click", async () => {
@@ -235,6 +224,7 @@ document.getElementById("toonVV").addEventListener("click", async () => {
   });
 });
 
+
 // === KLIK OP PUNT IN GRAFIEK PER VV ===
 document.getElementById("vvChart").onclick = async (evt) => {
   if (!vvChart || !window.selectedVV) return;
@@ -244,13 +234,7 @@ document.getElementById("vvChart").onclick = async (evt) => {
   const point = points[0];
   const label = vvChart.data.labels[point.index];
   const [maandStr, jaarStr] = label.split(" ");
-
-  const nlMaanden = {
-    "jan":1, "feb":2, "mrt":3, "apr":4, "mei":5, "jun":6,
-    "jul":7, "aug":8, "sep":9, "okt":10, "nov":11, "dec":12
-  };
-
-  const maand = nlMaanden[maandStr.toLowerCase()];
+  const maand = new Date(Date.parse(maandStr + " 1, " + jaarStr)).getMonth() + 1;
   const jaar = parseInt(jaarStr);
 
   const response = await fetch(`/grafieken/vv_vragen/${window.selectedVV}/${jaar}/${maand}`);

@@ -5,13 +5,12 @@
 <section class="hero">
   <h1 class="hero-title">Vlaams Parlement Transparantie</h1>
   <p class="hero-subtitle">
-    Ontdek schriftelijke vragen, analyseer activiteit van volksvertegenwoordigers en krijg inzicht in politieke thema’s
+    Ontdek schriftelijke vragen, analyseer activiteit van volksvertegenwoordigers en krijg inzicht in politieke thema’s.
   </p>
   <div class="hero-buttons">
     <a href="{{ url_for('main.zoeken') }}" class="btn">Zoek schriftelijke vragen op trefwoord</a>
     <a href="{{ url_for('main.statistieken_overzicht') }}" class="btn">Bekijk statistieken</a>
     <a href="{{ url_for('main.grafieken') }}" class="btn">Bekijk grafieken</a>
-
   </div>
 </section>
 
@@ -19,73 +18,33 @@
 <section>
   <h2 class="section-title">Platform Overzicht</h2>
   <div class="cards-grid">
-
-    <a href="{{ url_for('main.schriftelijke_vragen') }}" class="btn">
-      Laatste Schriftelijke Vragen
-    </a>
-
-    <a href="{{ url_for('main.actieve_themas') }}" class="btn">
-      Actieve Thema’s
-    </a>
-
-    <a href="{{ url_for('main.volksvertegenwoordigers') }}" class="btn">
-      Volksvertegenwoordigers
-    </a>
-  
+    <a href="{{ url_for('main.schriftelijke_vragen') }}" class="btn">Laatste Schriftelijke Vragen</a>
+    <a href="{{ url_for('main.actieve_themas') }}" class="btn">Actieve Thema’s</a>
+    <a href="{{ url_for('main.volksvertegenwoordigers') }}" class="btn">Volksvertegenwoordigers</a>
   </div>
 </section>
 
-<!-- Fracties in het Vlaams Parlement -->
-<section style="background-color:#f6f8fa; padding-bottom:3rem;">
+<!-- FRACTIES -->
+<section class="fracties-section">
   <h2 class="section-title">Fracties in het Vlaams Parlement</h2>
 
-  <!-- Regering -->
-  <h3 style="text-align:center; font-size:1.3rem; margin-top:2rem; color:#111827;">Regering (Coalitie)</h3>
-  <div class="cards-grid" style="margin-top:1rem;">
-    <div class="card" style="display:flex;align-items:center;gap:1rem;">
-      <div style="background-color:#fbbf24;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">31</div>
-      <div><strong>N-VA</strong><br><span style="font-size:0.9rem;color:#555;">31 zetels</span></div>
-    </div>
-    <div class="card" style="display:flex;align-items:center;gap:1rem;">
-      <div style="background-color:#dc2626;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">18</div>
-      <div><strong>Vooruit</strong><br><span style="font-size:0.9rem;color:#555;">18 zetels</span></div>
-    </div>
-    <div class="card" style="display:flex;align-items:center;gap:1rem;">
-      <div style="background-color:#ee7433;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">16</div>
-      <div><strong>CD&V</strong><br><span style="font-size:0.9rem;color:#555;">16 zetels</span></div>
-    </div>
+  <h3 class="fractie-titel">Regering (Coalitie)</h3>
+  <div class="cards-grid">
+    <div class="fractie-card fractie-nva"><span>31</span><div><strong>N-VA</strong><br><small>31 zetels</small></div></div>
+    <div class="fractie-card fractie-vooruit"><span>18</span><div><strong>Vooruit</strong><br><small>18 zetels</small></div></div>
+    <div class="fractie-card fractie-cdv"><span>16</span><div><strong>CD&V</strong><br><small>16 zetels</small></div></div>
   </div>
 
-  <!-- Oppositie -->
-  <h3 style="text-align:center; font-size:1.3rem; margin-top:3rem; color:#111827;">Oppositie</h3>
-  <div class="cards-grid" style="margin-top:1rem;">
-    <div class="card" style="display:flex;align-items:center;gap:1rem;">
-      <div style="background-color:#e7d12a;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">31</div>
-      <div><strong>Vlaams Belang</strong><br><span style="font-size:0.9rem;color:#555;">31 zetels</span></div>
-    </div>
-    <div class="card" style="display:flex;align-items:center;gap:1rem;">
-      <div style="background-color:#16a34a;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">9</div>
-      <div><strong>Groen</strong><br><span style="font-size:0.9rem;color:#555;">9 zetels</span></div>
-    </div>
-    <div class="card" style="display:flex;align-items:center;gap:1rem;">
-      <div style="background-color:#b91c1c;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">9</div>
-      <div><strong>PVDA</strong><br><span style="font-size:0.9rem;color:#555;">9 zetels</span></div>
-    </div>
-    <div class="card" style="display:flex;align-items:center;gap:1rem;">
-      <div style="background-color:#2563eb;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">8</div>
-      <div><strong>Open Vld</strong><br><span style="font-size:0.9rem;color:#555;">8 zetels</span></div>
-    </div>
-    <div class="card" style="display:flex;align-items:center;gap:1rem;">
-      <div style="background-color:#9333ea;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">1</div>
-      <div><strong>Team Fouad Ahidar</strong><br><span style="font-size:0.9rem;color:#555;">1 zetel</span></div>
-    </div>
-    <div class="card" style="display:flex;align-items:center;gap:1rem;">
-      <div style="background-color:#6b7280;color:#fff;padding:1rem 1.5rem;border-radius:0.5rem;font-weight:700;">1</div>
-      <div><strong>Onafhankelijke</strong><br><span style="font-size:0.9rem;color:#555;">1 zetel</span></div>
-    </div>
+  <h3 class="fractie-titel oppositie">Oppositie</h3>
+  <div class="cards-grid">
+    <div class="fractie-card fractie-vb"><span>31</span><div><strong>Vlaams Belang</strong><br><small>31 zetels</small></div></div>
+    <div class="fractie-card fractie-groen"><span>9</span><div><strong>Groen</strong><br><small>9 zetels</small></div></div>
+    <div class="fractie-card fractie-pvda"><span>9</span><div><strong>PVDA</strong><br><small>9 zetels</small></div></div>
+    <div class="fractie-card fractie-vld"><span>8</span><div><strong>Open Vld</strong><br><small>8 zetels</small></div></div>
+    <div class="fractie-card fractie-tfa"><span>1</span><div><strong>Team Fouad Ahidar</strong><br><small>1 zetel</small></div></div>
+    <div class="fractie-card fractie-onafh"><span>1</span><div><strong>Onafhankelijke</strong><br><small>1 zetel</small></div></div>
   </div>
 </section>
 
 {% endblock %}
-
 

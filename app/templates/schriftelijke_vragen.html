@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 
-<!-- HERO (stijl komt uit base.html) -->
+<!-- HERO -->
 <section class="hero">
   <h1 class="hero-title">Schriftelijke Vragen</h1>
   <p class="hero-subtitle">
@@ -9,10 +9,10 @@
   </p>
 </section>
 
-<!-- INFO-BOX -->
-<section style="background-color:#f9fafb; padding:1.5rem 0;">
-  <div style="max-width:800px; margin:auto; text-align:center; color:#374151;">
-    <h2 style="font-size:1.3rem; font-weight:600;">Over dit overzicht</h2>
+<!-- INFO -->
+<section class="info-section">
+  <div class="info-container">
+    <h2>Over dit overzicht</h2>
     <p>
       Hieronder vind je de 50 meest recente schriftelijke vragen,
       met de naam, fractie van de indiener en een link naar de officiële fiche.
@@ -21,42 +21,38 @@
 </section>
 
 <!-- TABEL -->
-<section style="padding:2rem;">
-  <div style="max-width:1200px; margin:auto;">
-    <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
-      <thead style="background:#f3f4f6;">
+<section class="table-section">
+  <div class="table-container">
+    <table>
+      <thead>
         <tr>
-          <th style="padding:10px; text-align:left;">Onderwerp</th>
-          <th style="padding:10px; text-align:left;">Indiener</th>
-          <th style="padding:10px; text-align:left;">Fractie</th>
-          <th style="padding:10px; text-align:left;">Datum ingediend</th>
-          <th style="padding:10px; text-align:left;">PDF</th>
+          <th>Onderwerp</th>
+          <th>Indiener</th>
+          <th>Fractie</th>
+          <th>Datum ingediend</th>
+          <th>PDF</th>
         </tr>
       </thead>
       <tbody>
         {% if vragen %}
           {% for v in vragen %}
-          <tr style="border-bottom:1px solid #e5e7eb;">
-            <td style="padding:10px;">{{ v.onderwerp }}</td>
-            <td style="padding:10px;">{{ v.indiener }}</td>
-            <td style="padding:10px;">{{ v.fractie }}</td>
-            <td style="padding:10px;">{{ v.datum }}</td>
-            <td style="padding:10px;">
+          <tr>
+            <td>{{ v.onderwerp }}</td>
+            <td>{{ v.indiener }}</td>
+            <td>{{ v.fractie }}</td>
+            <td>{{ v.datum }}</td>
+            <td>
               {% if v.link %}
-                <a href="{{ v.link }}" target="_blank"
-                   style="background:#2563eb; color:white; padding:4px 8px; border-radius:4px; 
-                          text-decoration:none; font-weight:600; font-size:0.85rem;">
-                  Bekijk
-                </a>
+                <a href="{{ v.link }}" target="_blank" class="pdf-link">Bekijk</a>
               {% else %}
-                <span style="color:#9ca3af;">-</span>
+                <span class="geen-data">-</span>
               {% endif %}
             </td>
           </tr>
           {% endfor %}
         {% else %}
           <tr>
-            <td colspan="5" style="text-align:center; padding:1rem;">
+            <td colspan="5" class="geen-data">
               Nog geen schriftelijke vragen beschikbaar.
             </td>
           </tr>

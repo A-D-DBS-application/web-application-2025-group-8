@@ -9,13 +9,15 @@
   </p>
 </section>
 
-<section class="py-4">
-  <div class="container text-center">
+<!-- SELECTIESECTIE -->
+<section class="table-section">
+  <div class="table-container" style="text-align:center;">
 
-    <div class="row g-3 justify-content-center align-items-end">
-      <div class="col-auto">
-        <label class="fw-semibold me-2">Kies een fractie:</label>
-        <select id="fractieSelect" class="form-select">
+    <!-- Filters -->
+    <div class="filters-form" style="justify-content:center;">
+      <div class="filter-field">
+        <label for="fractieSelect">Kies een fractie</label>
+        <select id="fractieSelect">
           <option value="">-- Selecteer fractie --</option>
           {% for f in fracties %}
             <option value="{{ f.id }}">{{ f.naam }}</option>
@@ -23,9 +25,9 @@
         </select>
       </div>
 
-      <div class="col-auto">
-        <label class="fw-semibold me-2">Kies een thema:</label>
-        <select id="themaSelect" class="form-select">
+      <div class="filter-field">
+        <label for="themaSelect">Kies een thema</label>
+        <select id="themaSelect">
           <option value="">-- Selecteer thema --</option>
           {% for t in themas %}
             <option value="{{ t.id }}">{{ t.naam }}</option>
@@ -33,18 +35,18 @@
         </select>
       </div>
 
-      <div class="col-auto">
-        <button id="toonBtn" class="btn btn-primary px-4">
-          Toon statistieken
-        </button>
+      <div class="filter-field filter-field-button">
+        <button id="toonBtn" class="btn">Toon statistieken</button>
       </div>
     </div>
 
-    <div id="resultaat" class="mt-4 text-start mx-auto" style="max-width:650px;"></div>
+    <!-- Resultaat -->
+    <div id="resultaat" style="max-width:700px; margin:2rem auto; text-align:left;"></div>
 
   </div>
 </section>
 
+<!-- SCRIPT -->
 <script>
 document.getElementById("toonBtn").addEventListener("click", async () => {
   const fractieId = document.getElementById("fractieSelect").value;
@@ -59,44 +61,22 @@ document.getElementById("toonBtn").addEventListener("click", async () => {
   const data = await resp.json();
 
   document.getElementById("resultaat").innerHTML = `
-    <div class="card shadow-sm border-0">
-      <div class="card-body">
-        <h3 class="h4 mb-3">Resultaten</h3>
-        <div class="row g-3">
-          <!-- Linker blok -->
-          <div class="col-md-6">
-            <div class="p-3 bg-light rounded">
-              <h6 class="text-uppercase text-muted small mb-2">Deze fractie</h6>
-              <ul class="list-group list-group-flush">
-                <li class="list-group-item bg-light d-flex justify-content-between px-0">
-                  <span>Aantal vragen over dit thema</span>
-                  <strong>${data.thema_vragen_fractie}</strong>
-                </li>
-                <li class="list-group-item bg-light d-flex justify-content-between px-0">
-                  <span>% van totale vragen fractie</span>
-                  <strong>${data.perc_van_fractie}%</strong>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- Rechter blok -->
-          <div class="col-md-6">
-            <div class="p-3 bg-light rounded">
-              <h6 class="text-uppercase text-muted small mb-2">Alle fracties</h6>
-              <ul class="list-group list-group-flush">
-                <li class="list-group-item bg-light d-flex justify-content-between px-0">
-                  <span>Totaal aantal vragen in dit thema</span>
-                  <strong>${data.totaal_vragen_thema}</strong>
-                </li>
-                <li class="list-group-item bg-light d-flex justify-content-between px-0">
-                  <span>% van alle themavragen</span>
-                  <strong>${data.perc_van_thema}%</strong>
-                </li>
-              </ul>
-            </div>
-          </div>
+    <div class="result-card">
+      <h3 class="section-title" style="font-size:1.3rem; margin-bottom:1rem;">Resultaten</h3>
+      <div style="display:flex; flex-wrap:wrap; gap:1.5rem;">
+        
+        <div class="result-block" style="flex:1; min-width:280px;">
+          <h4>Deze fractie</h4>
+          <p><strong>Aantal vragen over dit thema:</strong> ${data.thema_vragen_fractie}</p>
+          <p><strong>% van totale vragen fractie:</strong> ${data.perc_van_fractie}%</p>
         </div>
+
+        <div class="result-block" style="flex:1; min-width:280px;">
+          <h4>Alle fracties</h4>
+          <p><strong>Totaal aantal vragen in dit thema:</strong> ${data.totaal_vragen_thema}</p>
+          <p><strong>% van alle themavragen:</strong> ${data.perc_van_thema}%</p>
+        </div>
+
       </div>
     </div>
   `;

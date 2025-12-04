@@ -1,27 +1,33 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+<!-- HERO -->
 <section class="hero">
-    <h1 class="hero-title">Statistieken Overzicht</h1>
-    <p class="hero-subtitle">
-        Kies over welk aspect je statistieken wilt bekijken.
-    </p>
+  <h1 class="hero-title">Statistieken Overzicht</h1>
+  <p class="hero-subtitle">
+    Kies over welk aspect je statistieken wilt bekijken.
+  </p>
 
-    <div class="hero-buttons" style="display:flex; gap:1rem; justify-content:center; margin-top:1.5rem;">
-        <a href="{{ url_for('main.statistieken_themas') }}" class="btn">Per Thema</a>
-        <a href="{{ url_for('main.statistieken_fractie') }}" class="btn">Per Fractie</a>
-        <a href="{{ url_for('main.statistieken_personen') }}" class="btn">Per Volksvertegenwoordiger</a>
-        <a href="{{ url_for('main.statistieken_priority') }}" class="btn">Actualiteitsscore Schriftelijke Vragen</a>
-        <a href="{{ url_for('main.actiefste_per_thema_en_kieskring') }}" class="btn">Actiefste per thema & kieskring</a>
-    </div>
+  <div class="hero-buttons">
+    <a href="{{ url_for('main.statistieken_themas') }}" class="btn">Per Thema</a>
+    <a href="{{ url_for('main.statistieken_fractie') }}" class="btn">Per Fractie</a>
+    <a href="{{ url_for('main.statistieken_personen') }}" class="btn">Per Volksvertegenwoordiger</a>
+    <a href="{{ url_for('main.statistieken_priority') }}" class="btn">Actualiteitsscore</a>
+    <a href="{{ url_for('main.actiefste_per_thema_en_kieskring') }}" class="btn">Actiefste per Thema & Kieskring</a>
+  </div>
 </section>
 
-<section style="padding:3rem 0; text-align:center;">
-    <h2 class="section-title">Wat kan je hier ontdekken?</h2>
-    <div style="max-width:800px; margin:auto; font-size:1.1rem; color:#374151;">
-        <p><strong>Per Thema:</strong> Ontdek welke fracties en personen het actiefst zijn binnen elk thema.</p>
-        <p><strong>Per Fractie:</strong> Vergelijk het aantal schriftelijke vragen dat elke fractie heeft ingediend over een specifiek thema.</p>
-        <p><strong>Per Volksvertegenwoordiger:</strong> Bekijk wie de meeste vragen stelt en over welke onderwerpen.</p>
-    </div>
+<!-- INFOSECTIE -->
+<section class="info-section">
+  <div class="info-container">
+    <h2>Wat kan je hier ontdekken?</h2>
+    <p><strong>Per Thema:</strong> Ontdek verwante thema's, en de gemiddelde beantwoordingssnelheid voor elk thema.</p>
+    <p><strong>Per Fractie:</strong> Bekijk het aantal schriftelijke vragen dat elke fractie heeft ingediend over een specifiek thema.</p>
+    <p><strong>Per Volksvertegenwoordiger:</strong> Bekijk de populairste thema's van alle vertegenwoordigers.</p>
+    <p><strong>Actualiteitsscore:</strong> Analyseer welke vragen het meest recent en relevant zijn via de actualiteitsscore.</p>
+    <p><strong>Actiefste per Thema & Kieskring:</strong> Ontdek welke volksvertegenwoordigers uit uw kieskring het meest betrokken zijn in thema’s die u interesseren.</p>
+  </div>
 </section>
+
 {% endblock %}

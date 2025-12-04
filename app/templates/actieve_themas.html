@@ -10,9 +10,9 @@
 </section>
 
 <!-- INFO -->
-<section style="background-color:#f9fafb; padding:1.5rem 0;">
-  <div style="max-width:800px; margin:auto; text-align:center; color:#374151;">
-    <h2 style="font-size:1.3rem; font-weight:600;">Trends van de maand</h2>
+<section class="info-section">
+  <div class="info-container">
+    <h2>Trends van de maand</h2>
     <p>
       De cijfers tonen het aantal vragen per thema in de laatste 30 dagen, 
       met vergelijking ten opzichte van de voorgaande 30.
@@ -21,40 +21,38 @@
 </section>
 
 <!-- TABEL -->
-<section style="padding:2rem; background-color:#fff;">
-  <div style="max-width:1200px; margin:auto;">
-    <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
-      <thead style="background:#f3f4f6;">
+<section class="table-section">
+  <div class="table-container">
+    <table>
+      <thead>
         <tr>
-          <th style="padding:10px; text-align:left;">Thema</th>
-          <th style="padding:10px; text-align:left;">Aantal vragen (laatste 30 dagen)</th>
-          <th style="padding:10px; text-align:left;">Evolutie (t.o.v. voorgaande periode)</th>
+          <th>Thema</th>
+          <th>Aantal vragen (laatste 30 dagen)</th>
+          <th>Evolutie (t.o.v. voorgaande periode)</th>
         </tr>
       </thead>
       <tbody>
         {% if data %}
           {% for d in data %}
-            <tr style="border-bottom:1px solid #e5e7eb;">
-              <td style="padding:10px;">{{ d.thema }}</td>
-              <td style="padding:10px;">{{ d.aantal }}</td>
-              <td style="padding:10px; font-weight:600;">
+            <tr>
+              <td>{{ d.thema }}</td>
+              <td>{{ d.aantal }}</td>
+              <td class="evolutie">
                 {% if d.nieuw %}
-                  <span style="color:#1e3a8a;">Nieuw thema</span>
+                  <span class="evolutie-nieuw">Nieuw thema</span>
                 {% elif d.positief %}
-                  <span style="color:green;">↑ +{{ d.pct }}%</span>
+                  <span class="evolutie-positief">↑ +{{ d.pct }}%</span>
                 {% elif d.pct < 0 %}
-                  <span style="color:red;">↓ {{ d.pct }}%</span>
+                  <span class="evolutie-negatief">↓ {{ d.pct }}%</span>
                 {% else %}
-                  <span style="color:#6b7280;">→ 0%</span>
+                  <span class="evolutie-stabiel">→ 0%</span>
                 {% endif %}
               </td>
             </tr>
           {% endfor %}
         {% else %}
           <tr>
-            <td colspan="3" style="text-align:center; padding:1rem;">
-              Geen recente thema’s gevonden.
-            </td>
+            <td colspan="3" class="geen-data">Geen recente thema’s gevonden.</td>
           </tr>
         {% endif %}
       </tbody>

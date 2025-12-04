@@ -1,0 +1,548 @@
+/* ========== ALGEMENE BASIS ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: #f6f8fa;
+  color: #111;
+  line-height: 1.6;
+}
+
+.page-container {
+  min-height: 100vh;
+}
+
+/* ========== HERO ========== */
+.hero {
+  background: linear-gradient(135deg, #FFD000, #E5BE00);
+  color: #222;
+  text-align: center;
+  padding: 5rem 1rem;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  opacity: 0.9;
+  max-width: 700px;
+  margin: 0 auto 2rem auto;
+}
+
+.hero-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ========== KNOPPEN ========== */
+.btn {
+  background: white;
+  color: #000000;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ========== TITELS ========== */
+.section-title {
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 3rem 0 2rem;
+}
+
+/* ========== CARDS ========== */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+}
+
+
+
+/* ========== FOOTER ========== */
+footer {
+  background-color: #111827;
+  color: white;
+  padding: 3rem 1rem;
+  text-align: center;
+  margin-top: 3rem;
+}
+
+footer p {
+  opacity: 0.8;
+  font-size: 0.9rem;
+}
+
+
+/* ========== INFO SECTIES ========== */
+.info-section {
+  background-color: #f9fafb;
+  padding: 1.5rem 0;
+}
+
+.info-container {
+  max-width: 800px;
+  margin: auto;
+  text-align: center;
+  color: #374151;
+}
+
+.info-container h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+
+
+/* ========== TABEL STIJLEN (algemeen al aanwezig, hier extra’s) ========== */
+.evolutie {
+  font-weight: 600;
+}
+
+.evolutie-nieuw {
+  color: #1e3a8a;
+}
+
+.evolutie-positief {
+  color: green;
+}
+
+.evolutie-negatief {
+  color: red;
+}
+
+.evolutie-stabiel {
+  color: #6b7280;
+}
+
+.geen-data {
+  text-align: center;
+  padding: 1rem;
+  color: #555;
+}
+
+
+/* ========== FRACTIES SECTIE ========== */
+.fracties-section {
+  background-color: #f6f8fa;
+  padding-bottom: 3rem;
+}
+
+.fractie-titel {
+  text-align: center;
+  font-size: 1.3rem;
+  margin-top: 2rem;
+  color: #111827;
+}
+
+.fractie-titel.oppositie {
+  margin-top: 3rem;
+}
+
+.fractie-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.fractie-card span {
+  color: #fff;
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  min-width: 50px;
+  text-align: center;
+}
+
+.fractie-card small {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* ========== Fractiekleuren (hergebruikt overal) ========== */
+:root {
+  --kleur-nva: #fbbf24;
+  --kleur-vooruit: #dc2626;
+  --kleur-cdv: #ee7433;
+  --kleur-vb: #e7d12a;
+  --kleur-groen: #16a34a;
+  --kleur-pvda: #b91c1c;
+  --kleur-vld: #2563eb;
+  --kleur-tfa: #9333ea;
+  --kleur-onafh: #6b7280;
+}
+
+.fractie-nva span,
+.vv-rank[data-fractie="N-VA"] { background-color: var(--kleur-nva); }
+
+.fractie-vooruit span,
+.vv-rank[data-fractie="Vooruit"] { background-color: var(--kleur-vooruit); }
+
+.fractie-cdv span,
+.vv-rank[data-fractie="cd&v"] { background-color: var(--kleur-cdv); }
+
+.fractie-vb span,
+.vv-rank[data-fractie="Vlaams Belang"] { background-color: var(--kleur-vb); }
+
+.fractie-groen span,
+.vv-rank[data-fractie="Groen"] { background-color: var(--kleur-groen); }
+
+.fractie-pvda span,
+.vv-rank[data-fractie="PVDA"] { background-color: var(--kleur-pvda); }
+
+.fractie-vld span,
+.vv-rank[data-fractie="Open Vld"] { background-color: var(--kleur-vld); }
+
+.fractie-tfa span,
+.vv-rank[data-fractie="Team Fouad Ahidar"] { background-color: var(--kleur-tfa); }
+
+.fractie-onafh span,
+.vv-rank[data-fractie="Onafhankelijke"] { background-color: var(--kleur-onafh); }
+
+
+
+/* ========== TABELLEN (globaal herbruikbaar) ========== */
+.table-section {
+  padding: 2rem;
+  background-color: #fff;
+}
+
+.table-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem; /* klein beetje ademruimte aan de zijkanten */
+  overflow-x: auto; /* mobielvriendelijk */
+}
+
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+thead {
+  background: #f3f4f6;
+  color: #111827;
+  font-weight: 600;
+}
+
+th {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid #e5e7eb;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s ease;
+}
+
+th:hover {
+  background-color: #e5e7eb;
+}
+
+td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #111;
+  transition: background 0.15s ease;
+}
+
+tr:hover td {
+  background-color: #f9fafb;
+}
+
+.geen-data {
+  text-align: center;
+  padding: 1rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Kolomtitel met sorteerpijltjes */
+th.sortable::after {
+  content: " ⬍";
+  color: #9ca3af;
+  font-size: 0.8rem;
+  margin-left: 4px;
+}
+
+/* Kleine utility voor cijfers of percentages */
+.td-center { text-align: center; }
+.td-right { text-align: right; }
+
+/* PDF / actieknoppen */
+.pdf-link {
+  background: #2563eb;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.pdf-link:hover {
+  background: #1e40af;
+}
+
+
+/* ========== STATISTIEKEN & FILTERS ========== */
+.stats-container {
+  max-width: 1100px;
+  margin: 0 auto 3rem;
+  padding: 0 1.5rem 3rem;
+}
+
+.filters-card {
+  margin-top: -3rem;
+  padding: 1.75rem 2rem;
+  border-radius: 1.25rem;
+  background: #ffffff;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+}
+
+.filters-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem 2rem;
+  align-items: flex-end;
+}
+
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  gap: 1.25rem 2rem;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  flex: 1 1 220px;
+}
+
+.filter-field label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4b5563;
+  margin-bottom: 0.4rem;
+}
+
+.filter-field select {
+  border-radius: 0.75rem;
+  border: 1px solid #d1d5db;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.filter-field select:focus {
+  border-color: #FFD000;
+  box-shadow: 0 0 0 1px #2563eb33;
+}
+
+.filter-field-button {
+  flex: 0 0 140px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+/* Resultaatkaarten */
+.vv-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.2rem 1.4rem;
+}
+
+.vv-rank {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* kleur per fractie */
+.vv-rank[data-fractie="N-VA"] { background-color: var(--kleur-nva); }
+.vv-rank[data-fractie="Vooruit"] { background-color: var(--kleur-vooruit); }
+.vv-rank[data-fractie="cd&v"] { background-color: var(--kleur-cdv); }
+.vv-rank[data-fractie="Vlaams Belang"] { background-color: var(--kleur-vb); }
+.vv-rank[data-fractie="Groen"] { background-color: var(--kleur-groen); }
+.vv-rank[data-fractie="PVDA"] { background-color: var(--kleur-pvda); }
+.vv-rank[data-fractie="Open Vld"] { background-color: var(--kleur-vld); }
+.vv-rank[data-fractie="Team Fouad Ahidar"] { background-color: var(--kleur-tfa); }
+.vv-rank[data-fractie="Onafhankelijke"] { background-color: var(--kleur-onafh); }
+
+.vv-content {
+  flex: 1;
+}
+
+.vv-name {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.vv-fraction {
+  margin: 0.1rem 0 0.3rem;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.vv-count {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.vv-meta {
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.vv-meta span {
+  font-weight: 500;
+}
+
+/* Geen resultaten */
+.empty-state {
+  margin-top: 2.5rem;
+  padding: 2rem;
+  border-radius: 1.25rem;
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  text-align: center;
+}
+
+.empty-state p {
+  margin-top: 0.5rem;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+
+@media (max-width: 768px) {
+  .filters-card {
+    margin-top: -1.5rem;
+    padding: 1.25rem 1.4rem;
+  }
+
+  .filters-row {
+    flex-direction: column;
+  }
+
+  .filter-field {
+    width: 100%;
+  }
+
+  .filter-field-button {
+    width: 100%;
+  }
+
+  .filter-field-button .btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+
+
+/* ========== FRACTIE-STATISTIEKEN (optioneel extra stijl) ========== */
+.result-card {
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.result-block {
+  background: #f9fafb;
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.result-block h4 {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 0.75rem;
+}
+
+.result-block p {
+  margin: 0.4rem 0;
+  color: #111827;
+}
+
+
+
+/* ========== SCOREKLEUREN (Hoog / Gemiddeld / Laag) ========== */
+.score-hoog {
+  color: #16a34a; /* Groen voor hoge scores */
+  font-weight: 600;
+}
+
+.score-gemiddeld {
+  color: #f59e0b; /* Oranje voor gemiddelde scores */
+  font-weight: 600;
+}
+
+.score-laag {
+  color: #dc2626; /* Rood voor lage scores */
+  font-weight: 600;
+}

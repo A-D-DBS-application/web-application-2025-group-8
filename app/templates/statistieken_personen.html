@@ -1,39 +1,53 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+<!-- HERO -->
 <section class="hero">
   <h1 class="hero-title">Statistieken per Volksvertegenwoordiger</h1>
-  <p class="hero-subtitle">Bekijk over welke thema’s elk parlementslid het vaakst vragen stelt</p>
+  <p class="hero-subtitle">
+    Bekijk over welke thema’s elk parlementslid het vaakst schriftelijke vragen stelt.
+  </p>
 </section>
 
-<section style="padding:2rem;">
-  <table style="width:100%; border-collapse:collapse;">
-    <thead style="background:#f3f4f6;">
-      <tr>
-        <th style="padding:8px;">Naam</th>
-        <th style="padding:8px;">Populairst Thema</th>
-        <th style="padding:8px;">Aantal Vragen</th>
-        <th style="padding:8px;">2e Thema</th>
-        <th style="padding:8px;">Aantal</th>
-        <th style="padding:8px;">3e Thema</th>
-        <th style="padding:8px;">Aantal</th>
-        <th style="padding:8px;">Laatste Vraag</th>
-      </tr>
-    </thead>
-    <tbody>
-{% for p in data %}
-    <tr>
-        <td>{{ p.naam }}</td>
-        <td>{{ p.populair or "—" }}</td>
-        <td>{{ p.pop_count }}</td>
-        <td>{{ p.tweede or "—" }}</td>
-        <td>{{ p.tweede_count }}</td>
-        <td>{{ p.derde or "—" }}</td>
-        <td>{{ p.derde_count }}</td>
-        <td>{{ p.laatste_vraag or "—" }}</td>
-    </tr>
-{% endfor %}
-</tbody>
-  </table>
+<!-- TABEL -->
+<section class="table-section">
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Naam</th>
+          <th>Populairst Thema</th>
+          <th>Aantal Vragen</th>
+          <th>2e Thema</th>
+          <th>Aantal</th>
+          <th>3e Thema</th>
+          <th>Aantal</th>
+          <th>Laatste Vraag</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if data %}
+          {% for p in data %}
+          <tr>
+            <td>{{ p.naam }}</td>
+            <td>{{ p.populair or "—" }}</td>
+            <td class="td-center">{{ p.pop_count }}</td>
+            <td>{{ p.tweede or "—" }}</td>
+            <td class="td-center">{{ p.tweede_count }}</td>
+            <td>{{ p.derde or "—" }}</td>
+            <td class="td-center">{{ p.derde_count }}</td>
+            <td>{{ p.laatste_vraag or "—" }}</td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="8" class="geen-data">Geen gegevens beschikbaar.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
 </section>
+
 {% endblock %}

@@ -1,13 +1,14 @@
 {% extends "base.html" %}
-
 {% block content %}
+
+<!-- HERO -->
 <section class="hero">
   <h1 class="hero-title">Statistieken per Thema</h1>
   <p class="hero-subtitle">
     Analyseer politieke thema’s: ontdek hoe ze samenhangen en hoe snel vragen binnen elk thema worden beantwoord.
   </p>
 
-  <div class="hero-buttons" style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-top:1.5rem;">
+  <div class="hero-buttons">
     <a href="{{ url_for('main.statistieken_thema_netwerk') }}" class="btn">
       Verwante Thema’s
     </a>
@@ -17,11 +18,15 @@
   </div>
 </section>
 
-<section style="padding:2rem; text-align:center;">
-  <h2 class="section-title">Kies een analyse</h2>
-  <p style="color:#374151; font-size:1.05rem; max-width:700px; margin:auto;">
-    - <strong>Verwante Thema’s:</strong> ontdek welke onderwerpen vaak samen in één vraag voorkomen.<br>
-    - <strong>Beantwoordingssnelheid:</strong> zie hoe efficiënt thema’s gemiddeld worden afgehandeld.
-  </p>
+<!-- INFO-TEKST -->
+<section class="info-section">
+  <div class="info-container">
+    <h2 class="section-title">Kies een analyse</h2>
+    <p>
+      <strong>Verwante Thema’s:</strong> ontdek welke onderwerpen vaak samen in één vraag voorkomen.<br>
+      <strong>Beantwoordingssnelheid:</strong> zie hoe efficiënt thema’s gemiddeld worden afgehandeld.
+    </p>
+  </div>
 </section>
+
 {% endblock %}
