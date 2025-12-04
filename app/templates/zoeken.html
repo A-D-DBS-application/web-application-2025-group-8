@@ -1,61 +1,65 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="hero">
+<!-- HERO -->
+<section class="hero" style="background:#facc15; color:#111;">
   <h1 class="hero-title">Zoek Schriftelijke Vragen</h1>
   <p class="hero-subtitle">
     Geef een trefwoord in om schriftelijke vragen te vinden waarin dit voorkomt.
   </p>
 </section>
 
-<section class="p-5">
-  <form method="POST" class="search-form">
+<section style="padding:2rem;">
+  <form method="POST" style="text-align:center; margin-bottom:2rem;">
     <input 
       type="text" 
       name="trefwoord" 
       value="{{ trefwoord }}" 
       placeholder="Bijv. PFAS, onderwijs, mobiliteit..." 
-      class="search-input"
+      style="width:50%; padding:0.5rem; border:1px solid #ccc; border-radius:6px;"
       required
     >
-    <button type="submit" class="btn btn-primary ms-2">Zoeken</button>
+    <button type="submit" 
+            style="margin-left:1rem; padding:0.5rem 1rem; background:#2563eb; color:white; border:none; border-radius:6px; cursor:pointer;">
+      Zoeken
+    </button>
   </form>
 
   {% if resultaten %}
-  <div class="container">
-    <div class="table-responsive">
-      <table class="table table-hover">
-        <thead class="table-light">
-          <tr>
-            <th>Onderwerp</th>
-            <th>Indiener</th>
-            <th>Fractie</th>
-            <th>Datum ingediend</th>
-            <th>PDF</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for v in resultaten %}
-          <tr>
-            <td>{{ v.onderwerp }}</td>
-            <td>{{ v.indiener }}</td>
-            <td>{{ v.fractie }}</td>
-            <td>{{ v.datum }}</td>
-            <td>
-              {% if v.link %}
-                <a href="{{ v.link }}" target="_blank" class="btn-table-link">Bekijk</a>
-              {% else %}
-                <span class="text-muted">-</span>
-              {% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
+  <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
+    <thead style="background:#f3f4f6;">
+      <tr>
+        <th style="padding:10px; text-align:left;">Onderwerp</th>
+        <th style="padding:10px; text-align:left;">Indiener</th>
+        <th style="padding:10px; text-align:left;">Fractie</th>
+        <th style="padding:10px; text-align:left;">Datum ingediend</th>
+        <th style="padding:10px; text-align:left;">PDF</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for v in resultaten %}
+      <tr style="border-bottom:1px solid #e5e7eb;">
+        <td style="padding:10px;">{{ v.onderwerp }}</td>
+        <td style="padding:10px;">{{ v.indiener }}</td>
+        <td style="padding:10px;">{{ v.fractie }}</td>
+        <td style="padding:10px;">{{ v.datum }}</td>
+        <td style="padding:10px;">
+          {% if v.link %}
+            <a href="{{ v.link }}" target="_blank"
+               style="background:#2563eb; color:white; padding:4px 8px; border-radius:4px; 
+                      text-decoration:none; font-weight:600; font-size:0.85rem;">
+              Bekijk
+            </a>
+          {% else %}
+            <span style="color:#9ca3af;">-</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
   {% elif trefwoord %}
-    <p class="text-center text-muted">Geen resultaten gevonden voor dit trefwoord.</p>
+  <p style="text-align:center; color:#555;">Geen resultaten gevonden voor dit trefwoord.</p>
   {% endif %}
 </section>
 {% endblock %}

@@ -1,97 +1,84 @@
 {% extends "base.html" %}
-
 {% block content %}
 
 <!-- HERO -->
-<section class="hero">
+<section class="hero" style="background:#facc15; color:#111;">
   <h1 class="hero-title">Evolutie van Schriftelijke Vragen</h1>
   <p class="hero-subtitle">
     Bekijk de evolutie per <strong>thema</strong> of per <strong>volksvertegenwoordiger</strong> over de laatste maanden.<br>
-    <em>Klik op een bolletje in de grafiek om de details te zien.</em>
+    <em>Klik op een bolletje in de grafiek om de schriftelijke vragen van die maand te bekijken (en pdf te downloaden).</em>
   </p>
 </section>
 
 <!-- KEUZE & GRAFIEKEN -->
-<section class="p-4">
-  <div class="container" style="max-width: 1000px;">
+<section style="padding:2rem; text-align:center;">
 
-    <!-- Tabs (Gebruikt nu jouw style.css classes) -->
-    <div class="tabs-container text-center">
-      <button id="tabThema" class="tab-btn left active">
-        Per Thema
-      </button>
-      <button id="tabVV" class="tab-btn right inactive">
-        Per Volksvertegenwoordiger
-      </button>
-    </div>
-
-    <!-- PER THEMA -->
-    <div id="themaDiv" class="card p-4">
-      <div class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
-        <label for="themaSelect" class="fw-bold m-0">Kies een thema:</label>
-
-        <select id="themaSelect" class="form-select" style="max-width:320px;">
-          <option value="">-- Selecteer een thema --</option>
-          {% for t in themas %}
-            <option value="{{ t.id }}">{{ t.naam }}</option>
-          {% endfor %}
-        </select>
-
-        <button id="toonGrafiek" class="btn btn-primary">
-          Toon grafiek
-        </button>
-      </div>
-
-      <div class="mt-4" style="position: relative; height:400px; width:100%">
-        <canvas id="evolutieChart"></canvas>
-      </div>
-    </div>
-
-    <!-- PER VOLKSVERTEGENWOORDIGER -->
-    <div id="vvDiv" class="card p-4" style="display:none;">
-      <div class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
-        <label class="fw-bold m-0">Zoek volksvertegenwoordiger:</label>
-
-        <div style="position:relative; width:300px;">
-          <input type="text" id="vvInput" placeholder="Typ een naam..." 
-                 class="form-control" autocomplete="off">
-          
-          <div id="vvSuggesties" class="list-group position-absolute w-100" 
-               style="z-index:1000; max-height:200px; overflow-y:auto; display:none;"></div>
-        </div>
-
-        <button id="toonVV" class="btn btn-primary">
-          Toon grafiek
-        </button>
-      </div>
-
-      <div class="mt-4" style="position: relative; height:400px; width:100%">
-        <canvas id="vvChart"></canvas>
-      </div>
-    </div>
-
+  <!-- Tabs -->
+  <div style="margin-bottom:2rem;">
+    <button id="tabThema" 
+            style="padding:0.5rem 1rem; border:none; border-radius:6px 0 0 6px; background:#2563eb; color:white; cursor:pointer;">
+      Per Thema
+    </button>
+    <button id="tabVV"
+            style="padding:0.5rem 1rem; border:none; border-radius:0 6px 6px 0; background:#e5e7eb; cursor:pointer;">
+      Per Volksvertegenwoordiger
+    </button>
   </div>
+
+  <!-- PER THEMA -->
+  <div id="themaDiv">
+
+  <div style="display:flex; align-items:center; justify-content:center; gap:1rem; flex-wrap:wrap; margin-top:1rem;">
+    <label for="themaSelect" style="font-weight:600; margin:0;">Kies een thema:</label>
+
+    <select id="themaSelect" style="padding:0.5rem 1rem; border:1px solid #ccc; border-radius:6px; min-width:320px;">
+      <option value="">-- Selecteer een thema --</option>
+      {% for t in themas %}
+        <option value="{{ t.id }}">{{ t.naam }}</option>
+      {% endfor %}
+    </select>
+
+    <button id="toonGrafiek" 
+            style="padding:0.5rem 1rem; background:#2563eb; color:white; border:none; border-radius:6px; cursor:pointer;">
+      Toon grafiek
+    </button>
+  </div>
+
+
+    <div style="max-width:800px; margin:2rem auto;">
+      <canvas id="evolutieChart"></canvas>
+    </div>
+  </div>
+
+  <!-- PER VOLKSVERTEGENWOORDIGER -->
+<div id="vvDiv" style="display:none;">
+
+  <div style="display:flex; align-items:center; justify-content:center; gap:1rem; flex-wrap:wrap; margin-top:1rem;">
+    <label style="font-weight:600; margin:0;">Zoek volksvertegenwoordiger:</label>
+
+    <div style="position:relative; width:250px;">
+      <input type="text" id="vvInput" placeholder="Typ een naam..." 
+         style="padding:0.5rem 1rem; border:1px solid #ccc; border-radius:6px; width:100%;" 
+         autocomplete="off">
+    
+      <div id="vvSuggesties" class="suggesties"
+          style="position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #ddd; border-radius:4px; text-align:left; z-index:10;"></div>
+    </div>
+
+
+    <button id="toonVV" 
+            style="padding:0.5rem 1rem; background:#2563eb; color:white; border:none; border-radius:6px; cursor:pointer;">
+      Toon grafiek
+    </button>
+  </div>
+
+
+    <div style="max-width:800px; margin:2rem auto;">
+      <canvas id="vvChart"></canvas>
+    </div>
+  </div>
+
 </section>
-
-<!-- MODAL VOOR DETAILS (Mooier dan een pop-up venster) -->
-<div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title fw-bold" id="modalTitle">Details</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div id="modalContent" class="list-group list-group-flush">
-          <!-- Hier komen de vragen -->
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -108,15 +95,19 @@ const themaDiv = document.getElementById("themaDiv");
 const vvDiv = document.getElementById("vvDiv");
 
 tabThema.addEventListener("click", () => {
-  tabThema.className = "tab-btn left active";
-  tabVV.className = "tab-btn right inactive";
+  tabThema.style.background = "#2563eb";
+  tabThema.style.color = "white";
+  tabVV.style.background = "#e5e7eb";
+  tabVV.style.color = "black";
   themaDiv.style.display = "block";
   vvDiv.style.display = "none";
 });
 
 tabVV.addEventListener("click", () => {
-  tabVV.className = "tab-btn left inactive";
-  tabThema.className = "tab-btn right active";
+  tabVV.style.background = "#2563eb";
+  tabVV.style.color = "white";
+  tabThema.style.background = "#e5e7eb";
+  tabThema.style.color = "black";
   vvDiv.style.display = "block";
   themaDiv.style.display = "none";
 });
@@ -124,10 +115,7 @@ tabVV.addEventListener("click", () => {
 
 // === GRAFIEK PER THEMA ===
 document.getElementById("toonGrafiek").addEventListener("click", async () => {
-  const themaSelect = document.getElementById("themaSelect");
-  const themaId = themaSelect.value;
-  const themaNaam = themaSelect.options[themaSelect.selectedIndex].text;
-
+  const themaId = document.getElementById("themaSelect").value;
   if (!themaId) return alert("Selecteer eerst een thema.");
   gekozenThema = themaId;
 
@@ -143,7 +131,7 @@ document.getElementById("toonGrafiek").addEventListener("click", async () => {
     data: {
       labels: data.labels,
       datasets: [{
-        label: `Aantal vragen: ${themaNaam}`,
+        label: 'Aantal vragen per maand',
         data: data.values,
         borderColor: '#2563eb',
         backgroundColor: 'rgba(37,99,235,0.2)',
@@ -156,8 +144,6 @@ document.getElementById("toonGrafiek").addEventListener("click", async () => {
       }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
       scales: { y: { beginAtZero: true } },
       plugins: { legend: { display: true, position: 'bottom' } }
     }
@@ -165,7 +151,7 @@ document.getElementById("toonGrafiek").addEventListener("click", async () => {
 });
 
 
-// === KLIK OP PUNT IN GRAFIEK PER THEMA (Met jouw Fix!) ===
+// === KLIK OP PUNT IN GRAFIEK PER THEMA ===
 document.getElementById("evolutieChart").onclick = async (evt) => {
   if (!chart || !gekozenThema) return;
   const points = chart.getElementsAtEventForMode(evt, "nearest", { intersect: true }, true);
@@ -174,11 +160,11 @@ document.getElementById("evolutieChart").onclick = async (evt) => {
   const point = points[0];
   const label = chart.data.labels[point.index];
   const [maandStr, jaarStr] = label.split(" ");
-  
+  //maanden in het nederlands
   const nlMaanden = {
-    "jan":1, "feb":2, "mrt":3, "apr":4, "mei":5, "jun":6,
-    "jul":7, "aug":8, "sep":9, "okt":10, "nov":11, "dec":12
-  };
+  "jan":1, "feb":2, "mrt":3, "apr":4, "mei":5, "jun":6,
+  "jul":7, "aug":8, "sep":9, "okt":10, "nov":11, "dec":12
+};
 
   const maand = nlMaanden[maandStr.toLowerCase()];
   const jaar = parseInt(jaarStr);
@@ -186,7 +172,18 @@ document.getElementById("evolutieChart").onclick = async (evt) => {
   const response = await fetch(`/grafieken/thema_vragen/${gekozenThema}/${jaar}/${maand}`);
   const data = await response.json();
 
-  toonDetails(data, `${maandStr} ${jaar}`);
+  if (!data.length) return alert(`Geen schriftelijke vragen in ${label}`);
+
+  let html = `<h3>Vragen van ${label}</h3><ul>`;
+  data.forEach(v => {
+    html += `<li><b>${v.datum}</b> — ${v.onderwerp}`;
+    if (v.link) html += ` — <a href="${v.link}" target="_blank" style="color:#2563eb;">[pdf vraag]</a>`;
+    html += `</li>`;
+  });
+  html += "</ul>";
+
+  const win = window.open("", "_blank", "width=600,height=600,scrollbars=yes");
+  win.document.write(`<html><body style='font-family:sans-serif;'>${html}</body></html>`);
 };
 
 
@@ -196,40 +193,28 @@ const suggestiesDiv = document.getElementById('vvSuggesties');
 
 input.addEventListener('input', async () => {
   const q = input.value.trim();
-  if (q.length < 2) { 
-      suggestiesDiv.innerHTML = ''; 
-      suggestiesDiv.style.display = 'none';
-      gekozenVV = null; 
-      return; 
-  }
+  if (q.length < 2) { suggestiesDiv.innerHTML = ''; gekozenVV = null; return; }
 
   const resp = await fetch(`/grafieken/vv_suggesties?q=${encodeURIComponent(q)}`);
   const data = await resp.json();
 
+  suggestiesDiv.innerHTML = data.map(v =>
+    `<div class="suggestie" data-id="${v.id}" style="padding:5px; cursor:pointer; border-bottom:1px solid #ddd;">${v.naam}</div>`
+  ).join('');
+});
+
+suggestiesDiv.addEventListener('click', e => {
+  if (!e.target.dataset.id) return;
+  gekozenVV = e.target.dataset.id;
+  input.value = e.target.innerText;
   suggestiesDiv.innerHTML = '';
-  if (data.length > 0) {
-      suggestiesDiv.style.display = 'block';
-      data.forEach(v => {
-        const div = document.createElement('button');
-        div.className = "list-group-item list-group-item-action text-start";
-        div.textContent = v.naam;
-        div.onclick = () => {
-            gekozenVV = v.id;
-            input.value = v.naam;
-            suggestiesDiv.innerHTML = '';
-            suggestiesDiv.style.display = 'none';
-        };
-        suggestiesDiv.appendChild(div);
-      });
-  } else {
-      suggestiesDiv.style.display = 'none';
-  }
 });
 
 
 // === GRAFIEK PER VV ===
 document.getElementById("toonVV").addEventListener("click", async () => {
   if (!gekozenVV) return alert("Selecteer eerst een volksvertegenwoordiger.");
+  window.selectedVV = gekozenVV;
 
   const resp = await fetch(`/grafieken/vv_data/${gekozenVV}`);
   const data = await resp.json();
@@ -242,7 +227,7 @@ document.getElementById("toonVV").addEventListener("click", async () => {
     data: {
       labels: data.labels,
       datasets: [{
-        label: `Vragen door ${input.value}`,
+        label: 'Aantal vragen per maand',
         data: data.values,
         borderColor: '#ef4444',
         backgroundColor: 'rgba(239,68,68,0.2)',
@@ -254,76 +239,45 @@ document.getElementById("toonVV").addEventListener("click", async () => {
         fill: true
       }]
     },
-    options: { 
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: { y: { beginAtZero: true } }, 
-        plugins: { legend: { display: true, position: 'bottom' } } 
-    }
+    options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: true, position: 'bottom' } } }
   });
 });
 
 
-// === KLIK OP PUNT IN GRAFIEK PER VV (Met jouw Fix!) ===
+// === KLIK OP PUNT IN GRAFIEK PER VV ===
 document.getElementById("vvChart").onclick = async (evt) => {
-  if (!vvChart || !gekozenVV) return;
+  if (!vvChart || !window.selectedVV) return;
   const points = vvChart.getElementsAtEventForMode(evt, "nearest", { intersect: true }, true);
   if (!points.length) return;
 
   const point = points[0];
   const label = vvChart.data.labels[point.index];
   const [maandStr, jaarStr] = label.split(" ");
-  
   const nlMaanden = {
-    "jan":1, "feb":2, "mrt":3, "apr":4, "mei":5, "jun":6,
-    "jul":7, "aug":8, "sep":9, "okt":10, "nov":11, "dec":12
-  };
-
-  const maand = nlMaanden[maandStr.toLowerCase()];
-  const jaar = parseInt(jaarStr);
-
-  const response = await fetch(`/grafieken/vv_vragen/${gekozenVV}/${jaar}/${maand}`);
-  const data = await response.json();
-
-  toonDetails(data, `${maandStr} ${jaar}`);
+  "jan":1, "feb":2, "mrt":3, "apr":4, "mei":5, "jun":6,
+  "jul":7, "aug":8, "sep":9, "okt":10, "nov":11, "dec":12
 };
 
-// --- FUNCTIE OM DETAILS TE TONEN (In Modal) ---
-function toonDetails(data, label) {
-    const modalTitle = document.getElementById("modalTitle");
-    const modalContent = document.getElementById("modalContent");
-    
-    modalTitle.textContent = `Vragen in ${label}`;
-    modalContent.innerHTML = "";
+const maand = nlMaanden[maandStr.toLowerCase()];
+const jaar = parseInt(jaarStr);
 
-    if (!data.length) {
-        modalContent.innerHTML = "<div class='p-3'>Geen schriftelijke vragen gevonden.</div>";
-    } else {
-        data.forEach(v => {
-            const item = document.createElement("div");
-            item.className = "list-group-item";
-            
-            let linkHtml = "";
-            if (v.link) {
-                linkHtml = `<a href="${v.link}" target="_blank" class="btn btn-sm btn-primary float-end">PDF</a>`;
-            }
 
-            item.innerHTML = `
-                <div class="d-flex w-100 justify-content-between align-items-start">
-                    <div>
-                        <small class="text-muted">${v.datum}</small>
-                        <h6 class="mb-1 mt-1 fw-bold" style="font-size:1rem;">${v.onderwerp}</h6>
-                    </div>
-                    ${linkHtml}
-                </div>
-            `;
-            modalContent.appendChild(item);
-        });
-    }
+  const response = await fetch(`/grafieken/vv_vragen/${window.selectedVV}/${jaar}/${maand}`);
+  const data = await response.json();
 
-    const modal = new bootstrap.Modal(document.getElementById("detailModal"));
-    modal.show();
-}
+  if (!data.length) return alert(`Geen schriftelijke vragen in ${label}`);
+
+  let html = `<h3>Vragen van ${label}</h3><ul>`;
+  data.forEach(v => {
+    html += `<li><b>${v.datum}</b> — ${v.onderwerp}`;
+    if (v.link) html += ` — <a href="${v.link}" target="_blank" style="color:#2563eb;">[pdf vraag]</a>`;
+    html += `</li>`;
+  });
+  html += "</ul>";
+
+  const win = window.open("", "_blank", "width=600,height=600,scrollbars=yes");
+  win.document.write(`<html><body style='font-family:sans-serif;'>${html}</body></html>`);
+};
 </script>
 
 {% endblock %}
