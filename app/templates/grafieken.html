@@ -13,7 +13,8 @@
 </section>
 
 <!-- KEUZE & GRAFIEKEN -->
-<section style="padding:2rem; text-align:center;">
+<section class="grafieken-section">
+
 
   <!-- Tabs -->
   <div style="margin-bottom:2rem;">
@@ -48,24 +49,21 @@
   </div>
 
   <!-- PER VOLKSVERTEGENWOORDIGER -->
-  <div id="vvDiv" style="display:none;">
-    <label style="font-weight:600; margin-right:10px;">Zoek volksvertegenwoordiger:</label>
-    <input type="text" id="vvInput" placeholder="Typ een naam..." 
-           style="padding:0.5rem 1rem; border:1px solid #ccc; border-radius:6px; width:250px;" autocomplete="off">
-    <div id="vvSuggesties" class="suggesties" 
-         style="position:relative; max-width:260px; margin:0 auto; background:white; border-radius:4px; text-align:left;"></div>
+  <div id="vvDiv" class="vv-container" style="display:none;">
+    <div class="vv-row">
+      <label for="vvInput" class="vv-label">Zoek volksvertegenwoordiger:</label>
+      <input type="text" id="vvInput" placeholder="Typ een naam..." class="vv-input" autocomplete="off">
+      <button id="toonVV" class="vv-button">Toon grafiek</button>
+    </div>
 
-    <button id="toonVV" 
-            style="margin-left:1rem; padding:0.5rem 1rem; background:#2563eb; color:white; border:none; border-radius:6px; cursor:pointer;">
-      Toon grafiek
-    </button>
+    <div id="vvSuggesties" class="vv-suggesties"></div>
 
-    <div style="max-width:800px; margin:2rem auto;">
+    <div class="chart-container">
       <canvas id="vvChart"></canvas>
     </div>
   </div>
 
-</section>
+
 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

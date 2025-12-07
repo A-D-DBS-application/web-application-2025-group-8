@@ -684,3 +684,115 @@ th.sortable::after {
   color: #dc2626; /* Rood voor lage scores */
   font-weight: 600;
 }
+
+
+/* ========== GRAFIEKEN RESPONSIVE FIX ========== */
+.grafieken-section {
+  padding: 2rem;
+  text-align: center;
+}
+
+.grafieken-section select,
+.grafieken-section input,
+.grafieken-section button {
+  font-size: 1rem;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.grafieken-section .chart-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  overflow-x: auto;
+}
+
+/* Mobiel: alles netjes stapelen */
+@media (max-width: 768px) {
+  .grafieken-section {
+    padding: 1rem;
+  }
+
+  .grafieken-section label {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .grafieken-section select,
+  .grafieken-section button {
+    display: block;
+    width: 100%;
+    margin: 0.5rem auto;
+  }
+
+  #tabThema, #tabVV {
+    width: 50%;
+    border-radius: 0;
+  }
+}
+
+
+/* ========== PER VOLKSVERTEGENWOORDIGER GRAFIEK ========== */
+.vv-container {
+  text-align: center;
+}
+
+.vv-input-group {
+  margin-bottom: 1.5rem;
+}
+
+.vv-label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.vv-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.vv-input {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 250px;
+  max-width: 100%;
+}
+
+.vv-button {
+  padding: 0.5rem 1rem;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.vv-button:hover {
+  background: #1e40af;
+}
+
+.vv-suggesties {
+  position: relative;
+  max-width: 260px;
+  margin: 0.5rem auto 0;
+  background: white;
+  border-radius: 4px;
+  text-align: left;
+}
+
+/* Mobiel */
+@media (max-width: 768px) {
+  .vv-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .vv-input, .vv-button {
+    width: 100%;
+  }
+}
