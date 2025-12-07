@@ -13,10 +13,10 @@
 <!-- TABEL -->
 <section class="table-section">
   <div class="table-container">
-    <table>
+    <table id="personenTable">
       <thead>
         <tr>
-          <th>Naam</th>
+          <th onclick="sortTable(0)">Naam ⬍</th>
           <th>Populairst Thema</th>
           <th>Aantal Vragen</th>
           <th>2e Thema</th>
@@ -49,5 +49,25 @@
     </table>
   </div>
 </section>
+
+<!-- SORT SCRIPT -->
+<script>
+let sortDirection = [true]; // alleen 1 kolom om te sorteren
+
+function sortTable(columnIndex) {
+  const table = document.getElementById("personenTable");
+  const rows = Array.from(table.rows).slice(1);
+  const dir = sortDirection[columnIndex] ? 1 : -1;
+
+  rows.sort((a, b) => {
+    const A = a.cells[columnIndex].innerText.trim().toLowerCase();
+    const B = b.cells[columnIndex].innerText.trim().toLowerCase();
+    return A.localeCompare(B) * dir;
+  });
+
+  rows.forEach(row => table.tBodies[0].appendChild(row));
+  sortDirection[columnIndex] = !sortDirection[columnIndex];
+}
+</script>
 
 {% endblock %}

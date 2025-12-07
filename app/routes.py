@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, request
 from app.models import Persoon, Fractie, Thema, SchriftelijkeVragen, Persoonfunctie, ThemaKoppeling, Functies
 from sqlalchemy import func
-from app import db
+from app import db, cache
 from sqlalchemy.exc import OperationalError
-from flask_caching import Cache
+
 
 # priority scoring algoritme 
 from datetime import datetime, date
@@ -219,77 +219,64 @@ def statistieken_fractie_data(fractie_id, thema_id):
     })
 
 
-# --- STATISTIEKEN PER PERSOON ---
 @main.route("/statistieken/personen")
+@cache.cached(timeout=1800)  # 30 minuten cachen
 def statistieken_personen():
-    # 1. Haal alle personen op
-    personen = Persoon.query.all()
+    # 1. Haal alle volksvertegenwoordigers (niet-ministers)
+    personen = (
+        db.session.query(Persoon)
+        .join(Persoonfunctie, Persoonfunctie.id_prs == Persoon.id)
+        .join(Functies, Persoonfunctie.id_fnc == Functies.id)
+        .filter(~func.lower(Functies.naam).like("%minister%"))
+        .distinct()
+        .all()
+    )
 
     resultaat = []
+    referentie_ids = [p.id for p in personen]
+    if not referentie_ids:
+        return render_template("statistieken_personen.html", data=[])
 
-    for persoon in personen:
-
-        # 2. Haal alle functies op + JOIN naar Functies
-        functies = (
-            db.session.query(Persoonfunctie, Functies)
-            .join(Functies, Persoonfunctie.id_fnc == Functies.id)
-            .filter(Persoonfunctie.id_prs == persoon.id)
-            .all()
+    # 2. Haal alle thema’s en vragen ineens op via één join-query
+    thema_data = (
+        db.session.query(
+            Persoon.id.label("persoon_id"),
+            Thema.naam.label("thema_naam"),
+            func.count(ThemaKoppeling.id).label("thema_count"),
+            func.max(SchriftelijkeVragen.ingediend).label("laatste_vraag")
         )
+        .join(Persoonfunctie, Persoonfunctie.id_prs == Persoon.id)
+        .join(SchriftelijkeVragen, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
+        .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
+        .join(Thema, Thema.id == ThemaKoppeling.id_thm)
+        .filter(Persoon.id.in_(referentie_ids))
+        .group_by(Persoon.id, Thema.naam)
+        .all()
+    )
 
-        if not functies:
-            continue
+    # 3. Bundel resultaten per persoon
+    from collections import defaultdict
+    per_persoon = defaultdict(list)
+    laatste_vraag_dict = {}
 
-        # 3. ➤ FILTER: Als één van de functies "minister" bevat → skip
-        if any("minister" in f2.naam.lower() for f1, f2 in functies):
-            continue
+    for row in thema_data:
+        per_persoon[row.persoon_id].append((row.thema_naam, row.thema_count))
+        if row.persoon_id not in laatste_vraag_dict or row.laatste_vraag > laatste_vraag_dict[row.persoon_id]:
+            laatste_vraag_dict[row.persoon_id] = row.laatste_vraag
 
-        # 4. lijst van persoonfunctie-ID's
-        functie_ids = [f1.id for f1, f2 in functies]
-
-        # 5. Haal alle vragen van deze persoon
-        vragen = SchriftelijkeVragen.query.filter(
-            SchriftelijkeVragen.id_prsfnc_vs.in_(functie_ids)
-        ).all()
-
-        if not vragen:
-            resultaat.append({
-                "naam": f"{persoon.voornaam} {persoon.naam}",
-                "populair": None,
-                "pop_count": 0,
-                "tweede": None,
-                "tweede_count": 0,
-                "derde": None,
-                "derde_count": 0,
-                "laatste_vraag": None
-            })
-            continue
-
-        # 6. Thema’s tellen
-        thema_counts = (
-            db.session.query(Thema.naam, func.count(ThemaKoppeling.id))
-            .join(ThemaKoppeling, Thema.id == ThemaKoppeling.id_thm)
-            .join(SchriftelijkeVragen, SchriftelijkeVragen.id == ThemaKoppeling.id_schv)
-            .filter(SchriftelijkeVragen.id_prsfnc_vs.in_(functie_ids))
-            .group_by(Thema.naam)
-            .order_by(func.count(ThemaKoppeling.id).desc())
-            .all()
-        )
-
-        top3 = thema_counts[:3]
-
-        # 7. Laatste vraag
-        laatste = max(v.ingediend for v in vragen)
-
+    # 4. Samenvatten voor de template
+    for p in personen:
+        thema_list = sorted(per_persoon[p.id], key=lambda x: x[1], reverse=True)
+        top3 = thema_list[:3]
         resultaat.append({
-            "naam": f"{persoon.voornaam} {persoon.naam}",
+            "naam": f"{p.voornaam} {p.naam}",
             "populair": top3[0][0] if len(top3) >= 1 else None,
             "pop_count": top3[0][1] if len(top3) >= 1 else 0,
             "tweede": top3[1][0] if len(top3) >= 2 else None,
             "tweede_count": top3[1][1] if len(top3) >= 2 else 0,
             "derde": top3[2][0] if len(top3) >= 3 else None,
             "derde_count": top3[2][1] if len(top3) >= 3 else 0,
-            "laatste_vraag": laatste
+            "laatste_vraag": laatste_vraag_dict.get(p.id)
         })
 
     return render_template("statistieken_personen.html", data=resultaat)
@@ -392,7 +379,7 @@ def actiefste_per_thema_en_kieskring():
 
 
 
-# ✅ Zorg dat cache in __init__.py staat, bijvoorbeeld:
+# Zorg dat cache in __init__.py staat, bijvoorbeeld:
 # cache = Cache(config={'CACHE_TYPE': 'simple'})
 # cache.init_app(app)
 
