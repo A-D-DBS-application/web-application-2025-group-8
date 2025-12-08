@@ -3,74 +3,89 @@
 {% block content %}
 <!-- HERO -->
 <section class="hero">
-  <h1 class="hero-title">Verkozenen</h1>
+  <h1 class="hero-title">Volksvertegenwoordigers</h1>
   <p class="hero-subtitle">
-    Overzicht van alle volksvertegenwoordigers en ministers met hun fractie, functie, kieskring en leeftijd.
+    Overzicht van alle volksvertegenwoordigers met hun fractie, functie, kieskring en leeftijd.
   </p>
 </section>
 
 <!-- TABEL -->
 <section class="table-section">
   <div class="table-container">
-    <table id="vvTable">
+    <table>
       <thead>
         <tr>
-          <th onclick="sortTable(0)">Naam ⬍</th>
-          <th onclick="sortTable(1)">Leeftijd ⬍</th>
-          <th onclick="sortTable(2)">Fractie ⬍</th>
-          <th onclick="sortTable(3)">Kieskring ⬍</th>
-          <th onclick="sortTable(4)">Functie ⬍</th>
+          {% set kolommen = [
+            ('naam', 'Naam'),
+            ('leeftijd', 'Leeftijd'),
+            ('fractie', 'Fractie'),
+            ('kieskring', 'Kieskring'),
+            ('functie', 'Functie')
+          ] %}
+
+          {% for k, label in kolommen %}
+          <th>
+            <a href="{{ url_for('main.volksvertegenwoordigers', kolom=k, sort='asc' if sort == 'desc' or kolom != k else 'desc') }}"
+               class="sortable">
+              {{ label }}
+              <span class="sort-icons">
+                {% if kolom == k %}
+                  {% if sort == 'asc' %}
+                    <span class="arrow active">↑</span><span class="arrow inactive">↓</span>
+                  {% else %}
+                    <span class="arrow inactive">↑</span><span class="arrow active">↓</span>
+                  {% endif %}
+                {% else %}
+                  <span class="arrow inactive">↑</span><span class="arrow inactive">↓</span>
+                {% endif %}
+              </span>
+            </a>
+          </th>
+          {% endfor %}
         </tr>
       </thead>
+
       <tbody>
         {% if volksvertegenwoordigers %}
           {% for persoon in volksvertegenwoordigers %}
           <tr>
-            <td>
-              <a href="{{ url_for('main.vv_vragen', vv_id=persoon.id) }}">
-                {{ persoon.naam }}
-              </a>
-            </td>
-            <td>{{ persoon.leeftijd }}</td>
+            <td><a href="{{ url_for('main.vv_vragen', vv_id=persoon.id) }}">{{ persoon.naam }}</a></td>
+            <td>{{ persoon.leeftijd or '-' }}</td>
             <td>{{ persoon.fractie }}</td>
             <td>{{ persoon.kieskring }}</td>
             <td>{{ persoon.functie }}</td>
           </tr>
           {% endfor %}
         {% else %}
-          <tr>
-            <td colspan="5" class="geen-data">
-              Er zijn momenteel geen volksvertegenwoordigers beschikbaar.
-            </td>
-          </tr>
+          <tr><td colspan="5" class="geen-data">Er zijn momenteel geen volksvertegenwoordigers beschikbaar.</td></tr>
         {% endif %}
       </tbody>
     </table>
   </div>
 </section>
 
-<!-- SORT SCRIPT -->
-<script>
-let sortDirection = [true, true, true, true, true];
-
-function sortTable(columnIndex) {
-  const table = document.getElementById("vvTable");
-  const rows = Array.from(table.rows).slice(1);
-  const dir = sortDirection[columnIndex] ? 1 : -1;
-
-  rows.sort((a, b) => {
-    const A = a.cells[columnIndex].innerText.trim().toLowerCase();
-    const B = b.cells[columnIndex].innerText.trim().toLowerCase();
-
-    // speciale sortering voor cijfers (zoals leeftijd)
-    if (!isNaN(A) && !isNaN(B)) {
-      return (parseInt(A) - parseInt(B)) * dir;
-    }
-    return A.localeCompare(B) * dir;
-  });
-
-  rows.forEach(row => table.tBodies[0].appendChild(row));
-  sortDirection[columnIndex] = !sortDirection[columnIndex];
+<!-- STYLE -->
+<style>
+.sortable {
+  text-decoration: none;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
-</script>
+.sort-icons {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 0.9;
+  font-size: 0.8rem;
+}
+.arrow {
+  opacity: 0.3;
+  font-weight: bold;
+}
+.arrow.active {
+  opacity: 1;
+  color: #2563eb; /* blauwe highlight voor actieve sortering */
+}
+</style>
 {% endblock %}

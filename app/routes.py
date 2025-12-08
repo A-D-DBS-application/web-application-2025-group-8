@@ -220,66 +220,68 @@ def statistieken_fractie_data(fractie_id, thema_id):
 
 
 @main.route("/statistieken/personen")
-@cache.cached(timeout=1800)  # 30 minuten cachen
 def statistieken_personen():
-    # 1. Haal alle volksvertegenwoordigers (niet-ministers)
-    personen = (
-        db.session.query(Persoon)
-        .join(Persoonfunctie, Persoonfunctie.id_prs == Persoon.id)
-        .join(Functies, Persoonfunctie.id_fnc == Functies.id)
-        .filter(~func.lower(Functies.naam).like("%minister%"))
-        .distinct()
-        .all()
-    )
+    sort = request.args.get("sort", "asc")
 
-    resultaat = []
-    referentie_ids = [p.id for p in personen]
-    if not referentie_ids:
-        return render_template("statistieken_personen.html", data=[])
-
-    # 2. Haal alle thema’s en vragen ineens op via één join-query
-    thema_data = (
+    # Haal in één keer alle niet-minister functies met personen en thema’s op
+    data = (
         db.session.query(
-            Persoon.id.label("persoon_id"),
-            Thema.naam.label("thema_naam"),
-            func.count(ThemaKoppeling.id).label("thema_count"),
+            Persoon.id,
+            Persoon.voornaam,
+            Persoon.naam,
+            Thema.naam.label("thema"),
+            func.count(SchriftelijkeVragen.id).label("aantal"),
             func.max(SchriftelijkeVragen.ingediend).label("laatste_vraag")
         )
         .join(Persoonfunctie, Persoonfunctie.id_prs == Persoon.id)
-        .join(SchriftelijkeVragen, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
-        .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
-        .join(Thema, Thema.id == ThemaKoppeling.id_thm)
-        .filter(Persoon.id.in_(referentie_ids))
-        .group_by(Persoon.id, Thema.naam)
+        .join(Functies, Persoonfunctie.id_fnc == Functies.id)
+        .outerjoin(SchriftelijkeVragen, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
+        .outerjoin(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
+        .outerjoin(Thema, Thema.id == ThemaKoppeling.id_thm)
+        .filter(~func.lower(Functies.naam).like("%minister%"))
+        .group_by(Persoon.id, Persoon.voornaam, Persoon.naam, Thema.naam)
         .all()
     )
 
-    # 3. Bundel resultaten per persoon
-    from collections import defaultdict
-    per_persoon = defaultdict(list)
-    laatste_vraag_dict = {}
+    # Groepeer resultaten per persoon
+    personen_dict = {}
+    for r in data:
+        if r.id not in personen_dict:
+            personen_dict[r.id] = {
+                "naam": f"{r.voornaam} {r.naam}",
+                "themas": {},
+                "laatste_vraag": r.laatste_vraag
+            }
+        if r.thema:
+            personen_dict[r.id]["themas"][r.thema] = personen_dict[r.id]["themas"].get(r.thema, 0) + r.aantal
+        if r.laatste_vraag and (
+            not personen_dict[r.id]["laatste_vraag"]
+            or r.laatste_vraag > personen_dict[r.id]["laatste_vraag"]
+        ):
+            personen_dict[r.id]["laatste_vraag"] = r.laatste_vraag
 
-    for row in thema_data:
-        per_persoon[row.persoon_id].append((row.thema_naam, row.thema_count))
-        if row.persoon_id not in laatste_vraag_dict or row.laatste_vraag > laatste_vraag_dict[row.persoon_id]:
-            laatste_vraag_dict[row.persoon_id] = row.laatste_vraag
-
-    # 4. Samenvatten voor de template
-    for p in personen:
-        thema_list = sorted(per_persoon[p.id], key=lambda x: x[1], reverse=True)
-        top3 = thema_list[:3]
+    # Bepaal top 3 thema’s
+    resultaat = []
+    for persoon_id, info in personen_dict.items():
+        the_dict = info["themas"]
+        top3 = sorted(the_dict.items(), key=lambda x: x[1], reverse=True)[:3]
         resultaat.append({
-            "naam": f"{p.voornaam} {p.naam}",
+            "naam": info["naam"],
             "populair": top3[0][0] if len(top3) >= 1 else None,
             "pop_count": top3[0][1] if len(top3) >= 1 else 0,
             "tweede": top3[1][0] if len(top3) >= 2 else None,
             "tweede_count": top3[1][1] if len(top3) >= 2 else 0,
             "derde": top3[2][0] if len(top3) >= 3 else None,
             "derde_count": top3[2][1] if len(top3) >= 3 else 0,
-            "laatste_vraag": laatste_vraag_dict.get(p.id)
+            "laatste_vraag": info["laatste_vraag"].strftime("%Y-%m-%d") if info["laatste_vraag"] else "-"
         })
 
-    return render_template("statistieken_personen.html", data=resultaat)
+    # Sorteren op naam
+    resultaat.sort(key=lambda x: x["naam"].lower(), reverse=(sort == "desc"))
+
+    return render_template("statistieken_personen.html", data=resultaat, sort=sort)
+
+
 
 
 # --- ACTIEFSTE VOLKSVERTEGENWOORDIGERS PER THEMA & KIESKRING ---
@@ -470,10 +472,15 @@ def statistieken_priority():
 
 
 
-
+# --- VOLKSVERTEGENWOORDIGERS MET PYTHON-SORTERING ---
 @main.route('/volksvertegenwoordigers')
 def volksvertegenwoordigers():
+    # Sorteervolgorde (asc of desc) en kolom via queryparameters
+    sort = request.args.get("sort", "asc")
+    kolom = request.args.get("kolom", "naam")  # standaard op naam
+
     try:
+        # Query: haal alle gegevens in één keer op
         rows = (
             db.session.query(
                 Persoon.id,
@@ -487,10 +494,10 @@ def volksvertegenwoordigers():
             .join(Persoonfunctie, Persoonfunctie.id_prs == Persoon.id)
             .join(Fractie, Fractie.id == Persoonfunctie.id_frc, isouter=True)
             .join(Functies, Functies.id == Persoonfunctie.id_fnc, isouter=True)
-            .order_by(Persoon.naam)
             .all()
         )
 
+        # Leeftijd berekenen
         def bereken_leeftijd(geboortedatum):
             if geboortedatum:
                 vandaag = date.today()
@@ -499,8 +506,9 @@ def volksvertegenwoordigers():
                     ((vandaag.month, vandaag.day) < (geboortedatum.month, geboortedatum.day))
                 )
                 return leeftijd
-            return "-"
+            return None
 
+        # Structureren
         data = [
             {
                 "id": r.id,
@@ -513,10 +521,16 @@ def volksvertegenwoordigers():
             for r in rows
         ]
 
+        # Sorteren in Python (A–Z of Z–A op gekozen kolom)
+        reverse = sort == "desc"
+        data.sort(key=lambda x: (x[kolom] or "").lower() if isinstance(x[kolom], str) else (x[kolom] or 0), reverse=reverse)
+
     except OperationalError:
         data = []
 
-    return render_template("volksvertegenwoordigers.html", volksvertegenwoordigers=data)
+    # Doorsturen naar template
+    return render_template("volksvertegenwoordigers.html", volksvertegenwoordigers=data, sort=sort, kolom=kolom)
+
 
 
 from uuid import UUID as UUIDType
