@@ -9,7 +9,21 @@
   </p>
 </section>
 
-<!-- INFO -->
+<!-- INFO OVERZICHT (alleen voor detail-pagina's) -->
+{% if vv_name is defined and vraag_count is defined %}
+<section class="vragen-count-section">
+  <div class="vragen-count-container">
+    <h2 class="vragen-count-title">
+      {% if vv_type == 'minister' %}
+        <strong>{{ vv_name }}</strong> heeft <strong>{{ vraag_count }}</strong> schriftelijke vragen beantwoord
+      {% else %}
+        <strong>{{ vv_name }}</strong> heeft <strong>{{ vraag_count }}</strong> schriftelijke vragen gesteld
+      {% endif %}
+    </h2>
+  </div>
+</section>
+{% else %}
+<!-- INFO SECTIE (voor algemene pagina) -->
 <section class="info-section">
   <div class="info-container">
     <h2>Over dit overzicht</h2>
@@ -19,6 +33,7 @@
     </p>
   </div>
 </section>
+{% endif %}
 
 <!-- TABEL -->
 <section class="table-section">
