@@ -7,9 +7,22 @@
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background-color: #f6f8fa;
   color: #111;
   line-height: 1.6;
+
+  /* --- AANPASSING START: Gele balk naar boven getrokken --- */
+  /* De gele achtergrond staat nu op de body, zodat hij achter de knoppen doorloopt */
+  background-color: #f6f8fa; /* De grijze kleur voor de rest van de pagina */
+  background-image: linear-gradient(135deg, #FFD000, #E5BE00);
+  background-repeat: no-repeat;
+  background-size: 100% 350px; /* Hoogte van het gele vlak: past achter nav + hero */
+  /* --- AANPASSING EINDE --- */
+}
+
+/* Zorg dat de navigatiebalk transparant is (anders blijft hij wit) */
+.navbar, .bg-light {
+  background-color: transparent !important;
+  box-shadow: none !important;
 }
 
 .page-container {
@@ -18,10 +31,11 @@ body {
 
 /* ========== HERO ========== */
 .hero {
-  background: linear-gradient(135deg, #FFD000, #E5BE00);
+  /* background: ...  <-- VERWIJDERD, want de kleur zit nu op de body */
+  background: transparent;
   color: #222;
   text-align: center;
-  padding: 5rem 1rem;
+  padding: 2rem 1rem;
   word-wrap: break-word;
   overflow-wrap: break-word;
   max-width: 100%;
