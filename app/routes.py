@@ -626,7 +626,19 @@ def vv_vragen(vv_id):
                 "link": link
             })
         
-        return render_template("schriftelijke_vragen.html", vragen=data, title=title)
+        # Bepaal het type (minister of volksvertegenwoordiger) voor de info-sectie
+        vv_type = "minister" if is_minister else "volksvertegenwoordiger"
+        vv_name = f"{persoon.voornaam} {persoon.naam}"
+        vraag_count = len(data)
+        
+        return render_template(
+            "schriftelijke_vragen.html",
+            vragen=data,
+            title=title,
+            vv_type=vv_type,
+            vv_name=vv_name,
+            vraag_count=vraag_count
+        )
         
     except OperationalError as e:
         print("❌ Databasefout:", e)
