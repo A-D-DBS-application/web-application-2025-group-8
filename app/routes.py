@@ -881,7 +881,6 @@ def grafieken():
 # --- DATA VOOR GRAFIEK PER THEMA ---
 @main.route("/grafieken/data/<uuid:thema_id>")
 def grafieken_data(thema_id):
-    """Levert JSON met evolutie van vragen per maand voor gekozen thema."""
     eind_datum = date.today()
     begin_datum = eind_datum - relativedelta(months=12)
 

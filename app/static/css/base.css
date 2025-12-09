@@ -19,6 +19,12 @@ body {
   /* --- AANPASSING EINDE --- */
 }
 
+/*Mobiel: meer hoogte voor gele achtergrond */
+@media (max-width: 768px) {
+  body {
+    background-size: 100% 480px; /* verhoog de hoogte van het gele vlak */
+  }
+}
 /* Zorg dat de navigatiebalk transparant is (anders blijft hij wit) */
 .navbar, .bg-light {
   background-color: transparent !important;
@@ -847,3 +853,12 @@ th.sortable::after {
     width: 100%;
   }
 }
+
+
+/* Alleen op mobiel: gele achtergrond op grafiekenpagina iets lager */
+@media (max-width: 768px) {
+  body.page-grafieken {
+    background-size: 100% 300px !important;
+  }
+}
+
