@@ -166,57 +166,65 @@ def statistieken_thema_netwerk():
 
 
 # --- STATISTIEKEN PER FRACTIE ---
-@main.route('/statistieken/fractie')
+@main.route('/statistieken/fractie', methods=['GET'])
 def statistieken_fractie():
-    """Toont dropdowns om fractie en thema te kiezen."""
-    from app.models import Fractie, Thema
+    from app.models import Fractie, Thema, Persoonfunctie
+
+    # dropdowndata
     fracties = db.session.query(Fractie).order_by(Fractie.naam.asc()).all()
     themas = db.session.query(Thema).order_by(Thema.naam.asc()).all()
-    return render_template('statistieken_fracties.html', fracties=fracties, themas=themas)
 
+    fractie_id = request.args.get("fractie")
+    thema_id = request.args.get("thema")
 
-@main.route("/statistieken/fractie/data/<uuid:fractie_id>/<uuid:thema_id>")
-def statistieken_fractie_data(fractie_id, thema_id):
-    """Geeft statistieken over 1 fractie en 1 thema."""
-    from app.models import Persoonfunctie  # om circular import te vermijden
+    resultaat = None
 
-    # Totaal aantal vragen van de fractie
-    totaal_vragen_fractie = (
-        db.session.query(SchriftelijkeVragen)
-        .join(Persoonfunctie, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
-        .filter(Persoonfunctie.id_frc == fractie_id)
-        .count()
+    if fractie_id and thema_id:
+        # totaal aantal vragen van deze fractie
+        totaal_vragen_fractie = (
+            db.session.query(SchriftelijkeVragen)
+            .join(Persoonfunctie, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
+            .filter(Persoonfunctie.id_frc == fractie_id)
+            .count()
+        )
+
+        # aantal vragen van fractie over dit thema
+        thema_vragen_fractie = (
+            db.session.query(SchriftelijkeVragen)
+            .join(Persoonfunctie, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
+            .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
+            .filter(Persoonfunctie.id_frc == fractie_id)
+            .filter(ThemaKoppeling.id_thm == thema_id)
+            .count()
+        )
+
+        # totaal aantal vragen over dit thema (alle fracties)
+        totaal_vragen_thema = (
+            db.session.query(SchriftelijkeVragen)
+            .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
+            .filter(ThemaKoppeling.id_thm == thema_id)
+            .count()
+        )
+
+        perc_van_fractie = round((thema_vragen_fractie / totaal_vragen_fractie) * 100, 2) if totaal_vragen_fractie else 0
+        perc_van_thema = round((thema_vragen_fractie / totaal_vragen_thema) * 100, 2) if totaal_vragen_thema else 0
+
+        resultaat = {
+            "totaal_vragen_fractie": totaal_vragen_fractie,
+            "thema_vragen_fractie": thema_vragen_fractie,
+            "totaal_vragen_thema": totaal_vragen_thema,
+            "perc_van_fractie": perc_van_fractie,
+            "perc_van_thema": perc_van_thema
+        }
+
+    return render_template(
+        "statistieken_fracties.html",
+        fracties=fracties,
+        themas=themas,
+        fractie_id=fractie_id,
+        thema_id=thema_id,
+        resultaat=resultaat
     )
-
-    # Aantal vragen van deze fractie over dit thema
-    thema_vragen_fractie = (
-        db.session.query(SchriftelijkeVragen)
-        .join(Persoonfunctie, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
-        .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
-        .filter(Persoonfunctie.id_frc == fractie_id)
-        .filter(ThemaKoppeling.id_thm == thema_id)
-        .count()
-    )
-
-    # Totaal aantal vragen over dit thema (alle fracties samen)
-    totaal_vragen_thema = (
-        db.session.query(SchriftelijkeVragen)
-        .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
-        .filter(ThemaKoppeling.id_thm == thema_id)
-        .count()
-    )
-
-    # Berekeningen
-    perc_van_fractie = round((thema_vragen_fractie / totaal_vragen_fractie) * 100, 2) if totaal_vragen_fractie else 0
-    perc_van_thema = round((thema_vragen_fractie / totaal_vragen_thema) * 100, 2) if totaal_vragen_thema else 0
-
-    return jsonify({
-        "totaal_vragen_fractie": totaal_vragen_fractie,
-        "thema_vragen_fractie": thema_vragen_fractie,
-        "perc_van_fractie": perc_van_fractie,
-        "totaal_vragen_thema": totaal_vragen_thema,
-        "perc_van_thema": perc_van_thema
-    })
 
 
 @main.route("/statistieken/personen")

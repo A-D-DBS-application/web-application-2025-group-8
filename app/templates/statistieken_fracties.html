@@ -5,82 +5,65 @@
 <section class="hero">
   <h1 class="hero-title">Statistieken per Fractie</h1>
   <p class="hero-subtitle">
-    Bekijk hoeveel vragen een fractie stelde over een bepaald thema, in verhouding tot hun totale activiteit én tot het totale aantal vragen binnen dat thema.
+    Bekijk hoeveel vragen een fractie stelde over een bepaald thema, 
+    vergeleken met haar totale activiteit én met het totale aantal vragen binnen dat thema.
   </p>
 </section>
 
-<!-- SELECTIESECTIE -->
-<section class="table-section">
-  <div class="table-container" style="text-align:center;">
-
-    <!-- Filters -->
-    <div class="filters-form" style="justify-content:center;">
+<!-- FORMULIER -->
+<section class="info-section">
+  <div class="info-container" style="max-width:950px; margin:auto;">
+    <form method="get" action="{{ url_for('main.statistieken_fractie') }}" class="filters-form" style="margin-top:1.5rem;">
       <div class="filter-field">
-        <label for="fractieSelect">Kies een fractie</label>
-        <select id="fractieSelect">
+        <label for="fractie">Kies een fractie</label>
+        <select name="fractie" id="fractie">
           <option value="">-- Selecteer fractie --</option>
           {% for f in fracties %}
-            <option value="{{ f.id }}">{{ f.naam }}</option>
+            <option value="{{ f.id }}" {% if fractie_id == f.id|string %}selected{% endif %}>{{ f.naam }}</option>
           {% endfor %}
         </select>
       </div>
 
       <div class="filter-field">
-        <label for="themaSelect">Kies een thema</label>
-        <select id="themaSelect">
+        <label for="thema">Kies een thema</label>
+        <select name="thema" id="thema">
           <option value="">-- Selecteer thema --</option>
           {% for t in themas %}
-            <option value="{{ t.id }}">{{ t.naam }}</option>
+            <option value="{{ t.id }}" {% if thema_id == t.id|string %}selected{% endif %}>{{ t.naam }}</option>
           {% endfor %}
         </select>
       </div>
 
       <div class="filter-field filter-field-button">
-        <button id="toonBtn" class="btn">Toon statistieken</button>
+        <button type="submit" class="btn">Toon statistieken</button>
       </div>
-    </div>
-
-    <!-- Resultaat -->
-    <div id="resultaat" style="max-width:700px; margin:2rem auto; text-align:left;"></div>
-
+    </form>
   </div>
 </section>
 
-<!-- SCRIPT -->
-<script>
-document.getElementById("toonBtn").addEventListener("click", async () => {
-  const fractieId = document.getElementById("fractieSelect").value;
-  const themaId = document.getElementById("themaSelect").value;
+<!-- RESULTATEN IN KAARTVORM -->
+{% if resultaat %}
+<section class="table-section" style="text-align:center;">
+  <h2 style="font-size:1.5rem; margin-bottom:2rem;">Resultaten</h2>
 
-  if (!fractieId || !themaId) {
-    alert("Selecteer zowel een fractie als een thema.");
-    return;
-  }
+  <div style="display:flex; justify-content:center; flex-wrap:wrap; gap:2rem;">
 
-  const resp = await fetch(`/statistieken/fractie/data/${fractieId}/${themaId}`);
-  const data = await resp.json();
-
-  document.getElementById("resultaat").innerHTML = `
-    <div class="result-card">
-      <h3 class="section-title" style="font-size:1.3rem; margin-bottom:1rem;">Resultaten</h3>
-      <div style="display:flex; flex-wrap:wrap; gap:1.5rem;">
-        
-        <div class="result-block" style="flex:1; min-width:280px;">
-          <h4>Deze fractie</h4>
-          <p><strong>Aantal vragen over dit thema:</strong> ${data.thema_vragen_fractie}</p>
-          <p><strong>% van totale vragen fractie:</strong> ${data.perc_van_fractie}%</p>
-        </div>
-
-        <div class="result-block" style="flex:1; min-width:280px;">
-          <h4>Alle fracties</h4>
-          <p><strong>Totaal aantal vragen in dit thema:</strong> ${data.totaal_vragen_thema}</p>
-          <p><strong>% van alle themavragen:</strong> ${data.perc_van_thema}%</p>
-        </div>
-
-      </div>
+    <!-- Blok 1: Deze fractie -->
+    <div style="flex:1; min-width:280px; max-width:400px; background:#f9fafb; border-radius:12px; padding:1.5rem; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+      <h3 style="text-transform:uppercase; font-size:0.9rem; letter-spacing:0.05em; color:#6b7280;">Deze fractie</h3>
+      <p style="margin-top:1rem;"><strong>Aantal vragen over dit thema:</strong> {{ resultaat.thema_vragen_fractie }}</p>
+      <p><strong>% van totale vragen fractie:</strong> {{ resultaat.perc_van_fractie }}%</p>
     </div>
-  `;
-});
-</script>
+
+    <!-- Blok 2: Alle fracties -->
+    <div style="flex:1; min-width:280px; max-width:400px; background:#f9fafb; border-radius:12px; padding:1.5rem; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+      <h3 style="text-transform:uppercase; font-size:0.9rem; letter-spacing:0.05em; color:#6b7280;">Alle fracties</h3>
+      <p style="margin-top:1rem;"><strong>Totaal aantal vragen in dit thema:</strong> {{ resultaat.totaal_vragen_thema }}</p>
+      <p><strong>% van alle themavragen:</strong> {{ resultaat.perc_van_thema }}%</p>
+    </div>
+
+  </div>
+</section>
+{% endif %}
 
 {% endblock %}
