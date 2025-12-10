@@ -12,15 +12,15 @@
 <!-- ZOEKVELD -->
 <section class="info-section">
   <div class="info-container">
-    <form method="POST" class="filters-form" style="justify-content:center;">
-      <div class="filter-field" style="min-width:300px;">
+    <form method="POST" class="filters-form filters-form-centered">
+      <div class="filter-field filter-field-wide">
         <input 
           type="text" 
           name="trefwoord" 
           value="{{ trefwoord }}" 
           placeholder="Bijv. PFAS, onderwijs, mobiliteit..." 
           required
-          style="padding:0.6rem 1rem; border:1px solid #ccc; border-radius:6px; width:100%;"
+          class="search-input"
         >
       </div>
       <div class="filter-field-button">
@@ -50,8 +50,8 @@
           <td>{{ v.onderwerp }}</td>
           <td>{{ v.indiener }}</td>
           <td>{{ v.fractie }}</td>
-          <td>{{ v.datum }}</td>
-          <td>
+          <td class="td-center">{{ v.datum }}</td>
+          <td class="td-center">
             {% if v.link %}
               <a href="{{ v.link }}" target="_blank" class="pdf-link">Bekijk</a>
             {% else %}
@@ -66,7 +66,9 @@
 </section>
 
 {% elif trefwoord %}
-<p class="geen-data">Geen resultaten gevonden voor dit trefwoord.</p>
+<section class="table-section">
+  <p class="geen-data">Geen resultaten gevonden voor dit trefwoord.</p>
+</section>
 {% endif %}
 
 {% endblock %}

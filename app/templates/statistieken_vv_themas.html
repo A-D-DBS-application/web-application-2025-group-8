@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-
 {% block content %}
 
 <!-- HERO -->
@@ -16,21 +15,40 @@
     <table>
       <thead>
         <tr>
-          <!-- Klikbare kolomkop voor sorteren op naam -->
-          <th>
-            <a href="{{ url_for('main.statistieken_vv_themas', sort='asc' if sort == 'desc' else 'desc') }}"
-                style="text-decoration:none; color:inherit;">
-              Naam {% if sort == 'asc' %}⬆{% else %}⬇{% endif %}
-            </a>
+          {% set kolommen = [
+            ('naam', 'Naam'),
+            ('populair', 'Populairst Thema'),
+            ('pop_count', 'Aantal Vragen'),
+            ('tweede', '2e Thema'),
+            ('tweede_count', 'Aantal'),
+            ('derde', '3e Thema'),
+            ('derde_count', 'Aantal'),
+            ('laatste_vraag', 'Laatste Vraag')
+          ] %}
 
+          {% for k, label in kolommen %}
+          <th>
+            {% if k == 'naam' %}
+            <a href="{{ url_for('main.statistieken_vv_themas', kolom=k, sort='asc' if sort == 'desc' or kolom != k else 'desc') }}"
+               class="sortable">
+              {{ label }}
+              <span class="sort-icons">
+                {% if kolom == k %}
+                  {% if sort == 'asc' %}
+                    <span class="arrow active">↑</span><span class="arrow inactive">↓</span>
+                  {% else %}
+                    <span class="arrow inactive">↑</span><span class="arrow active">↓</span>
+                  {% endif %}
+                {% else %}
+                  <span class="arrow inactive">↑</span><span class="arrow inactive">↓</span>
+                {% endif %}
+              </span>
+            </a>
+            {% else %}
+              {{ label }}
+            {% endif %}
           </th>
-          <th>Populairst Thema</th>
-          <th>Aantal Vragen</th>
-          <th>2e Thema</th>
-          <th>Aantal</th>
-          <th>3e Thema</th>
-          <th>Aantal</th>
-          <th>Laatste Vraag</th>
+          {% endfor %}
         </tr>
       </thead>
 

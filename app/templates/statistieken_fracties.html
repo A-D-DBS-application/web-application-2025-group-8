@@ -12,8 +12,8 @@
 
 <!-- FORMULIER -->
 <section class="info-section">
-  <div class="info-container" style="max-width:950px; margin:auto;">
-    <form method="get" action="{{ url_for('main.statistieken_fractie') }}" class="filters-form" style="margin-top:1.5rem;">
+  <div class="info-container fractie-form-container">
+    <form method="get" action="{{ url_for('main.statistieken_fractie') }}" class="filters-form fractie-form">
       <div class="filter-field">
         <label for="fractie">Kies een fractie</label>
         <select name="fractie" id="fractie">
@@ -41,24 +41,25 @@
   </div>
 </section>
 
-<!-- RESULTATEN IN KAARTVORM -->
+<!-- RESULTATEN -->
 {% if resultaat %}
-<section class="table-section" style="text-align:center;">
-  <h2 style="font-size:1.5rem; margin-bottom:2rem;">Resultaten</h2>
+<section class="table-section fractie-result-section">
+  <h2 class="section-title small">Resultaten</h2>
 
-  <div style="display:flex; justify-content:center; flex-wrap:wrap; gap:2rem;">
+  <div class="fractie-result-grid">
 
-    <!-- Blok 1: Deze fractie -->
-    <div style="flex:1; min-width:280px; max-width:400px; background:#f9fafb; border-radius:12px; padding:1.5rem; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
-      <h3 style="text-transform:uppercase; font-size:0.9rem; letter-spacing:0.05em; color:#6b7280;">Deze fractie</h3>
-      <p style="margin-top:1rem;"><strong>Aantal vragen over dit thema:</strong> {{ resultaat.thema_vragen_fractie }}</p>
+    <!-- Blok 1 -->
+    <div class="fractie-stat-card">
+      <h3>Deze fractie</h3>
+      <p><strong>Aantal vragen over dit thema:</strong> {{ resultaat.thema_vragen_fractie }}</p>
       <p><strong>% van totale vragen fractie:</strong> {{ resultaat.perc_van_fractie }}%</p>
     </div>
 
-    <!-- Blok 2: Alle fracties -->
-    <div style="flex:1; min-width:280px; max-width:400px; background:#f9fafb; border-radius:12px; padding:1.5rem; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
-      <h3 style="text-transform:uppercase; font-size:0.9rem; letter-spacing:0.05em; color:#6b7280;">Alle fracties</h3>
-      <p style="margin-top:1rem;"><strong>Totaal aantal vragen in dit thema:</strong> {{ resultaat.totaal_vragen_thema }}</p>
+    <!-- Blok 2 -->
+    <div class="fractie-stat-card">
+
+      <h3>Alle fracties</h3>
+      <p><strong>Totaal aantal vragen in dit thema:</strong> {{ resultaat.totaal_vragen_thema }}</p>
       <p><strong>% van alle themavragen:</strong> {{ resultaat.perc_van_thema }}%</p>
     </div>
 

@@ -230,6 +230,7 @@ def statistieken_fractie():
 @main.route("/statistieken/vv/themas")
 def statistieken_vv_themas():
     sort = request.args.get("sort", "asc")
+    kolom = request.args.get("kolom", "naam")  
 
     # Haal in één keer alle niet-minister functies met personen en thema’s op
     data = (
@@ -284,10 +285,23 @@ def statistieken_vv_themas():
             "laatste_vraag": info["laatste_vraag"].strftime("%Y-%m-%d") if info["laatste_vraag"] else "-"
         })
 
-    # Sorteren op naam
-    resultaat.sort(key=lambda x: x["naam"].lower(), reverse=(sort == "desc"))
+    # ✅ Dynamisch sorteren op kolom + richting
+    reverse = sort == "desc"
+    try:
+        resultaat.sort(
+            key=lambda x: (x[kolom] or "").lower() if isinstance(x[kolom], str) else (x[kolom] or 0),
+            reverse=reverse
+        )
+    except KeyError:
+        # fallback als kolom niet bestaat
+        resultaat.sort(key=lambda x: x["naam"].lower(), reverse=reverse)
 
-    return render_template("statistieken_vv_themas.html", data=resultaat, sort=sort)
+    return render_template(
+        "statistieken_vv_themas.html",
+        data=resultaat,
+        sort=sort,
+        kolom=kolom
+    )
 
 
 

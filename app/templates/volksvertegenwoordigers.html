@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-
 {% block content %}
+
 <!-- HERO -->
 <section class="hero">
   <h1 class="hero-title">Volksvertegenwoordigers</h1>
@@ -31,12 +31,15 @@
               <span class="sort-icons">
                 {% if kolom == k %}
                   {% if sort == 'asc' %}
-                    <span class="arrow active">↑</span><span class="arrow inactive">↓</span>
+                    <span class="arrow active">↑</span>
+                    <span class="arrow inactive">↓</span>
                   {% else %}
-                    <span class="arrow inactive">↑</span><span class="arrow active">↓</span>
+                    <span class="arrow inactive">↑</span>
+                    <span class="arrow active">↓</span>
                   {% endif %}
                 {% else %}
-                  <span class="arrow inactive">↑</span><span class="arrow inactive">↓</span>
+                  <span class="arrow inactive">↑</span>
+                  <span class="arrow inactive">↓</span>
                 {% endif %}
               </span>
             </a>
@@ -57,35 +60,15 @@
           </tr>
           {% endfor %}
         {% else %}
-          <tr><td colspan="5" class="geen-data">Er zijn momenteel geen volksvertegenwoordigers beschikbaar.</td></tr>
+          <tr>
+            <td colspan="5" class="geen-data">
+              Er zijn momenteel geen volksvertegenwoordigers beschikbaar.
+            </td>
+          </tr>
         {% endif %}
       </tbody>
     </table>
   </div>
 </section>
 
-<!-- STYLE -->
-<style>
-.sortable {
-  text-decoration: none;
-  color: inherit;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-.sort-icons {
-  display: inline-flex;
-  flex-direction: column;
-  line-height: 0.9;
-  font-size: 0.8rem;
-}
-.arrow {
-  opacity: 0.3;
-  font-weight: bold;
-}
-.arrow.active {
-  opacity: 1;
-  color: #2563eb; /* blauwe highlight voor actieve sortering */
-}
-</style>
 {% endblock %}
