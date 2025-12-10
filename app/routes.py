@@ -14,7 +14,7 @@ main = Blueprint('main', __name__)
 @main.route('/')
 def index():
     try:
-        # Statistieken
+        # Statistieken (haalt op uit database), count functie want we willen aantallen
         aantal_vragen = db.session.query(func.count(SchriftelijkeVragen.id)).scalar() or 0
         aantal_themas = db.session.query(func.count(Thema.id)).scalar() or 0
         aantal_personen = db.session.query(func.count(Persoon.id)).scalar() or 0
@@ -26,7 +26,7 @@ def index():
             or 0
         )
 
-        # Recentste vragen
+        # Recentste vragen: haalt 5 recentste vragen op
         vragen = (
             db.session.query(SchriftelijkeVragen)
             .order_by(SchriftelijkeVragen.ingediend.desc())
@@ -40,7 +40,7 @@ def index():
 
         # Fracties
         fracties_data = Fractie.query.all()
-        fracties = [{'naam': f.naam, 'zetels': 0} for f in fracties_data]
+        fracties = [{'naam': f.naam, 'zetels': 0} for f in fracties_data] #maak ook lijst van fracties 
 
     except OperationalError:
         # Database niet bereikbaar → geen crash, maar lege data
@@ -58,7 +58,7 @@ def index():
         {'label': 'Actieve Thema’s', 'value': aantal_themas, 'icon': 'tag'},
         {'label': 'Volksvertegenwoordigers', 'value': aantal_personen, 'icon': 'users'},
         {'label': 'Beantwoorde Vragen', 'value': f"{aantal_beantwoord}/{aantal_vragen}" if aantal_vragen else "0", 'icon': 'trending-up'},
-    ]
+    ] #lijst van 4 dictionaries
 
     return render_template(
         'index.html',
@@ -70,9 +70,9 @@ def index():
 
 
 # --- OVERZICHTPAGINA STATISTIEKEN ---
-@main.route('/statistieken')
-def statistieken_overzicht():
-    return render_template('statistieken_overzicht.html')
+@main.route('/statistieken') #'zegt' als iem naar statistieken pagina gaat
+def statistieken_overzicht(): #voer deze functie uit
+    return render_template('statistieken_overzicht.html') #geef deze pagina terug
 
 # --- STATISTIEKEN PER THEMA ---
 
@@ -90,47 +90,47 @@ def statistieken_thema_beantwoordtijd():
     """Bereken gemiddelde beantwoordingstijd (in dagen) per thema."""
     data = (
         db.session.query(
-            Thema.naam,
+            Thema.naam, #haal kolom naam ut tabel thema
             SchriftelijkeVragen.ingediend,
             SchriftelijkeVragen.beantwoord
         )
-        .join(ThemaKoppeling, ThemaKoppeling.id_thm == Thema.id)
-        .join(SchriftelijkeVragen, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
-        .filter(SchriftelijkeVragen.ingediend.isnot(None))
-        .filter(SchriftelijkeVragen.beantwoord.isnot(None))
-        .all()
-    )
+        .join(ThemaKoppeling, ThemaKoppeling.id_thm == Thema.id) #verbind thema  met themakoppeling via thema id
+        .join(SchriftelijkeVragen, ThemaKoppeling.id_schv == SchriftelijkeVragen.id) #verbind themakoppeling met schriftelijke vragen via vraag id
+        .filter(SchriftelijkeVragen.ingediend.isnot(None)) #weggooien van vragen zonder ingediend-datum (als dat een woord is)
+        .filter(SchriftelijkeVragen.beantwoord.isnot(None)) #alleen vragen die beantwoord zijn
+        .all() #all=verzamel alles dat hieraan voldoet
+    ) #we hebben 3 tabellen thema, themakoppeling en schriftelijke vragen
 
     resultaten = {}
-    for naam, ingediend, beantwoord in data:
+    for naam, ingediend, beantwoord in data: #loop door alle vragen
         try:
-            # Zorg dat ook datetime.date objecten werken (niet enkel strings)
-            if isinstance(ingediend, datetime):
-                d1 = ingediend.date()
-            else:
+            # Zorg dat ook datetime.date objecten werken (niet enkel strings), we gaan ingediend omzetten naar een data() format
+            if isinstance(ingediend, datetime): #controle: is het een datatime object
+                d1 = ingediend.date() #ja : haal datum eruit
+            else: #nee:: parse de string naar een dateobject
                 d1 = datetime.strptime(str(ingediend), "%Y-%m-%d").date()
 
-            if isinstance(beantwoord, datetime):
+            if isinstance(beantwoord, datetime): #hier doe je zelfde maar dan voor beantwoordigsdata
                 d2 = beantwoord.date()
             else:
                 d2 = datetime.strptime(str(beantwoord), "%Y-%m-%d").date()
 
-            dagen = (d2 - d1).days
+            dagen = (d2 - d1).days #bereken tijd tussen ingediend en beantwoord
             if dagen >= 0:  # geen negatieve waarden
-                resultaten.setdefault(naam, []).append(dagen)
-        except Exception:
+                resultaten.setdefault(naam, []).append(dagen) #voeg toe aan resultaten dict met key= thema naam en value=lijst van alle wachttijden voor dat thema
+        except Exception: #als iets misgaat: skip rij
             continue
 
     resultaten = [
         {"thema": k, "gem_dagen": round(sum(v) / len(v), 1)}
         for k, v in resultaten.items()
         if len(v) > 0
-    ]
+    ] #maakt dictionary met met de naam vh thema en als value de gemiddelde beantwoordingstijd
 
     # Sorteer van snelst naar traagst
     resultaten.sort(key=lambda x: x["gem_dagen"])
 
-    return render_template("statistieken_thema_beantwoordtijd.html", resultaten=resultaten)
+    return render_template("statistieken_thema_beantwoordtijd.html", resultaten=resultaten) 
 
 
 
