@@ -154,7 +154,7 @@ document.getElementById("evolutieChart").onclick = async (evt) => {
   const response = await fetch(`/grafieken/thema_vragen/${gekozenThema}/${jaar}/${maand}`);
   const data = await response.json();
 
-  if (!data.length) return alert(`Geen schriftelijke vragen in ${label}`);
+  if (!data.length) return alert(`Geen schriftelijke vragen in ${label} voor dit thema.`);
 
   let html = `<h3>Vragen van ${label}</h3><ul>`;
   data.forEach(v => {
@@ -241,7 +241,7 @@ document.getElementById("vvChart").onclick = async (evt) => {
   const response = await fetch(`/grafieken/vv_vragen/${window.selectedVV}/${jaar}/${maand}`);
   const data = await response.json();
 
-  if (!data.length) return alert(`Geen schriftelijke vragen in ${label}`);
+  if (!data.length) return alert(`Geen schriftelijke vragen in ${label} voor deze volksvertegenwoordiger.`);
 
   let html = `<h3>Vragen van ${label}</h3><ul>`;
   data.forEach(v => {

@@ -881,11 +881,13 @@ def grafieken():
 # --- DATA VOOR GRAFIEK PER THEMA ---
 @main.route("/grafieken/data/<uuid:thema_id>")
 def grafieken_data(thema_id):
-    eind_datum = date.today()
-    begin_datum = eind_datum - relativedelta(months=12)
+    #Vaste periode: van april t.e.m. oktober 2025. Bij inladen nieuwe data, pas dit aan indien nodig. 
+    #nog makkelijker: in de afgewerkte versie (dus niet-mvp) zal de data hele zitjaren bevatten, dus kunnen deze data weg.
+    #hier is dit nu enkel om de grafiek te tonen met de huidige, beperkte data waarvoor wij gekozen hebben in de mvp
+    begin_datum = date(2025, 4, 1)
+    eind_datum = date(2025, 10, 31)
 
-    # Aantal vragen per maand voor dit thema (laatste 12 maanden)
-    results = (
+    resultaten = (
         db.session.query(
             func.date_trunc("month", SchriftelijkeVragen.ingediend).label("maand"),
             func.count(SchriftelijkeVragen.id)
@@ -893,19 +895,27 @@ def grafieken_data(thema_id):
         .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
         .filter(ThemaKoppeling.id_thm == thema_id)
         .filter(SchriftelijkeVragen.ingediend >= begin_datum)
+        .filter(SchriftelijkeVragen.ingediend <= eind_datum)
         .group_by(func.date_trunc("month", SchriftelijkeVragen.ingediend))
         .order_by(func.date_trunc("month", SchriftelijkeVragen.ingediend))
         .all()
     )
 
-    maanden = ["jan", "feb", "mrt", "apr", "mei", "jun",
-           "jul", "aug", "sep", "okt", "nov", "dec"]
+    maand_dict = {r[0].strftime("%Y-%m"): r[1] for r in resultaten}
 
-    labels = [f"{maanden[r[0].month - 1]} {r[0].year}" for r in results]
+    labels, values = [], []
+    huidige = begin_datum
+    maanden = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"]
 
-    values = [r[1] for r in results]
+    while huidige <= eind_datum:
+        key = huidige.strftime("%Y-%m")
+        labels.append(f"{maanden[huidige.month - 1]} {huidige.year}")
+        values.append(maand_dict.get(key, 0))
+        huidige += relativedelta(months=1)
 
     return jsonify({"labels": labels, "values": values})
+
+
 
 
 # --- AUTOCOMPLETE VOOR VOLKSVERTEGENWOORDIGERS ---
@@ -933,14 +943,15 @@ def vv_suggesties():
 
 # --- DATA VOOR GRAFIEK PER VOLKSVERTEGENWOORDIGER ---
 @main.route("/grafieken/vv_data/<uuid:vv_id>")
+@main.route("/grafieken/vv_data/<uuid:vv_id>")
 def vv_data(vv_id):
-    """Aantal schriftelijke vragen per maand voor gekozen volksvertegenwoordiger."""
-    from app.models import Persoonfunctie  # importeren binnen de functie om circular import te vermijden
+    from app.models import Persoonfunctie
 
-    eind_datum = date.today()
-    begin_datum = eind_datum - relativedelta(months=12)
+    # ✅ Zelfde vaste periode: april → oktober
+    begin_datum = date(2025, 4, 1)
+    eind_datum = date(2025, 10, 31)
 
-    results = (
+    resultaten = (
         db.session.query(
             func.date_trunc("month", SchriftelijkeVragen.ingediend).label("maand"),
             func.count(SchriftelijkeVragen.id)
@@ -948,15 +959,27 @@ def vv_data(vv_id):
         .join(Persoonfunctie, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
         .filter(Persoonfunctie.id_prs == vv_id)
         .filter(SchriftelijkeVragen.ingediend >= begin_datum)
+        .filter(SchriftelijkeVragen.ingediend <= eind_datum)
         .group_by(func.date_trunc("month", SchriftelijkeVragen.ingediend))
         .order_by(func.date_trunc("month", SchriftelijkeVragen.ingediend))
         .all()
     )
 
-    labels = [r[0].strftime("%b %Y") for r in results]
-    values = [r[1] for r in results]
+    maand_dict = {r[0].strftime("%Y-%m"): r[1] for r in resultaten}
+
+    labels, values = [], []
+    huidige = begin_datum
+    maanden = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"]
+
+    while huidige <= eind_datum:
+        key = huidige.strftime("%Y-%m")
+        labels.append(f"{maanden[huidige.month - 1]} {huidige.year}")
+        values.append(maand_dict.get(key, 0))
+        huidige += relativedelta(months=1)
 
     return jsonify({"labels": labels, "values": values})
+
+
 
 
 # --- DETAILVRAGEN VOOR EEN VOLKSVERTEGENWOORDIGER IN EEN MAAND ---
