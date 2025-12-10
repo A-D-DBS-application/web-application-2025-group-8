@@ -480,8 +480,8 @@ def statistieken_priority():
 
 
 
-
-
+#2e algoritme
+#--- SAMENGESTELDE ACTIVITEITSSCORE VOLKSVERTEGENWOORDIGERS ---
 def bereken_activiteitsscore(aantal_vragen, unieke_themas, gemiddelde_maanden_oud):
     """
     Combineer aantal vragen, themadiversiteit en actualiteit in één samengestelde score.
@@ -492,11 +492,10 @@ def bereken_activiteitsscore(aantal_vragen, unieke_themas, gemiddelde_maanden_ou
     return round((aantal_vragen * 0.6) + (unieke_themas * 0.3) + (actualiteit_score * 10), 2)
 
 
-#2e algoritme: activiteitsscore
-
 @main.route("/statistieken/vv")
 def statistieken_vv():
     return render_template("statistieken_vv.html")
+
 
 @main.route("/statistieken/activiteit")
 @cache.cached(timeout=3600)
@@ -515,16 +514,16 @@ def activiteitsscore():
             Persoon.voornaam,
             Persoon.naam,
             Fractie.naam.label("fractie_naam"),
-            func.count(SchriftelijkeVragen.id).label("aantal_vragen"),
+            func.count(func.distinct(SchriftelijkeVragen.id)).label("aantal_vragen"),
             func.count(func.distinct(ThemaKoppeling.id_thm)).label("unieke_themas"),
-            func.array_agg(SchriftelijkeVragen.ingediend).label("alle_datums")
+            func.array_agg(func.distinct(SchriftelijkeVragen.ingediend)).label("alle_datums")
         )
         .join(Persoonfunctie, Persoonfunctie.id_prs == Persoon.id)
         .join(Fractie, Fractie.id == Persoonfunctie.id_frc)
         .join(SchriftelijkeVragen, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
         .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
         .group_by(Persoon.id, Persoon.voornaam, Persoon.naam, Fractie.naam)
-        .having(func.count(SchriftelijkeVragen.id) > 3)
+        .having(func.count(func.distinct(SchriftelijkeVragen.id)) > 3)
         .all()
     )
 
