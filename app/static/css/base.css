@@ -763,6 +763,11 @@ th.sortable::after {
   overflow-x: auto;
 }
 
+.hero-grafieken {
+  background-color: #facc15;
+  color: #111;
+}
+
 /* Mobiel: alles netjes stapelen */
 @media (max-width: 768px) {
   .grafieken-section {
