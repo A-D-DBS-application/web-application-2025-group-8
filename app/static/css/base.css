@@ -368,6 +368,17 @@ tr:hover td {
   font-style: italic;
 }
 
+/* Standaard: geen handcursor meer op kolomhoofding */
+th {
+  cursor: default;
+}
+
+/* Enkel sorteerbare kolommen (zoals bij VV-tabellen) krijgen nog een handcursor */
+th a.sortable {
+  cursor: pointer;
+}
+
+
 
 /* ========== SORTEERBARE KOLOMMEN (pijltjes ↑↓) ========== */
 .sortable {
