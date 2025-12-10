@@ -144,21 +144,21 @@ def statistieken_thema_netwerk():
         db.session.query(ThemaKoppeling.id_schv, func.array_agg(ThemaKoppeling.id_thm))
         .group_by(ThemaKoppeling.id_schv)
         .all()
-    )
+    ) #haal alle thema's per vraago op
 
-    combinaties = {}
+    combinaties = {} #vind alle thema paren
     for _, ids in koppelingen:
-        ids = list(set(ids))
-        if len(ids) > 1:
-            for i in range(len(ids)):
+        ids = list(set(ids)) #zet lijst om naar set om duplicaten te verwijderen: voorkomen dat we themas dubbel tellen in dezelfde vraav
+        if len(ids) > 1: #alleen als er 2+ themas zijn kunnen we paren maken
+            for i in range(len(ids)): #nested loop want we willen elk uniek paar(geen duplicaten,geen omgekeerde
                 for j in range(i + 1, len(ids)):
                     paar = tuple(sorted([ids[i], ids[j]]))
-                    combinaties[paar] = combinaties.get(paar, 0) + 1
+                    combinaties[paar] = combinaties.get(paar, 0) + 1 
 
-    id_to_naam = {t.id: t.naam for t in db.session.query(Thema).all()}
+    id_to_naam = {t.id: t.naam for t in db.session.query(Thema).all()} #zet thema id terug om naar thema namen
     resultaten = [
         {"thema1": id_to_naam.get(a, "?"), "thema2": id_to_naam.get(b, "?"), "aantal": n}
-        for (a, b), n in sorted(combinaties.items(), key=lambda x: x[1], reverse=True)
+        for (a, b), n in sorted(combinaties.items(), key=lambda x: x[1], reverse=True) #zet paren van IDs om naar paren van namen en sorteer vanv veel naar weinig(grootste netwerken eerst)
     ]
 
     return render_template("statistieken_thema_netwerk.html", resultaten=resultaten)
@@ -171,10 +171,10 @@ def statistieken_fractie():
     from app.models import Fractie, Thema, Persoonfunctie
 
     # dropdowndata
-    fracties = db.session.query(Fractie).order_by(Fractie.naam.asc()).all()
-    themas = db.session.query(Thema).order_by(Thema.naam.asc()).all()
+    fracties = db.session.query(Fractie).order_by(Fractie.naam.asc()).all() #haal fracties op alfabeettisch gesorteerd (voor drop down)
+    themas = db.session.query(Thema).order_by(Thema.naam.asc()).all() #idem als bij fracties
 
-    fractie_id = request.args.get("fractie")
+    fractie_id = request.args.get("fractie") #lezen waarde die gebruiker in de URL zet (via dropdowns)
     thema_id = request.args.get("thema")
 
     resultaat = None
@@ -186,28 +186,28 @@ def statistieken_fractie():
             .join(Persoonfunctie, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
             .filter(Persoonfunctie.id_frc == fractie_id)
             .count()
-        )
-
+        ) #Wat? Hoeveel vragen heeft deze fractie in TOTAAL gesteld
+#hoe? query alle schriftelijke vragen, join: koppel schriftelijke vragen aan persoonsfunctie,filter:waar die persoon in deze fractie zit, count om ze te tellen
         # aantal vragen van fractie over dit thema
         thema_vragen_fractie = (
             db.session.query(SchriftelijkeVragen)
-            .join(Persoonfunctie, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
-            .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
-            .filter(Persoonfunctie.id_frc == fractie_id)
-            .filter(ThemaKoppeling.id_thm == thema_id)
-            .count()
-        )
+            .join(Persoonfunctie, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id) #koppel aan persoonsfunctie(wie stelde de vraag?)
+            .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id) #koppel aan themakoppeling(welke thema's heeft deze vraag?)
+            .filter(Persoonfunctie.id_frc == fractie_id) #alleen deze fractie
+            .filter(ThemaKoppeling.id_thm == thema_id) #alleen dit thema
+            .count() #tel ze
+        ) #Wat? Hoeveel vragen heeft de fractie over dit thema gesteld
 
         # totaal aantal vragen over dit thema (alle fracties)
         totaal_vragen_thema = (
             db.session.query(SchriftelijkeVragen)
-            .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
-            .filter(ThemaKoppeling.id_thm == thema_id)
-            .count()
-        )
+            .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id) #koppel aan themakoppeling
+            .filter(ThemaKoppeling.id_thm == thema_id) #alleen dit thema
+            .count() #tel ze
+        ) #Wat? Hoeveel vragen gaan over dit thema (van IEDEREEN)?
 
-        perc_van_fractie = round((thema_vragen_fractie / totaal_vragen_fractie) * 100, 2) if totaal_vragen_fractie else 0
-        perc_van_thema = round((thema_vragen_fractie / totaal_vragen_thema) * 100, 2) if totaal_vragen_thema else 0
+        perc_van_fractie = round((thema_vragen_fractie / totaal_vragen_fractie) * 100, 2) if totaal_vragen_fractie else 0 #van alle vragen over deze fractie, welk % is over dit thema?
+        perc_van_thema = round((thema_vragen_fractie / totaal_vragen_thema) * 100, 2) if totaal_vragen_thema else 0 #van alle vragen van deze fractie, welk % komt van deze fractie?
 
         resultaat = {
             "totaal_vragen_fractie": totaal_vragen_fractie,
@@ -224,13 +224,13 @@ def statistieken_fractie():
         fractie_id=fractie_id,
         thema_id=thema_id,
         resultaat=resultaat
-    )
+    ) #pak alles in resultaat en stuur naar template
 
-
+#statistieken per volksvertegenwoordiger
 @main.route("/statistieken/vv/themas")
 def statistieken_vv_themas():
-    sort = request.args.get("sort", "asc")
-    kolom = request.args.get("kolom", "naam")  
+    sort = request.args.get("sort", "asc") #leest de sorteer-richting uit de query string
+    kolom = request.args.get("kolom", "naam")  #leest op welke kolom gesorteerd moet worden: default:naam
 
     # Haal in één keer alle niet-minister functies met personen en thema’s op
     data = (
@@ -242,13 +242,13 @@ def statistieken_vv_themas():
             func.count(SchriftelijkeVragen.id).label("aantal"),
             func.max(SchriftelijkeVragen.ingediend).label("laatste_vraag")
         )
-        .join(Persoonfunctie, Persoonfunctie.id_prs == Persoon.id)
-        .join(Functies, Persoonfunctie.id_fnc == Functies.id)
+        .join(Persoonfunctie, Persoonfunctie.id_prs == Persoon.id) #join om functies te kennen
+        .join(Functies, Persoonfunctie.id_fnc == Functies.id) #join om functies te kennen
         .outerjoin(SchriftelijkeVragen, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
-        .outerjoin(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
-        .outerjoin(Thema, Thema.id == ThemaKoppeling.id_thm)
-        .filter(~func.lower(Functies.naam).like("%minister%"))
-        .group_by(Persoon.id, Persoon.voornaam, Persoon.naam, Thema.naam)
+        .outerjoin(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id) #outer join om ook personen zonder vragen te behouden
+        .outerjoin(Thema, Thema.id == ThemaKoppeling.id_thm) #outer join om ook personen zonder thema te behouden
+        .filter(~func.lower(Functies.naam).like("%minister%")) #sluit alle ministers uit
+        .group_by(Persoon.id, Persoon.voornaam, Persoon.naam, Thema.naam) #groepeer op persoon+themanaam,zodat de count per persoon per thema komt
         .all()
     )
 
@@ -262,12 +262,12 @@ def statistieken_vv_themas():
                 "laatste_vraag": r.laatste_vraag
             }
         if r.thema:
-            personen_dict[r.id]["themas"][r.thema] = personen_dict[r.id]["themas"].get(r.thema, 0) + r.aantal
+            personen_dict[r.id]["themas"][r.thema] = personen_dict[r.id]["themas"].get(r.thema, 0) + r.aantal #als r.thema bestaat, verhoog teller voor dat thema met r.aantal
         if r.laatste_vraag and (
             not personen_dict[r.id]["laatste_vraag"]
             or r.laatste_vraag > personen_dict[r.id]["laatste_vraag"]
         ):
-            personen_dict[r.id]["laatste_vraag"] = r.laatste_vraag
+            personen_dict[r.id]["laatste_vraag"] = r.laatste_vraag #update laatste_vraag als deze rij een latere datum heeft
 
     # Bepaal top 3 thema’s
     resultaat = []
@@ -285,15 +285,15 @@ def statistieken_vv_themas():
             "laatste_vraag": info["laatste_vraag"].strftime("%Y-%m-%d") if info["laatste_vraag"] else "-"
         })
 
-    # ✅ Dynamisch sorteren op kolom + richting
+    #  Dynamisch sorteren op kolom + richting
     reverse = sort == "desc"
-    try:
+    try: #probeer te sorteren op kolom die gebruiker koos in drop down
         resultaat.sort(
             key=lambda x: (x[kolom] or "").lower() if isinstance(x[kolom], str) else (x[kolom] or 0),
             reverse=reverse
         )
     except KeyError:
-        # fallback als kolom niet bestaat
+        # fallback als kolom niet bestaat, val dan terug op sorteren op naam
         resultaat.sort(key=lambda x: x["naam"].lower(), reverse=reverse)
 
     return render_template(
@@ -301,7 +301,7 @@ def statistieken_vv_themas():
         data=resultaat,
         sort=sort,
         kolom=kolom
-    )
+    ) #stuurt resultaat + sort parameters naar template
 
 
 
