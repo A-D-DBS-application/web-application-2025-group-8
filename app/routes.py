@@ -253,7 +253,7 @@ def statistieken_vv_themas():
     )
 
     # Groepeer resultaten per persoon
-    personen_dict = {}
+    personen_dict = {} #hadiger om mee te werken dan de 'raw query' resultaten want die bevatten nog duplicaten enz
     for r in data:
         if r.id not in personen_dict:
             personen_dict[r.id] = {
@@ -313,7 +313,7 @@ def statistieken_vv_themas():
 from app import db, cache  # gebruik de cache die in __init__.py is geïnitialiseerd
 
 
-@main.route('/statistieken/actiefste', methods=['GET'])
+@main.route('/statistieken/actiefste', methods=['GET']) #politici in jou regio die meest actief zijn?
 @cache.cached(timeout=3600, query_string=True)   # cache 1 uur per combinatie van parameters
 def actiefste_per_thema_en_kieskring():
     try:
@@ -321,23 +321,23 @@ def actiefste_per_thema_en_kieskring():
         kieskringen = [
             k[0] for k in (
                 db.session.query(Persoon.kieskring)
-                .distinct()
-                .order_by(Persoon.kieskring)
+                .distinct() #verwijder duplicaten
+                .order_by(Persoon.kieskring) #sorteer automatisch
                 .all()
             )
             if k[0] is not None
         ]
-        themas = [{"id": t.id, "naam": t.naam} for t in Thema.query.order_by(Thema.naam).all()]
+        themas = [{"id": t.id, "naam": t.naam} for t in Thema.query.order_by(Thema.naam).all()] #query alle thema's met id en naam
+    #map naar lijst van dicts bv [{"id":1, "naam"= 'klimaat'},'{"id":2,"naam":'gezondheid'}
 
-
-        geselecteerde_kieskring = request.args.get('kieskring')
-        geselecteerd_thema_id = request.args.get('thema')
+        geselecteerde_kieskring = request.args.get('kieskring') #lees filters uit query string, dus wat gebruiker koos
+        geselecteerd_thema_id = request.args.get('thema') #idem
         data = []
 
-        if geselecteerde_kieskring and geselecteerd_thema_id:
+        if geselecteerde_kieskring and geselecteerd_thema_id: #voor enkel query uit als beide filters zijn geselecteerd
             # 🔹 Subquery: enkel persoonfuncties in gekozen kieskring
             subq_pf = (
-                db.session.query(Persoonfunctie.id)
+                db.session.query(Persoonfunctie.id) # doel:haal alle persoonfunctie_id's van persoon uit geselelecteerde kieskring
                 .join(Persoon, Persoon.id == Persoonfunctie.id_prs)
                 .filter(Persoon.kieskring == geselecteerde_kieskring)
                 .subquery()
@@ -349,35 +349,35 @@ def actiefste_per_thema_en_kieskring():
                     Persoon.id.label("persoon_id"),
                     Persoon.voornaam,
                     Persoon.naam,
-                    Persoon.kieskring,
-                    Fractie.naam.label("fractie_naam"),
+                    Persoon.kieskring, #welke persoon is het?
+                    Fractie.naam.label("fractie_naam"), #van welke partij?
                     func.count(SchriftelijkeVragen.id).label("aantal_vragen"),
-                )
-                .join(Persoonfunctie, Persoonfunctie.id_prs == Persoon.id)
-                .join(Fractie, Fractie.id == Persoonfunctie.id_frc)
-                .join(SchriftelijkeVragen, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
-                .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
-                .filter(Persoonfunctie.id.in_(subq_pf))  # 🔥 filter eerst
-                .filter(ThemaKoppeling.id_thm == geselecteerd_thema_id)
+                ) #hoeveel vragen?
+                .join(Persoonfunctie, Persoonfunctie.id_prs == Persoon.id) #wie heeft welke functie?
+                .join(Fractie, Fractie.id == Persoonfunctie.id_frc) #welke partij
+                .join(SchriftelijkeVragen, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id) #welke vragen stelde deze persoon
+                .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id) #over welke themas stelde hij vragen
+                .filter(Persoonfunctie.id.in_(subq_pf))  # alleen uit door gebruiker geselecteerde kieskring
+                .filter(ThemaKoppeling.id_thm == geselecteerd_thema_id) #alleen dit thema
                 .group_by(
                     Persoon.id,
                     Persoon.voornaam,
                     Persoon.naam,
                     Persoon.kieskring,
                     Fractie.naam,
-                )
-                .order_by(func.count(SchriftelijkeVragen.id).desc())
+                ) #group by per persoon zodat je totaal aantal vragen per persoon voor dit thema krijgt
+                .order_by(func.count(SchriftelijkeVragen.id).desc()) #aflopend op aantal vragen (MEEST ACTIEF EERST)
                 .all()
             )
 
-            for idx, r in enumerate(rows, start=1):
+            for idx, r in enumerate(rows, start=1): #enumarate om een rangnummer toe te voegen(1,2,etc)
                 data.append({
                     "rang": idx,
                     "naam": f"{r.voornaam} {r.naam}",
                     "fractie": r.fractie_naam,
                     "kieskring": r.kieskring,
                     "aantal_vragen": r.aantal_vragen,
-                })
+                }) #hier bouwen we schone dictionaries  voor de template
 
     except OperationalError:
         # Als de database niet bereikbaar is → lege state ipv 500 error
@@ -395,7 +395,7 @@ def actiefste_per_thema_en_kieskring():
         geselecteerd_thema_id=geselecteerd_thema_id,
         data=data,
     )
-
+#dus deze functie zegt:"Wie zijn de meest actieve politici in [kieskring X] op thema [Y]?"
 
 
 
