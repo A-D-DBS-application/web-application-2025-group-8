@@ -839,42 +839,36 @@ th a.sortable {
 
 
 
-/* ========== ALLES VAN MOBIEL STYLING ========= */
-/*Mobiel: meer hoogte voor gele achtergrond */
+/* ========== MOBIELE STYLING ========== */
+
+/* Mobiel: algemene hero en achtergrondaanpassingen */
 @media (max-width: 768px) {
+
+  /* Gele achtergrond groter (algemeen) */
   body {
-    background-size: 100% 480px; /* verhoog de hoogte van het gele vlak */
-  }
-}
-
-/* Mobiel specifieke aanpassingen */
-@media (max-width: 480px) {
-  .hero {
-    padding: 3rem 1rem;
+    background-size: 100% 480px;
   }
 
-  .hero-title {
-    font-size: 1.8rem;
+  /* Zoekpagina – iets lagere gele balk */
+  body.page-zoeken {
+    background-size: 100% 300px !important;
   }
 
-  .hero-subtitle {
-    font-size: 1rem;
+  /* Grafiekenpagina – iets lagere gele balk */
+  body.page-grafieken {
+    background-size: 100% 300px !important;
   }
-}
 
-@media (max-width: 768px) {
+  /* Tellen van vragen */
   .vragen-count-section {
     padding: 1.5rem 1rem;
   }
-  
+
   .vragen-count-title {
     font-size: 1.1rem;
   }
-}
 
-
-
-@media (max-width: 768px) {
+  /* Filters */
   .filters-card {
     margin-top: -1.5rem;
     padding: 1.25rem 1.4rem;
@@ -884,10 +878,7 @@ th a.sortable {
     flex-direction: column;
   }
 
-  .filter-field {
-    width: 100%;
-  }
-
+  .filter-field,
   .filter-field-button {
     width: 100%;
   }
@@ -896,10 +887,8 @@ th a.sortable {
     width: 100%;
     text-align: center;
   }
-}
 
-/* Mobiel: alles netjes stapelen */
-@media (max-width: 768px) {
+  /* Grafieken */
   .grafieken-section {
     padding: 1rem;
   }
@@ -916,36 +905,35 @@ th a.sortable {
     margin: 0.5rem auto;
   }
 
-  #tabThema, #tabVV {
+  #tabThema,
+  #tabVV {
     width: 50%;
     border-radius: 0;
   }
-}
 
-/* Mobiel */
-@media (max-width: 768px) {
+  /* VV-zoekveld */
   .vv-row {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .vv-input, .vv-button {
+  .vv-input,
+  .vv-button {
     width: 100%;
   }
 }
 
-
-/* Alleen op mobiel: gele hero kleiner op zoekpagina */
-@media (max-width: 768px) {
-  body.page-zoeken {
-    background-size: 100% 300px !important; /* lagere gele balk */
+/* Extra compact voor zeer kleine schermen */
+@media (max-width: 480px) {
+  .hero {
+    padding: 3rem 1rem;
   }
-}
 
+  .hero-title {
+    font-size: 1.8rem;
+  }
 
-/* Alleen op mobiel: gele achtergrond op grafiekenpagina iets lager */
-@media (max-width: 768px) {
-  body.page-grafieken {
-    background-size: 100% 300px !important;
+  .hero-subtitle {
+    font-size: 1rem;
   }
 }
