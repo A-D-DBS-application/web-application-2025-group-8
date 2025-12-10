@@ -42,7 +42,11 @@
       <thead>
         <tr>
           <th>Onderwerp</th>
-          <th>Indiener</th>
+          {% if vv_type == 'minister' %}
+            <th>Indiener</th>
+          {% else %}
+            <th>Beantwoord door</th>
+          {% endif %}
           <th>Fractie</th>
           <th>Datum ingediend</th>
           <th>PDF</th>

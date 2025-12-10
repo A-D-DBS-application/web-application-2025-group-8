@@ -708,9 +708,9 @@ def vv_vragen(vv_id):
                         Fractie.naam.label("fractie_naam")
                     )
                     .filter(SchriftelijkeVragen.id_prsfnc_vs.in_(pf_ids))
-                    .join(
+                    .join(  #we tonen de minister!
                         Persoonfunctie,
-                        SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id
+                        SchriftelijkeVragen.id_prsfnc_min == Persoonfunctie.id
                     )
                     .join(Persoon, Persoon.id == Persoonfunctie.id_prs)
                     .outerjoin(Fractie, Fractie.id == Persoonfunctie.id_frc)
@@ -755,6 +755,7 @@ def vv_vragen(vv_id):
     except OperationalError as e:
         print("❌ Databasefout:", e)
         return render_template("schriftelijke_vragen.html", vragen=[], title="Fout")
+
 
 
 @main.route('/zoeken', methods=['GET', 'POST'])
