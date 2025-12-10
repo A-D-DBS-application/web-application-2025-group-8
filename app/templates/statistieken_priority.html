@@ -25,9 +25,9 @@
         <li>De totale score is dus maximaal <strong>100 punten</strong>.</li>
       </ul>
       <p class="priority-legende">
-        <span class="score-hoog">Hoog (≥ 80)</span> &nbsp;|&nbsp;
-        <span class="score-gemiddeld">Gemiddeld (65 – 79)</span> &nbsp;|&nbsp;
-        <span class="score-laag">Laag (&lt; 65)</span>
+        <span class="score-hoog">Hoog (≥ 75)</span> &nbsp;|&nbsp;
+        <span class="score-gemiddeld">Gemiddeld (50 – 74)</span> &nbsp;|&nbsp;
+        <span class="score-laag">Laag (&lt; 50)</span>
       </p>
       <p class="priority-tip">
         De maximale score van 100 punten wordt enkel behaald door zeer recente vragen met meerdere thema’s.
@@ -81,9 +81,9 @@
             <td>{{ item.ingediend }}</td>
             <td class="td-center">{{ item.aantal_themas }}</td>
             <td>
-              {% if item.priority_score >= 80 %}
+              {% if item.priority_score >= 75 %}
                 <span class="score-hoog">{{ item.priority_score }}</span>
-              {% elif item.priority_score >= 65 %}
+              {% elif item.priority_score >= 50 %}
                 <span class="score-gemiddeld">{{ item.priority_score }}</span>
               {% else %}
                 <span class="score-laag">{{ item.priority_score }}</span>

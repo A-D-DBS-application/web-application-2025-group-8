@@ -19,12 +19,7 @@ body {
   /* --- AANPASSING EINDE --- */
 }
 
-/*Mobiel: meer hoogte voor gele achtergrond */
-@media (max-width: 768px) {
-  body {
-    background-size: 100% 480px; /* verhoog de hoogte van het gele vlak */
-  }
-}
+
 /* Zorg dat de navigatiebalk transparant is (anders blijft hij wit) */
 .navbar, .bg-light {
   background-color: transparent !important;
@@ -73,20 +68,7 @@ body {
   flex-wrap: wrap;
 }
 
-/* Mobiel specifieke aanpassingen */
-@media (max-width: 480px) {
-  .hero {
-    padding: 3rem 1rem;
-  }
 
-  .hero-title {
-    font-size: 1.8rem;
-  }
-
-  .hero-subtitle {
-    font-size: 1rem;
-  }
-}
 
 
 /* ========== KNOPPEN ========== */
@@ -434,82 +416,7 @@ th a.sortable {
 }
 
 
-/* ========== VV TABEL ========== */
-.vv-table-container {
-  padding: 2rem;
-}
 
-.vv-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.vv-table thead {
-  background: #f3f4f6;
-  cursor: pointer;
-}
-
-.vv-table th {
-  padding: 8px;
-  text-align: left;
-}
-
-.vv-table tbody tr {
-  border-bottom: 1px solid #ddd;
-}
-
-.vv-table td {
-  padding: 8px;
-}
-
-.vv-table a {
-  color: #2563eb;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.vv-table a:hover {
-  text-decoration: underline;
-}
-
-.vv-table-empty {
-  text-align: center;
-  color: #555;
-}
-
-
-/* ========== SCHRIFTELIJKE VRAGEN TABEL ========== */
-.vragen-section {
-  padding: 2rem;
-}
-
-.vragen-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.95rem;
-}
-
-.vragen-table thead {
-  background: #f3f4f6;
-}
-
-.vragen-table th {
-  padding: 10px;
-  text-align: left;
-}
-
-.vragen-table tbody tr {
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.vragen-table td {
-  padding: 10px;
-}
-
-.vragen-table-empty {
-  text-align: center;
-  padding: 1rem;
-}
 
 /* ========== VRAAG TELLER SECTIE ========== */
 .vragen-count-section {
@@ -538,15 +445,7 @@ th a.sortable {
   font-weight: 700;
 }
 
-@media (max-width: 768px) {
-  .vragen-count-section {
-    padding: 1.5rem 1rem;
-  }
-  
-  .vragen-count-title {
-    font-size: 1.1rem;
-  }
-}
+
 
 .vragen-info-section {
   background-color: #f9fafb;
@@ -780,33 +679,6 @@ th a.sortable {
   font-size: 0.95rem;
 }
 
-
-@media (max-width: 768px) {
-  .filters-card {
-    margin-top: -1.5rem;
-    padding: 1.25rem 1.4rem;
-  }
-
-  .filters-row {
-    flex-direction: column;
-  }
-
-  .filter-field {
-    width: 100%;
-  }
-
-  .filter-field-button {
-    width: 100%;
-  }
-
-  .filter-field-button .btn {
-    width: 100%;
-    text-align: center;
-  }
-}
-
-
-
 /* ========== FRACTIE-STATISTIEKEN (optioneel extra stijl) ========== */
 .result-card {
   background: #fff;
@@ -878,31 +750,6 @@ th a.sortable {
   color: #111;
 }
 
-/* Mobiel: alles netjes stapelen */
-@media (max-width: 768px) {
-  .grafieken-section {
-    padding: 1rem;
-  }
-
-  .grafieken-section label {
-    display: block;
-    margin-bottom: 0.5rem;
-  }
-
-  .grafieken-section select,
-  .grafieken-section button {
-    display: block;
-    width: 100%;
-    margin: 0.5rem auto;
-  }
-
-  #tabThema, #tabVV {
-    width: 50%;
-    border-radius: 0;
-  }
-}
-
-
 /* ========== PER VOLKSVERTEGENWOORDIGER GRAFIEK ========== */
 .vv-container {
   text-align: center;
@@ -957,25 +804,6 @@ th a.sortable {
   text-align: left;
 }
 
-/* Mobiel */
-@media (max-width: 768px) {
-  .vv-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .vv-input, .vv-button {
-    width: 100%;
-  }
-}
-
-
-/* Alleen op mobiel: gele achtergrond op grafiekenpagina iets lager */
-@media (max-width: 768px) {
-  body.page-grafieken {
-    background-size: 100% 300px !important;
-  }
-}
 
 
 
@@ -1003,4 +831,109 @@ th a.sortable {
   border-color: #2563eb;
   box-shadow: 0 0 0 1px #2563eb33;
   outline: none;
+}
+
+
+
+
+
+
+
+/* ========== MOBIELE STYLING ========== */
+
+/* Mobiel: algemene hero en achtergrondaanpassingen */
+@media (max-width: 768px) {
+
+  /* Gele achtergrond groter (algemeen) */
+  body {
+    background-size: 100% 480px;
+  }
+
+  /* Zoekpagina – iets lagere gele balk */
+  body.page-zoeken {
+    background-size: 100% 300px !important;
+  }
+
+  /* Grafiekenpagina – iets lagere gele balk */
+  body.page-grafieken {
+    background-size: 100% 300px !important;
+  }
+
+  /* Tellen van vragen */
+  .vragen-count-section {
+    padding: 1.5rem 1rem;
+  }
+
+  .vragen-count-title {
+    font-size: 1.1rem;
+  }
+
+  /* Filters */
+  .filters-card {
+    margin-top: -1.5rem;
+    padding: 1.25rem 1.4rem;
+  }
+
+  .filters-row {
+    flex-direction: column;
+  }
+
+  .filter-field,
+  .filter-field-button {
+    width: 100%;
+  }
+
+  .filter-field-button .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Grafieken */
+  .grafieken-section {
+    padding: 1rem;
+  }
+
+  .grafieken-section label {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .grafieken-section select,
+  .grafieken-section button {
+    display: block;
+    width: 100%;
+    margin: 0.5rem auto;
+  }
+
+  #tabThema,
+  #tabVV {
+    width: 50%;
+    border-radius: 0;
+  }
+
+  /* VV-zoekveld */
+  .vv-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .vv-input,
+  .vv-button {
+    width: 100%;
+  }
+}
+
+/* Extra compact voor zeer kleine schermen */
+@media (max-width: 480px) {
+  .hero {
+    padding: 3rem 1rem;
+  }
+
+  .hero-title {
+    font-size: 1.8rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
 }
