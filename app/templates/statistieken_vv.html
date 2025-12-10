@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <h1 class="hero-title">Statistieken per Volksvertegenwoordiger</h1>
+    <p class="hero-subtitle">
+      Analyseer de activiteit van parlementsleden: ontdek hun populairste thema’s en hoe actief ze zijn.
+    </p>
+
+    <div class="hero-buttons">
+      <a href="{{ url_for('main.statistieken_vv_themas') }}" class="btn">
+        Thema’s & Recente Vragen
+      </a>
+      <a href="{{ url_for('main.activiteitsscore') }}" class="btn">
+        Activiteitsscore
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- INFO -->
+<section class="info-section">
+  <div class="info-container">
+    <h2 class="section-title">Kies een analyse</h2>
+    <p>
+      <strong>Thema’s & Recente Vragen:</strong> ontdek waarover elke volksvertegenwoordiger het meest schrijft
+      en bekijk zijn of haar laatste schriftelijke vraag.<br>
+      <strong>Activiteitsscore:</strong> een samengestelde indicator die rekening houdt met het aantal vragen,
+      het aantal unieke thema’s en de actualiteit van de activiteit.
+    </p>
+  </div>
+</section>
+
+{% endblock %}

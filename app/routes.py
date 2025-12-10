@@ -227,8 +227,8 @@ def statistieken_fractie():
     )
 
 
-@main.route("/statistieken/personen")
-def statistieken_personen():
+@main.route("/statistieken/vv/themas")
+def statistieken_vv_themas():
     sort = request.args.get("sort", "asc")
 
     # Haal in één keer alle niet-minister functies met personen en thema’s op
@@ -287,7 +287,7 @@ def statistieken_personen():
     # Sorteren op naam
     resultaat.sort(key=lambda x: x["naam"].lower(), reverse=(sort == "desc"))
 
-    return render_template("statistieken_personen.html", data=resultaat, sort=sort)
+    return render_template("statistieken_vv_themas.html", data=resultaat, sort=sort)
 
 
 
@@ -477,6 +477,83 @@ def statistieken_priority():
         themas=themas,
         geselecteerd_thema_id=geselecteerd_thema_id
     )
+
+
+
+
+
+def bereken_activiteitsscore(aantal_vragen, unieke_themas, gemiddelde_maanden_oud):
+    """
+    Combineer aantal vragen, themadiversiteit en actualiteit in één samengestelde score.
+    """
+    # Recenter = hogere actualiteitsscore
+    actualiteit_score = max(0, 1 - (gemiddelde_maanden_oud / 12))
+    # Weging: 60% aantal vragen, 30% diversiteit, 10% recentheid
+    return round((aantal_vragen * 0.6) + (unieke_themas * 0.3) + (actualiteit_score * 10), 2)
+
+
+#2e algoritme: activiteitsscore
+
+@main.route("/statistieken/vv")
+def statistieken_vv():
+    return render_template("statistieken_vv.html")
+
+@main.route("/statistieken/activiteit")
+@cache.cached(timeout=3600)
+def activiteitsscore():
+    """
+    Toont de samengestelde activiteitsscore per volksvertegenwoordiger.
+    Componenten:
+    - Aantal schriftelijke vragen (volume)
+    - Aantal unieke thema’s (diversiteit)
+    - Gemiddelde ouderdom van vragen (actualiteit, in dagen)
+    """
+
+    rows = (
+        db.session.query(
+            Persoon.id.label("id"),
+            Persoon.voornaam,
+            Persoon.naam,
+            Fractie.naam.label("fractie_naam"),
+            func.count(SchriftelijkeVragen.id).label("aantal_vragen"),
+            func.count(func.distinct(ThemaKoppeling.id_thm)).label("unieke_themas"),
+            func.array_agg(SchriftelijkeVragen.ingediend).label("alle_datums")
+        )
+        .join(Persoonfunctie, Persoonfunctie.id_prs == Persoon.id)
+        .join(Fractie, Fractie.id == Persoonfunctie.id_frc)
+        .join(SchriftelijkeVragen, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
+        .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
+        .group_by(Persoon.id, Persoon.voornaam, Persoon.naam, Fractie.naam)
+        .having(func.count(SchriftelijkeVragen.id) > 3)
+        .all()
+    )
+
+    vandaag = date.today()
+    data = []
+
+    for r in rows:
+        datums = [d for d in (r.alle_datums or []) if d is not None]
+        if datums:
+            gemiddelde_dagen = sum((vandaag - d).days for d in datums) / len(datums)
+        else:
+            gemiddelde_dagen = 0
+
+        score = bereken_activiteitsscore(r.aantal_vragen, r.unieke_themas, gemiddelde_dagen / 30)
+        data.append({
+            "naam": f"{r.voornaam} {r.naam}",
+            "fractie": r.fractie_naam,
+            "aantal_vragen": r.aantal_vragen,
+            "unieke_themas": r.unieke_themas,
+            "gem_dagen": round(gemiddelde_dagen, 1),
+            "score": score,
+        })
+
+    data.sort(key=lambda x: x["score"], reverse=True)
+
+    return render_template("statistieken_vv_activiteit.html", data=data)
+
+
+
 
 
 

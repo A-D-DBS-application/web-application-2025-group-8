@@ -18,10 +18,11 @@
         <tr>
           <!-- Klikbare kolomkop voor sorteren op naam -->
           <th>
-            <a href="{{ url_for('main.statistieken_personen', sort='asc' if sort == 'desc' else 'desc') }}"
-               style="text-decoration:none; color:inherit;">
+            <a href="{{ url_for('main.statistieken_vv_themas', sort='asc' if sort == 'desc' else 'desc') }}"
+                style="text-decoration:none; color:inherit;">
               Naam {% if sort == 'asc' %}⬆{% else %}⬇{% endif %}
             </a>
+
           </th>
           <th>Populairst Thema</th>
           <th>Aantal Vragen</th>

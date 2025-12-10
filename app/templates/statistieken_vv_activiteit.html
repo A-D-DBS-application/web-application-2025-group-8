@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Activiteitsscore Volksvertegenwoordigers{% endblock %}
+{% block content %}
+
+<!-- HERO -->
+<section class="hero">
+  <h1 class="hero-title">Activiteitsscore Volksvertegenwoordigers</h1>
+  <p class="hero-subtitle">
+    De score combineert het <strong>aantal schriftelijke vragen</strong>,
+    het <strong>aantal unieke thema’s</strong> en de <strong>recentheid</strong> van de activiteit.
+  </p>
+</section>
+
+<!-- INFO -->
+<section class="info-section">
+  <div class="info-container priority-layout">
+
+    <!-- UITLEG -->
+    <div class="priority-uitleg">
+      <h2>Hoe wordt de activiteitsscore berekend?</h2>
+      <p>
+        De <strong>Activiteitsscore</strong> combineert <strong>kwantiteit</strong>,
+        <strong>diversiteit</strong> en <strong>actualiteit</strong> tot één totaalscore:
+      </p>
+      <ul>
+        <li><strong>Kwantiteit:</strong> aantal schriftelijke vragen (gewicht <strong>60%</strong>)</li>
+        <li><strong>Diversiteit:</strong> aantal unieke thema’s (gewicht <strong>30%</strong>)</li>
+        <li><strong>Actualiteit:</strong> hoe recent de activiteit is (gewicht <strong>10%</strong>)</li>
+      </ul>
+      <p class="priority-tip" style="margin-top:1rem;">
+        <strong>Formule:</strong><br>
+        Activiteitsscore = (0,6 × aantal vragen) + (0,3 × aantal thema’s) + (0,1 × actualiteit)<br>
+        waarbij de <em>actualiteit</em> berekend wordt als:<br>
+        <code>1 − (gemiddelde ouderdom van de vragen ÷ 365 × 12)</code><br>
+        → hoe recenter de vragen, hoe hoger de actualiteitsscore.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- TABEL -->
+<section class="table-section">
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Naam</th>
+          <th>Fractie</th>
+          <th>Aantal vragen</th>
+          <th>Unieke thema’s</th>
+          <th>Gem. ouderdom (dagen)</th>
+          <th>Activiteitsscore</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if data %}
+          {% for p in data %}
+          <tr>
+            <td>{{ p.naam }}</td>
+            <td>{{ p.fractie }}</td>
+            <td class="td-center">{{ p.aantal_vragen }}</td>
+            <td class="td-center">{{ p.unieke_themas }}</td>
+            <td class="td-center">{{ p.gem_dagen }}</td>
+            <td class="td-center"><strong>{{ p.score }}</strong></td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="6" class="geen-data">Geen gegevens beschikbaar.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% endblock %}
