@@ -411,14 +411,14 @@ def actiefste_per_thema_en_kieskring():
 #merk op we beginnen hier te tellen vanaf 2025-10-15. Dit is omdat tot dan de data loopt. 
 #Dit is makkelijk aan te passen in de toekomst indien nodig, wanneer er nieuwe data wordt ingeladen.
 @main.route('/statistieken/priority')
-@cache.cached(timeout=1800, query_string=True)
+@cache.cached(timeout=1800, query_string=True) #cache 30 min per query-string combinatie
 def statistieken_priority():
     try:
-        geselecteerd_thema_id = request.args.get('thema')
-        themas = db.session.query(Thema).order_by(Thema.naam.asc()).all()
+        geselecteerd_thema_id = request.args.get('thema') #lees geselecteerd thema
+        themas = db.session.query(Thema).order_by(Thema.naam.asc()).all() #haal alle thema's op voor dropdown
 
-        # --- Basisquery ---
-        query = (
+        # --- Basisquery ---, bouwt resultaat per vraag met aantal gekoppelde thema's en info over indiener
+        query = ( 
             db.session.query(
                 SchriftelijkeVragen.id,
                 SchriftelijkeVragen.onderwerp,
@@ -426,22 +426,22 @@ def statistieken_priority():
                 SchriftelijkeVragen.tekst,  # bevat eventueel pdf-link
                 Persoon.voornaam,
                 Persoon.naam,
-                func.count(ThemaKoppeling.id_thm).label("aantal_themas")
+                func.count(ThemaKoppeling.id_thm).label("aantal_themas") #geeft aantal thema's per vraag
             )
-            .outerjoin(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
-            .outerjoin(Persoonfunctie, Persoonfunctie.id == SchriftelijkeVragen.id_prsfnc_vs)
-            .outerjoin(Persoon, Persoon.id == Persoonfunctie.id_prs)
+            .outerjoin(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id) #behoud vragen zonder thema's
+            .outerjoin(Persoonfunctie, Persoonfunctie.id == SchriftelijkeVragen.id_prsfnc_vs) #behoud vragen zonder personen
+            .outerjoin(Persoon, Persoon.id == Persoonfunctie.id_prs) #behoud vragen waar persoonsfuncitie ontbreekt in dataset
             .group_by(SchriftelijkeVragen.id, Persoon.voornaam, Persoon.naam)
-        )
+        ) #group by per vraag (tel thema's)
 
         # --- Filter op gekozen thema ---
-        if geselecteerd_thema_id:
-            query = query.filter(
+        if geselecteerd_thema_id: #als gebruiker thema kies filter op vragen met dat thema
+            query = query.filter( 
                 SchriftelijkeVragen.id.in_(
                     db.session.query(ThemaKoppeling.id_schv)
                     .filter(ThemaKoppeling.id_thm == geselecteerd_thema_id)
                 )
-            )
+            ) #subquery haal alle vraag ID's op die dit thema hebben
 
         rows = query.all()
         data = []
@@ -452,23 +452,23 @@ def statistieken_priority():
             if r.ingediend:
                 dagen_verschil = (referentie - r.ingediend).days
                 if dagen_verschil <= 0:
-                    recency_score = 70
+                    recency_score = 70 #vraag van vandaag:70 punten
                 elif dagen_verschil <= 60:
-                    recency_score = max(15, 70 - (dagen_verschil * 0.9))
+                    recency_score = max(15, 70 - (dagen_verschil * 0.9)) #vraag van 30 dagen geleden
                 else:
-                    recency_score = 15
+                    recency_score = 15 #vraag van 60+ dagen geleden
             else:
-                recency_score = 0
+                recency_score = 0 #geen datum
 
             # --- THEMA SCORE (max 30) ---
             thema_score = min(30, r.aantal_themas * 6)
 
             # --- TOTAAL ---
             total_score = round(max(0, recency_score + thema_score), 1)
-            total_score = min(total_score, 100)
+            total_score = min(total_score, 100) #sore optellen en op 100 zetten
 
             # --- PDF-link ---
-            pdf_link = r.tekst if r.tekst and isinstance(r.tekst, str) and r.tekst.startswith("http") else None
+            pdf_link = r.tekst if r.tekst and isinstance(r.tekst, str) and r.tekst.startswith("http") else None #kijk of tekst veld een url bevat, zo ja pak deze als pdf_link
 
             data.append({
                 "onderwerp": r.onderwerp,
@@ -479,8 +479,8 @@ def statistieken_priority():
                 "pdf_url": pdf_link
             })
 
-        data.sort(key=lambda x: x["priority_score"], reverse=True)
-        data = data[:200]
+        data.sort(key=lambda x: x["priority_score"], reverse=True) #sorteer op prioriry score: van HOOG NAAR LAAG
+        data = data[:200] #pak alleen top 200 (sneller,performance)
 
     except OperationalError:
         data, themas, geselecteerd_thema_id = [], [], None
@@ -496,7 +496,7 @@ def statistieken_priority():
 
 #2e algoritme
 #--- SAMENGESTELDE ACTIVITEITSSCORE VOLKSVERTEGENWOORDIGERS ---
-def bereken_activiteitsscore(aantal_vragen, unieke_themas, gemiddelde_maanden_oud):
+def bereken_activiteitsscore(aantal_vragen, unieke_themas, gemiddelde_maanden_oud): #helper functie
     """
     Combineer aantal vragen, themadiversiteit en actualiteit in één samengestelde score.
     """
@@ -521,29 +521,29 @@ def activiteitsscore():
     - Aantal unieke thema’s (diversiteit)
     - Gemiddelde ouderdom van vragen (actualiteit, in dagen)
     """
-
+#query om per persoon aantal vragen, unieke thema's en alle indien datums op te halen
     rows = (
         db.session.query(
             Persoon.id.label("id"),
             Persoon.voornaam,
             Persoon.naam,
             Fractie.naam.label("fractie_naam"),
-            func.count(func.distinct(SchriftelijkeVragen.id)).label("aantal_vragen"),
-            func.count(func.distinct(ThemaKoppeling.id_thm)).label("unieke_themas"),
-            func.array_agg(func.distinct(SchriftelijkeVragen.ingediend)).label("alle_datums")
+            func.count(func.distinct(SchriftelijkeVragen.id)).label("aantal_vragen"), #totaal unieke vragen per persoon
+            func.count(func.distinct(ThemaKoppeling.id_thm)).label("unieke_themas"), #hoeveel verschillende thema's
+            func.array_agg(func.distinct(SchriftelijkeVragen.ingediend)).label("alle_datums") #alle indien datums
         )
-        .join(Persoonfunctie, Persoonfunctie.id_prs == Persoon.id)
-        .join(Fractie, Fractie.id == Persoonfunctie.id_frc)
-        .join(SchriftelijkeVragen, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
-        .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
-        .group_by(Persoon.id, Persoon.voornaam, Persoon.naam, Fractie.naam)
-        .having(func.count(func.distinct(SchriftelijkeVragen.id)) > 3)
+        .join(Persoonfunctie, Persoonfunctie.id_prs == Persoon.id) #vind functies van persoon
+        .join(Fractie, Fractie.id == Persoonfunctie.id_frc) #vind partij van persoon (partij naam)
+        .join(SchriftelijkeVragen, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id) #vindt vragen van persoon, join is inner niet outer zodat personen zonder vragen verdwijnen
+        .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id) #om thema gerelateerde aggregaten te kunnen berekenen
+        .group_by(Persoon.id, Persoon.voornaam, Persoon.naam, Fractie.naam) #groepeer op persoon+partij zodat de aggregaten per persoon worden berekend
+        .having(func.count(func.distinct(SchriftelijkeVragen.id)) > 3) #filter personen met minder dan 4 vragen (niet interessant)
         .all()
-    )
+    ) #query per vv
 
     vandaag = date.today()
     data = []
-
+#bereken gem aantal dagen oud
     for r in rows:
         datums = [d for d in (r.alle_datums or []) if d is not None]
         if datums:
@@ -551,7 +551,7 @@ def activiteitsscore():
         else:
             gemiddelde_dagen = 0
 
-        score = bereken_activiteitsscore(r.aantal_vragen, r.unieke_themas, gemiddelde_dagen / 30)
+        score = bereken_activiteitsscore(r.aantal_vragen, r.unieke_themas, gemiddelde_dagen / 30) #roep helper functie aan om score te berekenen
         data.append({
             "naam": f"{r.voornaam} {r.naam}",
             "fractie": r.fractie_naam,
@@ -561,7 +561,7 @@ def activiteitsscore():
             "score": score,
         })
 
-    data.sort(key=lambda x: x["score"], reverse=True)
+    data.sort(key=lambda x: x["score"], reverse=True) #meest actieve politicie eerst
 
     return render_template("statistieken_vv_activiteit.html", data=data)
 
