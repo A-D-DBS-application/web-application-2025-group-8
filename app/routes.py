@@ -758,45 +758,45 @@ def vv_vragen(vv_id):
 
 
 
-@main.route('/zoeken', methods=['GET', 'POST'])
-def zoeken():
-    resultaten = []
-    trefwoord = ""
+@main.route('/zoeken', methods=['GET', 'POST']) #zoek schriftelijke vragen
+def zoeken(): #functie die zoekpagina en zoekactie afhandelt
+    resultaten = [] #lege lijst om zoekresultaten in op te slaan
+    trefwoord = "" #zoekterm,standaar leeg
 
-    if request.method == 'POST':
-        trefwoord = request.form.get('trefwoord', '').strip()
+    if request.method == 'POST': #alleen bij formulier verzending verwerken we de zoekterm
+        trefwoord = request.form.get('trefwoord', '').strip() #haal trefwoord uit het POST formulier, verwijder eventuele leading/trailing spaces
 
-        if trefwoord:
-            # 🔹 Fuzzy + LIKE search gecombineerd
+        if trefwoord: #alleen zoeken als de gebruiker iets invulde
+            #  Fuzzy + LIKE search gecombineerd
             vragen = (
                 db.session.query(SchriftelijkeVragen)
                 .filter(
-                    (func.similarity(SchriftelijkeVragen.onderwerp, trefwoord) > 0.1) |
-                    (func.similarity(SchriftelijkeVragen.tekst, trefwoord) > 0.1) |
-                    (SchriftelijkeVragen.onderwerp.ilike(f"%{trefwoord}%")) |
-                    (SchriftelijkeVragen.tekst.ilike(f"%{trefwoord}%"))
-                )
+                    (func.similarity(SchriftelijkeVragen.onderwerp, trefwoord) > 0.1) | #vind fuzzy overeenkomsten tussen onderwerp en trerfwoord
+                    (func.similarity(SchriftelijkeVragen.tekst, trefwoord) > 0.1) | #idem fuzzy-vergelijking maar dan voor het tekstveld
+                    (SchriftelijkeVragen.onderwerp.ilike(f"%{trefwoord}%")) | #case-insensitive substring match op onderwerp
+                    (SchriftelijkeVragen.tekst.ilike(f"%{trefwoord}%")) #case insensitive substring-match op tekst
+                ) #deze 4 condities zijn OR gecombineerd: een vraag matcht als 1 van de 4 condities waar is
                 .order_by(
                     func.greatest(
                         func.similarity(SchriftelijkeVragen.onderwerp, trefwoord),
-                        func.similarity(SchriftelijkeVragen.tekst, trefwoord)
+                        func.similarity(SchriftelijkeVragen.tekst, trefwoord) #sorteer op grootste similarity score tussen onderwerp en tekst, aflopend => meest relevante matches bovenaan, daaarna sorter
                     ).desc(),
-                    SchriftelijkeVragen.ingediend.desc()
-                )
-                .limit(100)
+                    SchriftelijkeVragen.ingediend.desc() #sorteer bij gelijke score op datum (tie breaker)
+                ) 
+                .limit(100) #neem max 100 resultaten
                 .all()
-            )
+            ) #resultaat is lijst van schriftelijke vragen
 
             from app.models import Persoonfunctie, Persoon, Fractie
 
-            # 🔹 Verrijk met indiener + fractie + link
+            #  Verrijk met indiener + fractie + link
             for v in vragen:
-                pf = db.session.query(Persoonfunctie).get(v.id_prsfnc_vs)
-                indiener = "-"
-                fractie = "-"
-                if pf:
-                    persoon = db.session.query(Persoon).get(pf.id_prs)
-                    fractie_obj = db.session.query(Fractie).get(pf.id_frc)
+                pf = db.session.query(Persoonfunctie).get(v.id_prsfnc_vs) #haal de persoonsfunctie rij op die de indiener van deze vraag representeert
+                indiener = "-" #default
+                fractie = "-" #default
+                if pf: #als persoonsfunctie bestaat
+                    persoon = db.session.query(Persoon).get(pf.id_prs) #haal de persoon op
+                    fractie_obj = db.session.query(Fractie).get(pf.id_frc) #haal de partij op
                     if persoon:
                         indiener = f"{persoon.voornaam} {persoon.naam}"
                     if fractie_obj:
