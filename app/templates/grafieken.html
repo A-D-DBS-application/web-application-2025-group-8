@@ -69,14 +69,35 @@ let chart, vvChart;
 let gekozenVV = null;
 let gekozenThema = null;
 
-// Mapping zodat JS onze NL-maanden begrijpt
+/*ROBUUSTE MAAND-MAPPING (NL + EN + VARIANTEN)*/
 const monthMap = {
+  // NL afkortingen
   "jan": 1, "feb": 2, "mrt": 3, "apr": 4,
   "mei": 5, "jun": 6, "jul": 7, "aug": 8,
-  "sep": 9, "okt": 10, "nov": 11, "dec": 12
+  "sep": 9, "okt": 10, "nov": 11, "dec": 12,
+
+  // NL met punt
+  "jan.": 1, "feb.": 2, "mrt.": 3, "apr.": 4,
+  "mei.": 5, "jun.": 6, "jul.": 7, "aug.": 8,
+  "sep.": 9, "okt.": 10, "nov.": 11, "dec.": 12,
+
+  // EN afkortingen
+  "jan": 1, "feb": 2, "mar": 3, "apr": 4,
+  "may": 5, "jun": 6, "jul": 7, "aug": 8,
+  "sep": 9, "oct": 10, "nov": 11, "dec": 12,
+
+  // EN met punt
+  "jan.": 1, "feb.": 2, "mar.": 3, "apr.": 4,
+  "may.": 5, "jun.": 6, "jul.": 7, "aug.": 8,
+  "sep.": 9, "oct.": 10, "nov.": 11, "dec.": 12,
+
+  // Full English names
+  "january": 1, "february": 2, "march": 3, "april": 4,
+  "may": 5, "june": 6, "july": 7, "august": 8,
+  "september": 9, "october": 10, "november": 11, "december": 12
 };
 
-// Tabs
+/*TAB-SWITCHING*/
 const tabThema = document.getElementById("tabThema");
 const tabVV = document.getElementById("tabVV");
 const themaDiv = document.getElementById("themaDiv");
@@ -100,14 +121,13 @@ tabVV.addEventListener("click", () => {
   themaDiv.style.display = "none";
 });
 
-// === GRAFIEK PER THEMA ===
+/*GRAFIEK PER THEMA*/
 document.getElementById("toonGrafiek").addEventListener("click", async () => {
   const themaId = document.getElementById("themaSelect").value;
   if (!themaId) return alert("Selecteer eerst een thema.");
   gekozenThema = themaId;
 
   const response = await fetch(`/grafieken/data/${themaId}`);
-  if (!response.ok) return alert("Kon geen data ophalen voor dit thema.");
   const data = await response.json();
 
   const ctx = document.getElementById("evolutieChart").getContext("2d");
@@ -130,14 +150,11 @@ document.getElementById("toonGrafiek").addEventListener("click", async () => {
         fill: true
       }]
     },
-    options: {
-      scales: { y: { beginAtZero: true } },
-      plugins: { legend: { display: true, position: 'bottom' } }
-    }
+    options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: true, position: 'bottom' } } }
   });
 });
 
-// === KLIK OP PUNT IN GRAFIEK PER THEMA (met NL-maand fix) ===
+/*KLIK OP PUNT IN GRAFIEK (THEMA)*/
 document.getElementById("evolutieChart").onclick = async (evt) => {
   if (!chart || !gekozenThema) return;
 
@@ -146,12 +163,10 @@ document.getElementById("evolutieChart").onclick = async (evt) => {
 
   const point = points[0];
   const label = chart.data.labels[point.index];
-
   const [maandStr, jaarStr] = label.split(" ");
+
   const maand = monthMap[maandStr.toLowerCase()];
   const jaar = parseInt(jaarStr);
-
-  if (!maand) return alert("Ongeldige maand: " + maandStr);
 
   const resp = await fetch(`/grafieken/thema_vragen/${gekozenThema}/${jaar}/${maand}`);
   const vragen = await resp.json();
@@ -170,7 +185,7 @@ document.getElementById("evolutieChart").onclick = async (evt) => {
   win.document.write(`<html><body style='font-family:sans-serif;'>${html}</body></html>`);
 };
 
-// === AUTOCOMPLETE VOOR VV ===
+/*AUTOCOMPLETE VV*/
 const input = document.getElementById('vvInput');
 const suggestiesDiv = document.getElementById('vvSuggesties');
 
@@ -193,7 +208,7 @@ suggestiesDiv.addEventListener('click', e => {
   suggestiesDiv.innerHTML = '';
 });
 
-// === GRAFIEK PER VV ===
+/*GRAFIEK PER VV*/
 document.getElementById("toonVV").addEventListener("click", async () => {
   if (!gekozenVV) return alert("Selecteer eerst een volksvertegenwoordiger.");
   window.selectedVV = gekozenVV;
@@ -225,7 +240,7 @@ document.getElementById("toonVV").addEventListener("click", async () => {
   });
 });
 
-// === KLIK OP PUNT IN GRAFIEK PER VV (met NL-maand fix) ===
+/* KLIK OP PUNT IN VV-GRAFIEK */
 document.getElementById("vvChart").onclick = async (evt) => {
   if (!vvChart || !window.selectedVV) return;
 
@@ -234,12 +249,10 @@ document.getElementById("vvChart").onclick = async (evt) => {
 
   const point = points[0];
   const label = vvChart.data.labels[point.index];
-
   const [maandStr, jaarStr] = label.split(" ");
+
   const maand = monthMap[maandStr.toLowerCase()];
   const jaar = parseInt(jaarStr);
-
-  if (!maand) return alert("Ongeldige maand: " + maandStr);
 
   const resp = await fetch(`/grafieken/vv_vragen/${window.selectedVV}/${jaar}/${maand}`);
   const vragen = await resp.json();
@@ -257,7 +270,6 @@ document.getElementById("vvChart").onclick = async (evt) => {
   const win = window.open("", "_blank", "width=600,height=600,scrollbars=yes");
   win.document.write(`<html><body style='font-family:sans-serif;'>${html}</body></html>`);
 };
-
 </script>
 
 {% endblock %}
