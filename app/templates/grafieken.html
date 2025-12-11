@@ -1,9 +1,6 @@
-<!-- GRAFIEKEN WEL VOLLEDIG INLINE -->
-
 {% extends "base.html" %}
 {% block body_class %}page-grafieken{% endblock %}
 {% block content %}
-
 
 <!-- HERO -->
 <section class="hero hero-grafieken">
@@ -14,14 +11,12 @@
   </p>
 </section>
 
-
 <!-- KEUZE & GRAFIEKEN -->
 <section class="grafieken-section">
 
-
   <!-- Tabs -->
   <div style="margin-bottom:2rem;">
-    <button id="tabThema" 
+    <button id="tabThema"
             style="padding:0.5rem 1rem; border:none; border-radius:6px 0 0 6px; background:#2563eb; color:white; cursor:pointer;">
       Per Thema
     </button>
@@ -41,7 +36,7 @@
       {% endfor %}
     </select>
 
-    <button id="toonGrafiek" 
+    <button id="toonGrafiek"
             style="margin-left:1rem; padding:0.5rem 1rem; background:#2563eb; color:white; border:none; border-radius:6px; cursor:pointer;">
       Toon grafiek
     </button>
@@ -66,8 +61,6 @@
     </div>
   </div>
 
-
-
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -75,6 +68,13 @@
 let chart, vvChart;
 let gekozenVV = null;
 let gekozenThema = null;
+
+// Mapping zodat JS onze NL-maanden begrijpt
+const monthMap = {
+  "jan": 1, "feb": 2, "mrt": 3, "apr": 4,
+  "mei": 5, "jun": 6, "jul": 7, "aug": 8,
+  "sep": 9, "okt": 10, "nov": 11, "dec": 12
+};
 
 // Tabs
 const tabThema = document.getElementById("tabThema");
@@ -99,7 +99,6 @@ tabVV.addEventListener("click", () => {
   vvDiv.style.display = "block";
   themaDiv.style.display = "none";
 });
-
 
 // === GRAFIEK PER THEMA ===
 document.getElementById("toonGrafiek").addEventListener("click", async () => {
@@ -138,36 +137,38 @@ document.getElementById("toonGrafiek").addEventListener("click", async () => {
   });
 });
 
-
-// === KLIK OP PUNT IN GRAFIEK PER THEMA ===
+// === KLIK OP PUNT IN GRAFIEK PER THEMA (met NL-maand fix) ===
 document.getElementById("evolutieChart").onclick = async (evt) => {
   if (!chart || !gekozenThema) return;
+
   const points = chart.getElementsAtEventForMode(evt, "nearest", { intersect: true }, true);
   if (!points.length) return;
 
   const point = points[0];
   const label = chart.data.labels[point.index];
+
   const [maandStr, jaarStr] = label.split(" ");
-  const maand = new Date(Date.parse(maandStr + " 1, " + jaarStr)).getMonth() + 1;
+  const maand = monthMap[maandStr.toLowerCase()];
   const jaar = parseInt(jaarStr);
 
-  const response = await fetch(`/grafieken/thema_vragen/${gekozenThema}/${jaar}/${maand}`);
-  const data = await response.json();
+  if (!maand) return alert("Ongeldige maand: " + maandStr);
 
-  if (!data.length) return alert(`Geen schriftelijke vragen in ${label} voor dit thema.`);
+  const resp = await fetch(`/grafieken/thema_vragen/${gekozenThema}/${jaar}/${maand}`);
+  const vragen = await resp.json();
+
+  if (!vragen.length) return alert(`Geen schriftelijke vragen in ${label}.`);
 
   let html = `<h3>Vragen van ${label}</h3><ul>`;
-  data.forEach(v => {
-    html += `<li><b>${v.datum}</b> — ${v.onderwerp}`;
-    if (v.link) html += ` — <a href="${v.link}" target="_blank" style="color:#2563eb;">[pdf vraag]</a>`;
-    html += `</li>`;
+  vragen.forEach(v => {
+    html += `<li><b>${v.datum}</b> — ${v.onderwerp}${
+      v.link ? ` — <a href="${v.link}" target="_blank" style="color:#2563eb;">[pdf]</a>` : ""
+    }</li>`;
   });
   html += "</ul>";
 
   const win = window.open("", "_blank", "width=600,height=600,scrollbars=yes");
   win.document.write(`<html><body style='font-family:sans-serif;'>${html}</body></html>`);
 };
-
 
 // === AUTOCOMPLETE VOOR VV ===
 const input = document.getElementById('vvInput');
@@ -191,7 +192,6 @@ suggestiesDiv.addEventListener('click', e => {
   input.value = e.target.innerText;
   suggestiesDiv.innerHTML = '';
 });
-
 
 // === GRAFIEK PER VV ===
 document.getElementById("toonVV").addEventListener("click", async () => {
@@ -225,35 +225,39 @@ document.getElementById("toonVV").addEventListener("click", async () => {
   });
 });
 
-
-// === KLIK OP PUNT IN GRAFIEK PER VV ===
+// === KLIK OP PUNT IN GRAFIEK PER VV (met NL-maand fix) ===
 document.getElementById("vvChart").onclick = async (evt) => {
   if (!vvChart || !window.selectedVV) return;
+
   const points = vvChart.getElementsAtEventForMode(evt, "nearest", { intersect: true }, true);
   if (!points.length) return;
 
   const point = points[0];
   const label = vvChart.data.labels[point.index];
+
   const [maandStr, jaarStr] = label.split(" ");
-  const maand = new Date(Date.parse(maandStr + " 1, " + jaarStr)).getMonth() + 1;
+  const maand = monthMap[maandStr.toLowerCase()];
   const jaar = parseInt(jaarStr);
 
-  const response = await fetch(`/grafieken/vv_vragen/${window.selectedVV}/${jaar}/${maand}`);
-  const data = await response.json();
+  if (!maand) return alert("Ongeldige maand: " + maandStr);
 
-  if (!data.length) return alert(`Geen schriftelijke vragen in ${label} voor deze volksvertegenwoordiger.`);
+  const resp = await fetch(`/grafieken/vv_vragen/${window.selectedVV}/${jaar}/${maand}`);
+  const vragen = await resp.json();
+
+  if (!vragen.length) return alert(`Geen schriftelijke vragen in ${label}.`);
 
   let html = `<h3>Vragen van ${label}</h3><ul>`;
-  data.forEach(v => {
-    html += `<li><b>${v.datum}</b> — ${v.onderwerp}`;
-    if (v.link) html += ` — <a href="${v.link}" target="_blank" style="color:#2563eb;">[pdf vraag]</a>`;
-    html += `</li>`;
+  vragen.forEach(v => {
+    html += `<li><b>${v.datum}</b> — ${v.onderwerp}${
+      v.link ? ` — <a href="${v.link}" target="_blank" style="color:#2563eb;">[pdf]</a>` : ""
+    }</li>`;
   });
   html += "</ul>";
 
   const win = window.open("", "_blank", "width=600,height=600,scrollbars=yes");
   win.document.write(`<html><body style='font-family:sans-serif;'>${html}</body></html>`);
 };
+
 </script>
 
 {% endblock %}

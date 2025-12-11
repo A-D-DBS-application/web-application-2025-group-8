@@ -865,26 +865,6 @@ def schriftelijke_vragen():
 
 
 
-#verwijst naar ons recomendation algoritme
-from app.recommendations import vergelijkbare_vragen
-
-@main.route("/vraag/<int:vraag_id>")
-def vraag_detail(vraag_id):
-    vraag = SchriftelijkeVragen.query.get_or_404(vraag_id)
-    similar = vergelijkbare_vragen(vraag_id)
-
-    return render_template("vraag_detail.html", vraag=vraag, similar=similar)
-
-from app.recommendations import actieve_politici_for_thema
-
-@main.route("/thema/<int:thema_id>")
-def thema_detail(thema_id):
-    thema = Thema.query.get_or_404(thema_id)
-    actieve = actieve_politici_for_thema(thema_id)
-
-    return render_template("thema_detail.html", thema=thema, actieve=actieve)
-
-
 
 from datetime import timedelta
 
