@@ -571,14 +571,14 @@ def activiteitsscore():
 
 
 # --- VOLKSVERTEGENWOORDIGERS MET PYTHON-SORTERING ---
-@main.route('/volksvertegenwoordigers')
+@main.route('/volksvertegenwoordigers') #verkozenen pagina
 def volksvertegenwoordigers():
     # Sorteervolgorde (asc of desc) en kolom via queryparameters
     sort = request.args.get("sort", "asc")
     kolom = request.args.get("kolom", "naam")  # standaard op naam
 
     try:
-        # Query: haal alle gegevens in één keer op
+        # Query: haal alle gegevens in één keer op per persoon
         rows = (
             db.session.query(
                 Persoon.id,
@@ -586,27 +586,27 @@ def volksvertegenwoordigers():
                 Persoon.naam,
                 Persoon.kieskring,
                 Persoon.geboortedatum,
-                Fractie.naam.label("fractie"),
-                Functies.naam.label("functie")
+                Fractie.naam.label("fractie"), #partij naam
+                Functies.naam.label("functie") #functieomschrijving
             )
-            .join(Persoonfunctie, Persoonfunctie.id_prs == Persoon.id)
-            .join(Fractie, Fractie.id == Persoonfunctie.id_frc, isouter=True)
+            .join(Persoonfunctie, Persoonfunctie.id_prs == Persoon.id) #koppel persoon met persoonsfunctie(een persoon kan meerdere functies hebben)
+            .join(Fractie, Fractie.id == Persoonfunctie.id_frc, isouter=True) #outerjoins zodat ook records zonder gekoppelde fractie/functie behouden worden
             .join(Functies, Functies.id == Persoonfunctie.id_fnc, isouter=True)
             .all()
         )
 
         # Leeftijd berekenen
         def bereken_leeftijd(geboortedatum):
-            if geboortedatum:
+            if geboortedatum: #als geboortedatum bestaat bereken dan de leeftijd
                 vandaag = date.today()
                 leeftijd = (
                     vandaag.year - geboortedatum.year -
-                    ((vandaag.month, vandaag.day) < (geboortedatum.month, geboortedatum.day))
+                    ((vandaag.month, vandaag.day) < (geboortedatum.month, geboortedatum.day)) #check of al verjaard is dit jaar zo nee trek dan 1 af
                 )
                 return leeftijd
             return None
 
-        # Structureren
+        # Structureren, door aanmaken LIJST VAN DICTS, gebruik van or om lege waarden te vervangen door "-"
         data = [
             {
                 "id": r.id,
@@ -621,9 +621,9 @@ def volksvertegenwoordigers():
 
         # Sorteren in Python (A–Z of Z–A op gekozen kolom)
         reverse = sort == "desc"
-        data.sort(key=lambda x: (x[kolom] or "").lower() if isinstance(x[kolom], str) else (x[kolom] or 0), reverse=reverse)
+        data.sort(key=lambda x: (x[kolom] or "").lower() if isinstance(x[kolom], str) else (x[kolom] or 0), reverse=reverse) #sorteerd op door gebruiker gekozen kolom
 
-    except OperationalError:
+    except OperationalError: #is er een fout zet data=[] om 500 te voorkomen
         data = []
 
     # Doorsturen naar template
@@ -633,7 +633,7 @@ def volksvertegenwoordigers():
 
 from uuid import UUID as UUIDType
 
-@main.route('/vv/<uuid:vv_id>/vragen')
+@main.route('/vv/<uuid:vv_id>/vragen') #dit stukje code levert de pagina met schriftelijke vragen van één volksvertegenwoordiger
 def vv_vragen(vv_id):
     """
     Toont schriftelijke vragen voor een persoon:
@@ -647,23 +647,23 @@ def vv_vragen(vv_id):
         # Check of persoon een minister is (functie bevat "minister" of code bevat "min")
         is_minister = (
             db.session.query(Persoonfunctie)
-            .join(Functies, Functies.id == Persoonfunctie.id_fnc)
-            .filter(Persoonfunctie.id_prs == vv_id)
+            .join(Functies, Functies.id == Persoonfunctie.id_fnc) #join om functies te kunnen checken
+            .filter(Persoonfunctie.id_prs == vv_id) #beperk je tot persoonsfuncties voor de persoon met id=vv_id
             .filter(
                 (func.lower(Functies.naam).like("%minister%")) |
                 (func.lower(Functies.code).like("%min%"))
-            )
-            .first()
-        ) is not None
+            ) #match met functienamen die de string 'minister' of 'min' bevatten
+            .first() #first=haal de eerset match op, retourneert None als er geen match is
+        ) is not None  # hiermee zet je resultaten om naar BOOLEAN: TRUE ALS MINISTER
         
         if is_minister:
             # Minister: toon vragen die deze persoon heeft BEANTWOORD
             persoonfuncties = (
                 db.session.query(Persoonfunctie.id)
-                .filter(Persoonfunctie.id_prs == vv_id)
+                .filter(Persoonfunctie.id_prs == vv_id) #haal alle persoonsfunctie id's op die bij deze minister horen
                 .all()
-            )
-            pf_ids = [pf.id for pf in persoonfuncties]
+            ) #verzameld dus alle functie id's van de gegeven persoon
+            pf_ids = [pf.id for pf in persoonfuncties] #hier zitten alle vragen in die de minister heeft beantwoord
             
             if not pf_ids:
                 vragen_rows = []
@@ -675,16 +675,16 @@ def vv_vragen(vv_id):
                         Persoon.naam,
                         Fractie.naam.label("fractie_naam")
                     )
-                    .filter(SchriftelijkeVragen.id_prsfnc_min.in_(pf_ids))
+                    .filter(SchriftelijkeVragen.id_prsfnc_min.in_(pf_ids)) #hpud enkel vragen waarvan het veld id_prsfnc_min(de functie id vd beantwoordder) in de lijst pf_ids zit
                     .join(
                         Persoonfunctie,
                         SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id
-                    )
-                    .join(Persoon, Persoon.id == Persoonfunctie.id_prs)
-                    .outerjoin(Fractie, Fractie.id == Persoonfunctie.id_frc)
-                    .order_by(SchriftelijkeVragen.ingediend.desc())
+                    ) #verbind de vraag met de persoonsfunctie die de vraag indiendee(indiener)
+                    .join(Persoon, Persoon.id == Persoonfunctie.id_prs) #om voornaam en achernaam van indiener op te halen
+                    .outerjoin(Fractie, Fractie.id == Persoonfunctie.id_frc) #om partij van indiener te tonen (outerjoin om te voorkomen dat een ontbrekende fractie de rij wegfiltert)
+                    .order_by(SchriftelijkeVragen.ingediend.desc()) #sorteer op indien datum, nieuwste vragen eerst
                     .all()
-                )
+                ) #vind alle vragen die deze minister heeft beantwoord
             
             title = f"Beantwoorde vragen - {persoon.voornaam} {persoon.naam}"
             
@@ -694,11 +694,11 @@ def vv_vragen(vv_id):
                 db.session.query(Persoonfunctie.id)
                 .filter(Persoonfunctie.id_prs == vv_id)
                 .all()
-            )
-            pf_ids = [pf.id for pf in persoonfuncties]
+            ) #haal alle persoonsfunctie_id voor deze persoon op, resultaat een lijst van functie_id's
+            pf_ids = [pf.id for pf in persoonfuncties] #zet query resultaat om naar python lijst van integers
             
             if not pf_ids:
-                vragen_rows = []
+                vragen_rows = [] #controleer of persoon uberhaupt functies heeft
             else:
                 vragen_rows = (
                     db.session.query(
@@ -707,14 +707,14 @@ def vv_vragen(vv_id):
                         Persoon.naam,
                         Fractie.naam.label("fractie_naam")
                     )
-                    .filter(SchriftelijkeVragen.id_prsfnc_vs.in_(pf_ids))
+                    .filter(SchriftelijkeVragen.id_prsfnc_vs.in_(pf_ids)) #houd vragen waarvan de indiener_functie in pf_ids staat
                     .join(  #we tonen de minister!
                         Persoonfunctie,
                         SchriftelijkeVragen.id_prsfnc_min == Persoonfunctie.id
-                    )
-                    .join(Persoon, Persoon.id == Persoonfunctie.id_prs)
-                    .outerjoin(Fractie, Fractie.id == Persoonfunctie.id_frc)
-                    .order_by(SchriftelijkeVragen.ingediend.desc())
+                    ) #join om de functie van de minister te vinden die antoordde
+                    .join(Persoon, Persoon.id == Persoonfunctie.id_prs) #haal voornaam en achternaam op van minister
+                    .outerjoin(Fractie, Fractie.id == Persoonfunctie.id_frc) #outerjoin om partij van de beantwoorder te tonen(outer om geen rijen te verliezen indien geen fractie)
+                    .order_by(SchriftelijkeVragen.ingediend.desc()) #sorteer op indien datum, nieuwste eerst
                     .all()
                 )
             
@@ -724,28 +724,28 @@ def vv_vragen(vv_id):
         data = []
         for row in vragen_rows:
             vraag = row.SchriftelijkeVragen
-            indiener = f"{row.voornaam} {row.naam}"
-            fractie = row.fractie_naam or "-"
+            indiener = f"{row.voornaam} {row.naam}" #maak volledige naam van persoon
+            fractie = row.fractie_naam or "-" #haal fractie naam op
             
             # Probeer link uit tekst te extraheren
             link = vraag.tekst if vraag.tekst and vraag.tekst.startswith("http") else None
             
             data.append({
                 "onderwerp": vraag.onderwerp,
-                "indiener": indiener,
+                "indiener": indiener, #volledige naam van wie vraag stelde (normaal case), of beantwoorde(minister case)
                 "fractie": fractie,
                 "datum": vraag.ingediend.strftime("%Y-%m-%d") if vraag.ingediend else "-",
                 "link": link
             })
         
         # Bepaal het type (minister of volksvertegenwoordiger) voor de info-sectie
-        vv_type = "minister" if is_minister else "volksvertegenwoordiger"
-        vv_name = f"{persoon.voornaam} {persoon.naam}"
-        vraag_count = len(data)
+        vv_type = "minister" if is_minister else "volksvertegenwoordiger" #zet of minister of volksvertegenwoordiger afhankelijk van de boleaan waarde is_minister
+        vv_name = f"{persoon.voornaam} {persoon.naam}" #volledige naam van persoon waarvan je pagina bekijkt
+        vraag_count = len(data) #tel hoeveel vragen er zijn
         
         return render_template(
             "schriftelijke_vragen.html",
-            vragen=data,
+            vragen=data, #lijst van vraag-dicts
             title=title,
             vv_type=vv_type,
             vv_name=vv_name,
