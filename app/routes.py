@@ -767,7 +767,7 @@ def zoeken(): #functie die zoekpagina en zoekactie afhandelt
         trefwoord = request.form.get('trefwoord', '').strip() #haal trefwoord uit het POST formulier, verwijder eventuele leading/trailing spaces
 
         if trefwoord: #alleen zoeken als de gebruiker iets invulde
-            #  Fuzzy + LIKE search gecombineerd
+            #  Fuzzy + LIKE search gecombineerd,fuzzy vangt spelfouten en nabije matches, Like vangt impliciete substring op
             vragen = (
                 db.session.query(SchriftelijkeVragen)
                 .filter(
@@ -777,7 +777,7 @@ def zoeken(): #functie die zoekpagina en zoekactie afhandelt
                     (SchriftelijkeVragen.tekst.ilike(f"%{trefwoord}%")) #case insensitive substring-match op tekst
                 ) #deze 4 condities zijn OR gecombineerd: een vraag matcht als 1 van de 4 condities waar is
                 .order_by(
-                    func.greatest(
+                    func.greatest( #neem hoogste van 2 similarity scores (onderwerp of tekst)
                         func.similarity(SchriftelijkeVragen.onderwerp, trefwoord),
                         func.similarity(SchriftelijkeVragen.tekst, trefwoord) #sorteer op grootste similarity score tussen onderwerp en tekst, aflopend => meest relevante matches bovenaan, daaarna sorter
                     ).desc(),
