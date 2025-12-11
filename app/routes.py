@@ -934,7 +934,7 @@ def actieve_themas():
 
 
 # grafieken 
-from flask import render_template, jsonify, request
+from flask import render_template, jsonify, request #flask hulpmiddelen voor JSON-responses
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from sqlalchemy import func
@@ -942,10 +942,10 @@ from app import db
 from app.models import Thema, SchriftelijkeVragen, ThemaKoppeling
 
 
-@main.route("/grafieken")
+@main.route("/grafieken") #functie die pagina met grafieken toont
 def grafieken():
-    """Toont dropdown met alle thema’s."""
-    themas = db.session.query(Thema).order_by(Thema.naam.asc()).all()
+    """Toont dropdown met alle thema’s.""" #template krijgt alle thama's zodat er een dropdown gebouwd kan worde
+    themas = db.session.query(Thema).order_by(Thema.naam.asc()).all() #query alle thema's en sorteer ze alfabetisch
     return render_template("grafieken.html", themas=themas)
 
 
@@ -960,31 +960,31 @@ def grafieken_data(thema_id):
 
     resultaten = (
         db.session.query(
-            func.date_trunc("month", SchriftelijkeVragen.ingediend).label("maand"),
-            func.count(SchriftelijkeVragen.id)
+            func.date_trunc("month", SchriftelijkeVragen.ingediend).label("maand"), #geeft datum terug van begin van de maand,zodat je per maand kunt groeperen
+            func.count(SchriftelijkeVragen.id) #telt aantal vragen per maand
         )
-        .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
-        .filter(ThemaKoppeling.id_thm == thema_id)
-        .filter(SchriftelijkeVragen.ingediend >= begin_datum)
-        .filter(SchriftelijkeVragen.ingediend <= eind_datum)
-        .group_by(func.date_trunc("month", SchriftelijkeVragen.ingediend))
-        .order_by(func.date_trunc("month", SchriftelijkeVragen.ingediend))
+        .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id) #koppelt vragen aan thema koppeling
+        .filter(ThemaKoppeling.id_thm == thema_id) #beperkt tot koppelingen voor het gevraagde thema_id
+        .filter(SchriftelijkeVragen.ingediend >= begin_datum) #beperken tot vaste periode
+        .filter(SchriftelijkeVragen.ingediend <= eind_datum) #idem
+        .group_by(func.date_trunc("month", SchriftelijkeVragen.ingediend)) #groepeert per maand
+        .order_by(func.date_trunc("month", SchriftelijkeVragen.ingediend)) #sorteer op maand (chronologisch)
         .all()
-    )
+    ) #selecteer per maand het aantal vragen die gekoppeld zijn aan het thema
 
-    maand_dict = {r[0].strftime("%Y-%m"): r[1] for r in resultaten}
+    maand_dict = {r[0].strftime("%Y-%m"): r[1] for r in resultaten} #di t voor snelle lookup r[0] is de maand, r[1]is het aantal
 
-    labels, values = [], []
-    huidige = begin_datum
+    labels, values = [], [] #initialiseert lijsten voor JSON
+    huidige = begin_datum 
     maanden = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"]
 
-    while huidige <= eind_datum:
-        key = huidige.strftime("%Y-%m")
-        labels.append(f"{maanden[huidige.month - 1]} {huidige.year}")
-        values.append(maand_dict.get(key, 0))
-        huidige += relativedelta(months=1)
+    while huidige <= eind_datum:#loop van begin tot einde elke maand
+        key = huidige.strftime("%Y-%m") #sleutel voor lookup in maand_dict
+        labels.append(f"{maanden[huidige.month - 1]} {huidige.year}") #voegt label toe bv 'apr 2025
+        values.append(maand_dict.get(key, 0)) #voegt het aantal toe of 0 als geen gegevens voor die maand
+        huidige += relativedelta(months=1) #ga naar volgende maand, GEBRUIK RELATIVEDELTA ZODAT EINDEN VAN MAANDEN GOED WERKEN
 
-    return jsonify({"labels": labels, "values": values})
+    return jsonify({"labels": labels, "values": values}) #stuur JSON terug
 
 
 
