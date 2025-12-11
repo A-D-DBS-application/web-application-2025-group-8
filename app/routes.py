@@ -825,17 +825,17 @@ def schriftelijke_vragen():
     try:
         vragen = (
             db.session.query(SchriftelijkeVragen)
-            .filter(SchriftelijkeVragen.ingediend.isnot(None))
-            .order_by(SchriftelijkeVragen.ingediend.desc())
+            .filter(SchriftelijkeVragen.ingediend.isnot(None)) #alleen vragen met een indiendatum
+            .order_by(SchriftelijkeVragen.ingediend.desc()) #neem 50 meest recente ingediende vragen, aflopend op datum
             .limit(50)
             .all()
         )
 
         data = []
-        for v in vragen:
-            pf = db.session.query(Persoonfunctie).get(v.id_prsfnc_vs)
-            indiener = "-"
-            fractie = "-"
+        for v in vragen: #voor elke vraag
+            pf = db.session.query(Persoonfunctie).get(v.id_prsfnc_vs) #haal bijbehorende persoonsfunctie op
+            indiener = "-" #default
+            fractie = "-" #default
             if pf:
                 persoon = db.session.query(Persoon).get(pf.id_prs)
                 fractie_obj = db.session.query(Fractie).get(pf.id_frc)
@@ -844,8 +844,8 @@ def schriftelijke_vragen():
                 if fractie_obj:
                     fractie = fractie_obj.naam
 
-            # ✅ Nieuw: link toevoegen als het een echte URL is
-            link = v.tekst if v.tekst and v.tekst.startswith("http") else None
+            #  Nieuw: link toevoegen als het een echte URL is
+            link = v.tekst if v.tekst and v.tekst.startswith("http") else None #als het tekstveld begint met 'http' wordt het als een echte url gezien
 
             data.append({
                 "onderwerp": v.onderwerp,
@@ -855,7 +855,7 @@ def schriftelijke_vragen():
                 "link": link
             })
 
-        data.sort(key=lambda x: x["datum"], reverse=True)
+        data.sort(key=lambda x: x["datum"], reverse=True) #sorteer op datum, aflopend
 
     except OperationalError as e:
         print("❌ Databasefout:", e)
@@ -868,55 +868,55 @@ def schriftelijke_vragen():
 
 from datetime import timedelta
 
-@main.route('/actieve_themas')
+@main.route('/actieve_themas') #welke thema's zijn meest actief in laatste 30 dagen,vergelijkst met vorige 30 dagen en berekent % verschil
 def actieve_themas():
     try:
-        # 🔹 Bepaal de meest recente datum van indiening
-        laatste_vraag_datum = db.session.query(func.max(SchriftelijkeVragen.ingediend)).scalar()
+        #  Bepaal de meest recente datum van indiening
+        laatste_vraag_datum = db.session.query(func.max(SchriftelijkeVragen.ingediend)).scalar() #vraagt meest recente datum op uit schriftelijke vragen, wordt gebruikt als eindpunt voor recentste periode
 
         if not laatste_vraag_datum:
             print("⚠️ Geen data gevonden in SchriftelijkeVragen.")
             return render_template("actieve_themas.html", data=[])
 
-        # 🔹 Bereken het 30-dagenvenster vanaf die laatste vraag
-        maand_geleden = laatste_vraag_datum - timedelta(days=30)
-        vorige_maand_start = maand_geleden - timedelta(days=30)
+        #  Bereken het 30-dagenvenster vanaf die laatste vraag
+        maand_geleden = laatste_vraag_datum - timedelta(days=30) #bepaald begin van laatste 30 dagen periode(30 dagen voor de laatste vraag)
+        vorige_maand_start = maand_geleden - timedelta(days=30) #bepaald begin van de vorige 30 dagen periode
 
-        # 🔹 Vragen per thema in de 'laatste 30 dagen'
+        #  Vragen per thema in de 'laatste 30 dagen'
         recent = (
             db.session.query(Thema.naam, func.count(SchriftelijkeVragen.id).label("aantal"))
             .join(ThemaKoppeling, Thema.id == ThemaKoppeling.id_thm)
             .join(SchriftelijkeVragen, SchriftelijkeVragen.id == ThemaKoppeling.id_schv)
             .filter(SchriftelijkeVragen.ingediend.between(maand_geleden, laatste_vraag_datum))
-            .group_by(Thema.naam)
-            .order_by(func.count(SchriftelijkeVragen.id).desc())
-            .limit(10)
+            .group_by(Thema.naam) #goepeert op thema naam
+            .order_by(func.count(SchriftelijkeVragen.id).desc()) #sorteer aflopend op aantal
+            .limit(10) #neemt top 10
             .all()
         )
 
-        # 🔹 Zelfde thema’s maar vorige maand
+        #  Zelfde thema’s maar vorige maand
         vorige = dict(
             db.session.query(Thema.naam, func.count(SchriftelijkeVragen.id))
             .join(ThemaKoppeling, Thema.id == ThemaKoppeling.id_thm)
             .join(SchriftelijkeVragen, SchriftelijkeVragen.id == ThemaKoppeling.id_schv)
-            .filter(SchriftelijkeVragen.ingediend.between(vorige_maand_start, maand_geleden))
+            .filter(SchriftelijkeVragen.ingediend.between(vorige_maand_start, maand_geleden)) #selet alleen rijen waarvan het veld ingediend tussen maand_geleden en laatste_vraa_datum ligt
             .group_by(Thema.naam)
             .all()
         )
 
         data = []
         for naam, aantal in recent:
-            oud = vorige.get(naam, 0)
+            oud = vorige.get(naam, 0) #aantal uit vorige periode
             verschil = aantal - oud
 
-            if oud == 0:
+            if oud == 0: #als thema niet in oud zit
                 pct = 0
-                nieuw = True
+                nieuw = True #nieuw thema in recente periode
             else:
-                pct = round((verschil / oud * 100), 1)
+                pct = round((verschil / oud * 100), 1) #percentage verschil berekenen
                 nieuw = False
 
-            positief = pct >= 0
+            positief = pct >= 0 #boolean die aangeeft of het percentage positief is
             data.append({
                 "thema": naam,
                 "aantal": aantal,
