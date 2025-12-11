@@ -1014,7 +1014,6 @@ def vv_suggesties():
 
 # --- DATA VOOR GRAFIEK PER VOLKSVERTEGENWOORDIGER ---
 @main.route("/grafieken/vv_data/<uuid:vv_id>")
-@main.route("/grafieken/vv_data/<uuid:vv_id>")
 def vv_data(vv_id):
     from app.models import Persoonfunctie
 
