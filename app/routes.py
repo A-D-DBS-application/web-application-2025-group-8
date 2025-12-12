@@ -995,21 +995,21 @@ def vv_suggesties():
     """Zoekt volksvertegenwoordigers bij naam (voornaam + achternaam)."""
     from app.models import Persoon
 
-    term = request.args.get("q", "").strip().lower()
-    if not term:
-        return jsonify([])
+    term = request.args.get("q", "").strip().lower() #haalt de zoekterm op, verwijdert witruimte en zet om naar kleine letters voor case-insensitive matching
+    if not term: #indien geen zoekterm
+        return jsonify([])  #geeft lege JSON lijt
 
     suggesties = (
         db.session.query(Persoon)
         .filter(func.lower(Persoon.voornaam + ' ' + Persoon.naam).like(f"%{term}%"))
-        .order_by(Persoon.naam.asc())
+        .order_by(Persoon.naam.asc()) #sorteer resultaten op achernaam
         .limit(10)
         .all()
     )
 
     return jsonify([
         {"id": str(p.id), "naam": f"{p.voornaam} {p.naam}"} for p in suggesties
-    ])
+    ]) #zet om in dict met id en naam en retourneert die als JSON
 
 
 # --- DATA VOOR GRAFIEK PER VOLKSVERTEGENWOORDIGER ---
@@ -1017,35 +1017,35 @@ def vv_suggesties():
 def vv_data(vv_id):
     from app.models import Persoonfunctie
 
-    # ✅ Zelfde vaste periode: april → oktober
+    #  Zelfde vaste periode: april → oktober
     begin_datum = date(2025, 4, 1)
-    eind_datum = date(2025, 10, 31)
+    eind_datum = date(2025, 10, 31) 
 
     resultaten = (
         db.session.query(
-            func.date_trunc("month", SchriftelijkeVragen.ingediend).label("maand"),
-            func.count(SchriftelijkeVragen.id)
+            func.date_trunc("month", SchriftelijkeVragen.ingediend).label("maand"), #ingediende datum afronden naar eerste dag van de maand, .label('maand') slaat de afgeronde datum op als label 'maand'
+            func.count(SchriftelijkeVragen.id) #totaal aantal vragen per maand
         )
-        .join(Persoonfunctie, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
-        .filter(Persoonfunctie.id_prs == vv_id)
+        .join(Persoonfunctie, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)  #zodat we kunnen filteren op welke persoon welke vragen stelde
+        .filter(Persoonfunctie.id_prs == vv_id) #alleen functies van deze persoon worden meegenomen
         .filter(SchriftelijkeVragen.ingediend >= begin_datum)
         .filter(SchriftelijkeVragen.ingediend <= eind_datum)
-        .group_by(func.date_trunc("month", SchriftelijkeVragen.ingediend))
-        .order_by(func.date_trunc("month", SchriftelijkeVragen.ingediend))
+        .group_by(func.date_trunc("month", SchriftelijkeVragen.ingediend)) #groepeer per maand zodat je per maand een telling krijgt
+        .order_by(func.date_trunc("month", SchriftelijkeVragen.ingediend)) #sorteer chronologisch op maand
         .all()
     )
-
+#converteer resultaten naar dictionary: key;yyyy-mm, value=aantal vragen die maand
     maand_dict = {r[0].strftime("%Y-%m"): r[1] for r in resultaten}
 
     labels, values = [], []
     huidige = begin_datum
     maanden = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"]
 
-    while huidige <= eind_datum:
+    while huidige <= eind_datum: #loop door alle maanden
         key = huidige.strftime("%Y-%m")
-        labels.append(f"{maanden[huidige.month - 1]} {huidige.year}")
-        values.append(maand_dict.get(key, 0))
-        huidige += relativedelta(months=1)
+        labels.append(f"{maanden[huidige.month - 1]} {huidige.year}") #voegt bv 'apr 2025' toe
+        values.append(maand_dict.get(key, 0)) #voegt aantal vragen toe of 0 als er geen data is
+        huidige += relativedelta(months=1) #verschuift de datum met exact 1 maand
 
     return jsonify({"labels": labels, "values": values})
 
@@ -1056,24 +1056,24 @@ def vv_data(vv_id):
 @main.route("/grafieken/vv_vragen/<uuid:vv_id>/<int:jaar>/<int:maand>")
 def vv_vragen_maand(vv_id, jaar, maand):
     """Geeft de lijst schriftelijke vragen van één VV in een specifieke maand."""
-    from app.models import Persoonfunctie  # vermijden van circular import
+    from app.models import Persoonfunctie  # vermijden van circular import,model pas aangeroepen op moment dat functie wordt uitgevoerd
 
-    # Start- en einddatum van de maand bepalen
-    van = date(jaar, maand, 1)
-    tot = date(jaar + (maand // 12), (maand % 12) + 1, 1)
+    # Start- en einddatum van de maand bepalen,baken volledige maand af
+    van = date(jaar, maand, 1) #eerset dag van gevraagde maand
+    tot = date(jaar + (maand // 12), (maand % 12) + 1, 1) #eerset dag van de volgende maand
 
     # Query: alle vragen in die maand van die persoon
     vragen = (
         db.session.query(SchriftelijkeVragen)
-        .join(Persoonfunctie, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id)
-        .filter(Persoonfunctie.id_prs == vv_id)
-        .filter(SchriftelijkeVragen.ingediend >= van)
-        .filter(SchriftelijkeVragen.ingediend < tot)
-        .order_by(SchriftelijkeVragen.ingediend.desc())
+        .join(Persoonfunctie, SchriftelijkeVragen.id_prsfnc_vs == Persoonfunctie.id) #welke perrsoon stelde de vraag
+        .filter(Persoonfunctie.id_prs == vv_id) #filter op persoon van wie we de vragen willen ophalen
+        .filter(SchriftelijkeVragen.ingediend >= van) #selecteer vragen als indiening=>eerste dag vd maand
+        .filter(SchriftelijkeVragen.ingediend < tot) #selecteer vragen als indiening<eerste datum vd volgende maand
+        .order_by(SchriftelijkeVragen.ingediend.desc()) #sorteer aflopend (nieuwste eerst)
         .all()
     )
 
-    # ✅ Link naar PDF toevoegen (v.tekst bevat de URL)
+    # Link naar PDF toevoegen (v.tekst bevat de URL), per vraag(v), 3 velden meegeven
     data = [
         {
             "datum": v.ingediend.strftime("%d/%m/%Y"),
@@ -1096,15 +1096,15 @@ def thema_vragen_maand(thema_id, jaar, maand):
     # Query: alle vragen van dat thema in die maand
     vragen = (
         db.session.query(SchriftelijkeVragen)
-        .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id)
-        .filter(ThemaKoppeling.id_thm == thema_id)
+        .join(ThemaKoppeling, ThemaKoppeling.id_schv == SchriftelijkeVragen.id) #koppelt vragen aan thema's
+        .filter(ThemaKoppeling.id_thm == thema_id) #filtert op specifiek thema,enkel vragen gekoppeld aan dit thema worden meegenomen
         .filter(SchriftelijkeVragen.ingediend >= van)
         .filter(SchriftelijkeVragen.ingediend < tot)
-        .order_by(SchriftelijkeVragen.ingediend.desc())
+        .order_by(SchriftelijkeVragen.ingediend.desc()) #van nieuwst naar oudste
         .all()
     )
 
-    # ✅ Link naar PDF toevoegen (v.tekst bevat de URL)
+    #  Link naar PDF toevoegen (v.tekst bevat de URL), per vraag(v) 3 velden
     data = [
         {
             "datum": v.ingediend.strftime("%d/%m/%Y"),
