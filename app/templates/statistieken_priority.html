@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+
 {% block content %}
 
 <!-- HERO -->
 <section class="hero">
   <h1 class="hero-title">Actualiteit van Schriftelijke Vragen</h1>
   <p class="hero-subtitle">
-    Welke vragen zijn het meest actueel en spelen sterk in op recente gebeurtenissen? 
+    Welke vragen zijn het meest actueel en spelen sterk in op recente gebeurtenissen?
   </p>
 </section>
 
@@ -17,42 +18,69 @@
     <div class="priority-uitleg">
       <h2>Hoe wordt de score berekend?</h2>
       <p>
-        De <strong>Actualiteitsscore</strong> combineert <strong>recentheid</strong> en <strong>thematische breedte</strong> tot één totaalscore:
+        De <strong>Actualiteitsscore</strong> combineert <strong>recentheid</strong> en
+        <strong>thematische breedte</strong> tot één totaalscore:
       </p>
       <ul>
-        <li><strong>Recente vragen</strong> scoren hoger: een pas ingediende vraag kan tot <strong>70 punten</strong> behalen. De score daalt geleidelijk tot een minimum van <strong>15 punten</strong> na 60 dagen.</li>
-        <li><strong>Meer thema’s</strong> gekoppeld aan een vraag leveren extra punten op (ongeveer <strong>6 punten per thema</strong>, tot een maximum van <strong>30 punten</strong>).</li>
+        <li>
+          <strong>Recente vragen</strong> scoren hoger: een pas ingediende vraag kan tot
+          <strong>70 punten</strong> behalen. De score daalt geleidelijk tot een minimum
+          van <strong>15 punten</strong> na 60 dagen.
+        </li>
+        <li>
+          <strong>Meer thema’s</strong> gekoppeld aan een vraag leveren extra punten op
+          (ongeveer <strong>6 punten per thema</strong>, tot een maximum van
+          <strong>30 punten</strong>).
+        </li>
         <li>De totale score is dus maximaal <strong>100 punten</strong>.</li>
       </ul>
+
       <p class="priority-legende">
         <span class="score-hoog">Hoog (≥ 75)</span> &nbsp;|&nbsp;
         <span class="score-gemiddeld">Gemiddeld (50 – 74)</span> &nbsp;|&nbsp;
         <span class="score-laag">Laag (&lt; 50)</span>
       </p>
+
       <p class="priority-tip">
-        De maximale score van 100 punten wordt enkel behaald door zeer recente vragen met meerdere thema’s.
+        De maximale score van 100 punten wordt enkel behaald door zeer recente vragen
+        met meerdere thema’s.
       </p>
     </div>
 
     <!-- FILTER -->
     <div class="priority-filter">
-      <form method="get" action="{{ url_for('main.statistieken_priority') }}" class="filters-form">
+
+      <!-- eerst uitleg -->
+      <p class="filter-uitleg">
+        Gebruik deze filter om enkel vragen te tonen waarin een bepaald thema
+        <strong>zeker voorkomt</strong>.
+        Zo kan je snel zien welke recente vragen relevant zijn voor dat onderwerp.
+      </p>
+
+      <!-- dan actie -->
+      <form method="get"
+            action="{{ url_for('main.statistieken_priority') }}"
+            class="filters-form">
+
         <div class="filter-field">
           <label for="thema">Filter op thema</label>
-          <select id="thema" name="thema" onchange="this.form.submit()">
+          <select id="thema" name="thema">
             <option value="">-- Alle thema’s --</option>
             {% for thema in themas %}
-              <option value="{{ thema.id }}" {% if geselecteerd_thema_id == thema.id|string %}selected{% endif %}>
+              <option value="{{ thema.id }}"
+                {% if geselecteerd_thema_id == thema.id|string %}selected{% endif %}>
                 {{ thema.naam }}
               </option>
             {% endfor %}
           </select>
         </div>
+
+        <div class="filter-field filter-field-button">
+          <button type="submit" class="btn">Filter</button>
+        </div>
+
       </form>
-      <p class="filter-uitleg">
-        Gebruik deze filter om enkel vragen te tonen waarin een bepaald thema <strong>zeker voorkomt</strong>.  
-        Zo kan je snel zien welke recente vragen relevant zijn voor dat onderwerp.
-      </p>
+
     </div>
 
   </div>

@@ -197,12 +197,6 @@ footer p {
   color: #6b7280;
 }
 
-.geen-data {
-  text-align: center;
-  padding: 1rem;
-  color: #555;
-}
-
 
 /* ========== FRACTIES SECTIE ========== */
 .fracties-section {
@@ -464,16 +458,6 @@ th a.sortable {
   font-weight: 600;
 }
 
-.vragen-pdf-link {
-  background: #2563eb;
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.85rem;
-}
-
 .vragen-pdf-link:hover {
   background: #1e40af;
 }
@@ -545,6 +529,35 @@ th a.sortable {
   align-items: flex-end;
   justify-content: flex-end;
 }
+
+
+  /* Priority filter uitlijning */
+.priority-filter .filters-form {
+  justify-content: center;
+}
+
+.priority-filter .filter-field {
+  align-items: center;
+}
+
+.priority-filter .filter-field-button {
+  align-self: flex-end;
+}
+.priority-filter {
+  margin-top: 2rem;
+}
+.priority-tip {
+  margin-top: 1rem;
+}
+
+.filter-uitleg {
+  max-width: 600px;
+  margin: 0 auto 1.5rem;
+  font-style: italic;
+}
+
+
+
 /* ========== FRACTIE-STATISTIEKEN ========== */
 .fractie-form-container {
   max-width: 950px;
@@ -887,6 +900,8 @@ th a.sortable {
     width: 100%;
     text-align: center;
   }
+
+
 
   /* Grafieken */
   .grafieken-section {
