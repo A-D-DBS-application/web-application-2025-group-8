@@ -25,7 +25,9 @@
           <select name="kieskring" id="kieskring">
             <option value="">Alle kieskringen</option>
             {% for k in kieskringen %}
-              <option value="{{ k }}" {% if geselecteerde_kieskring == k %}selected{% endif %}>{{ k }}</option>
+              <option value="{{ k }}" {% if geselecteerde_kieskring == k %}selected{% endif %}>
+                {{ k }}
+              </option>
             {% endfor %}
           </select>
         </div>
@@ -36,7 +38,10 @@
           <select name="thema" id="thema">
             <option value="">Alle thema’s</option>
             {% for t in themas %}
-              <option value="{{ t.id }}" {% if geselecteerd_thema_id == t.id|string %}selected{% endif %}>{{ t.naam }}</option>
+              <option value="{{ t.id }}"
+                {% if geselecteerd_thema_id == t.id|string %}selected{% endif %}>
+                {{ t.naam }}
+              </option>
             {% endfor %}
           </select>
         </div>
@@ -45,12 +50,14 @@
         <div class="filter-field filter-field-button">
           <button type="submit" class="btn">Filter</button>
         </div>
+
       </div>
     </form>
   </div>
 
   <!-- RESULTATEN -->
-  {% if data and data|length > 0 %}
+  {% if geselecteerde_kieskring and geselecteerd_thema_id and data and data|length > 0 %}
+
     <h2 class="section-title sub">Resultaten</h2>
     <p class="section-subtext">
       We tonen de meest actieve volksvertegenwoordigers voor de gekozen combinatie.
@@ -70,15 +77,45 @@
       {% endfor %}
     </div>
 
-  {% else %}
+  {% elif geselecteerde_kieskring and not geselecteerd_thema_id %}
+
+    <div class="empty-state">
+      <h2 class="section-title small">Selecteer een thema</h2>
+      <p>
+        Kies eerst een thema om te zien welke volksvertegenwoordigers hier het meest actief rond zijn.
+      </p>
+    </div>
+
+  {% elif geselecteerd_thema_id and not geselecteerde_kieskring %}
+
+    <div class="empty-state">
+      <h2 class="section-title small">Selecteer een kieskring</h2>
+      <p>
+        Kies eerst een kieskring om te zien welke volksvertegenwoordigers hier het meest actief zijn.
+      </p>
+    </div>
+
+  {% elif geselecteerde_kieskring and geselecteerd_thema_id %}
+
     <div class="empty-state">
       <h2 class="section-title small">Geen resultaten gevonden</h2>
       <p>
         Voor deze combinatie van thema en kieskring zijn geen resultaten beschikbaar.
-        Probeer een andere selectie, of kies “Alle kieskringen” of “Alle thema’s”.
+        Probeer een andere selectie.
       </p>
     </div>
+
+  {% else %}
+
+    <div class="empty-state">
+      <h2 class="section-title small">Maak een selectie</h2>
+      <p>
+        Kies een thema en een kieskring om de actiefste volksvertegenwoordigers te bekijken.
+      </p>
+    </div>
+
   {% endif %}
+
 </section>
 
 {% endblock %}

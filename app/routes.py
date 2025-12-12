@@ -332,10 +332,18 @@ def actiefste_per_thema_en_kieskring():
 
         geselecteerde_kieskring = request.args.get('kieskring') #lees filters uit query string, dus wat gebruiker koos
         geselecteerd_thema_id = request.args.get('thema') #idem
+
+        # Beschouw "alle" of lege waarden als NIET geselecteerd
+        if geselecteerde_kieskring in (None, "", "all"):
+            geselecteerde_kieskring = None
+
+        if geselecteerd_thema_id in (None, "", "all"):
+            geselecteerd_thema_id = None
+
         data = []
 
-        if geselecteerde_kieskring and geselecteerd_thema_id: #voor enkel query uit als beide filters zijn geselecteerd
-            # 🔹 Subquery: enkel persoonfuncties in gekozen kieskring
+        if geselecteerde_kieskring and geselecteerd_thema_id: #voor enkel query uit als beide filters zijn geselecteerd, beide gekozen → query uitvoeren
+            # Subquery: enkel persoonfuncties in gekozen kieskring
             subq_pf = (
                 db.session.query(Persoonfunctie.id) # doel:haal alle persoonfunctie_id's van persoon uit geselelecteerde kieskring
                 .join(Persoon, Persoon.id == Persoonfunctie.id_prs)
@@ -378,6 +386,16 @@ def actiefste_per_thema_en_kieskring():
                     "kieskring": r.kieskring,
                     "aantal_vragen": r.aantal_vragen,
                 }) #hier bouwen we schone dictionaries  voor de template
+        
+        elif geselecteerde_kieskring and not geselecteerd_thema_id:
+            #thema ontbreekt
+            data = []
+        elif geselecteerd_thema_id and not geselecteerde_kieskring:
+            #kieskring ontbreekt
+            data = []
+        else:
+            #niets gekozen
+            data = []
 
     except OperationalError:
         # Als de database niet bereikbaar is → lege state ipv 500 error
