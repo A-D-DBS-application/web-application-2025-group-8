@@ -16,7 +16,7 @@
       <thead>
         <tr>
           {% set kolommen = [
-            ('naam', 'Naam'),
+            ('achternaam', 'Naam'),
             ('populair', 'Populairst Thema'),
             ('pop_count', 'Aantal Vragen'),
             ('tweede', '2e Thema'),
@@ -28,7 +28,7 @@
 
           {% for k, label in kolommen %}
           <th>
-            {% if k == 'naam' %}
+            {% if k == 'achternaam' %}
             <a href="{{ url_for('main.statistieken_vv_themas', kolom=k, sort='asc' if sort == 'desc' or kolom != k else 'desc') }}"
                class="sortable">
               {{ label }}

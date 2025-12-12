@@ -230,7 +230,7 @@ def statistieken_fractie():
 @main.route("/statistieken/vv/themas")
 def statistieken_vv_themas():
     sort = request.args.get("sort", "asc") #leest de sorteer-richting uit de query string
-    kolom = request.args.get("kolom", "naam")  #leest op welke kolom gesorteerd moet worden: default:naam
+    kolom = request.args.get("kolom", "achternaam")  #leest op welke kolom gesorteerd moet worden: default:achternaam
 
     # Haal in één keer alle niet-minister functies met personen en thema’s op
     data = (
@@ -257,6 +257,8 @@ def statistieken_vv_themas():
     for r in data:
         if r.id not in personen_dict:
             personen_dict[r.id] = {
+                "voornaam": r.voornaam,
+                "achternaam": r.naam,
                 "naam": f"{r.voornaam} {r.naam}",
                 "themas": {},
                 "laatste_vraag": r.laatste_vraag
@@ -275,6 +277,8 @@ def statistieken_vv_themas():
         the_dict = info["themas"]
         top3 = sorted(the_dict.items(), key=lambda x: x[1], reverse=True)[:3]
         resultaat.append({
+            "voornaam": info["voornaam"],
+            "achternaam": info["achternaam"],
             "naam": info["naam"],
             "populair": top3[0][0] if len(top3) >= 1 else None,
             "pop_count": top3[0][1] if len(top3) >= 1 else 0,
@@ -287,14 +291,10 @@ def statistieken_vv_themas():
 
     #  Dynamisch sorteren op kolom + richting
     reverse = sort == "desc"
-    try: #probeer te sorteren op kolom die gebruiker koos in drop down
-        resultaat.sort(
-            key=lambda x: (x[kolom] or "").lower() if isinstance(x[kolom], str) else (x[kolom] or 0),
-            reverse=reverse
-        )
-    except KeyError:
-        # fallback als kolom niet bestaat, val dan terug op sorteren op naam
-        resultaat.sort(key=lambda x: x["naam"].lower(), reverse=reverse)
+    if kolom == "achternaam":#probeer te sorteren op kolom die gebruiker koos in drop down
+        resultaat.sort(key=lambda x: ((x["achternaam"] or "").lower(), (x["voornaam"] or "").lower()), reverse=reverse)
+    else:
+        resultaat.sort(key=lambda x: (x[kolom] or "").lower()if isinstance(x.get(kolom), str) else (x.get(kolom) or 0),reverse=reverse)
 
     return render_template(
         "statistieken_vv_themas.html",
@@ -570,12 +570,12 @@ def activiteitsscore():
 
 
 
-# --- VOLKSVERTEGENWOORDIGERS MET PYTHON-SORTERING ---
+# --- VOLKSVERTEGENWOORDIGERS MET PYTHON-SORTERING (OP ACHTERNAAM) ---
 @main.route('/volksvertegenwoordigers') #verkozenen pagina
 def volksvertegenwoordigers():
     # Sorteervolgorde (asc of desc) en kolom via queryparameters
     sort = request.args.get("sort", "asc")
-    kolom = request.args.get("kolom", "naam")  # standaard op naam
+    kolom = request.args.get("kolom", "achternaam")  #standaard op achternaam
 
     try:
         # Query: haal alle gegevens in één keer op per persoon
@@ -599,17 +599,18 @@ def volksvertegenwoordigers():
         def bereken_leeftijd(geboortedatum):
             if geboortedatum: #als geboortedatum bestaat bereken dan de leeftijd
                 vandaag = date.today()
-                leeftijd = (
+                return (
                     vandaag.year - geboortedatum.year -
                     ((vandaag.month, vandaag.day) < (geboortedatum.month, geboortedatum.day)) #check of al verjaard is dit jaar zo nee trek dan 1 af
                 )
-                return leeftijd
             return None
 
         # Structureren, door aanmaken LIJST VAN DICTS, gebruik van or om lege waarden te vervangen door "-"
         data = [
             {
                 "id": r.id,
+                "voornaam": r.voornaam,
+                "achternaam": r.naam,
                 "naam": f"{r.voornaam} {r.naam}",
                 "leeftijd": bereken_leeftijd(r.geboortedatum),
                 "fractie": r.fractie or "-",
@@ -621,7 +622,12 @@ def volksvertegenwoordigers():
 
         # Sorteren in Python (A–Z of Z–A op gekozen kolom)
         reverse = sort == "desc"
-        data.sort(key=lambda x: (x[kolom] or "").lower() if isinstance(x[kolom], str) else (x[kolom] or 0), reverse=reverse) #sorteerd op door gebruiker gekozen kolom
+
+        if kolom == "achternaam":
+            data.sort(key=lambda x: ((x["achternaam"] or "").lower(),(x["voornaam"] or "").lower()),reverse=reverse)
+        else:
+            data.sort(key=lambda x: (x[kolom] or "").lower() if isinstance(x[kolom], str) else (x[kolom] or 0), reverse=reverse)
+        #sorteerd op door gebruiker gekozen kolom, eerst achternaam met voornaam als secundaire sorteersleutel
 
     except OperationalError: #is er een fout zet data=[] om 500 te voorkomen
         data = []
