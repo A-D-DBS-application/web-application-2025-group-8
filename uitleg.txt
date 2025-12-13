@@ -3,33 +3,51 @@
 
 
 cardinalities:
-1. persoon — persoonfunctie
+1. Relatie: thema ↔ thema_koppeling
+De Relatie: thema (1) ———— (0..N) thema_koppeling
+Waarom de 1 bij thema? Elke regel in de koppeltabel (thema_koppeling) moet verwijzen naar één specifiek bestaand thema. Je kunt geen koppeling maken naar een thema dat niet bestaat.
+Waarom de 0..N bij thema_koppeling? Een specifiek thema (bijv. "Landbouw") kan:
+    0 keer voorkomen in de koppeltabel (het thema is net aangemaakt maar nog aan geen enkele vraag gekoppeld).
+    N keer voorkomen (het thema "Landbouw" is aan honderden verschillende vragen gekoppeld).
 
-Elke persoon kan meerdere functies hebben in de tijd.
-Elke persoonfunctie hoort bij exact één persoon.
-→ 1:N relatie
+2. Relatie: schriftelijke_vragen ↔ thema_koppeling
+De Relatie: schriftelijke_vragen (1) ———— (0..N) thema_koppeling
+Waarom de 1 bij schriftelijke_vragen? Elke regel in de koppeltabel hoort bij precies één specifieke vraag. Een "link" zonder bijbehorende vraag is zinloos.
+Waarom de 0..N bij thema_koppeling? Een specifieke vraag kan:
+    0 keer voorkomen in de koppeltabel (de vraag is ingediend, maar heeft nog geen labels/tags gekregen).
+    N keer voorkomen (de vraag gaat over zowel "Onderwijs" als "Financiën", dus er zijn 2 regels in de koppeltabel voor deze ene vraag).
 
-2. functies — persoonfunctie
+3. Relatie: persoon ↔ persoonfunctie
+De Relatie: persoon (1) ———— (0..N) persoonfunctie
+Waarom de 1 bij persoon? Een functie die wordt uitgevoerd (bijv. "Jan Janssen als Minister in 2022") hoort altijd bij precies één uniek mens (persoon).
+Waarom de 0..N bij persoonfunctie? Eén uniek persoon (bijv. Jan Janssen) kan:
+    0 functies hebben (hij staat in de database, maar heeft op dit moment geen actieve rol of zijn rol is nog niet ingevoerd).
+    N functies hebben (hij heeft een carrièreverloop: hij was eerst Gemeenteraadslid, toen Tweede Kamerlid, en nu Staatssecretaris. Dat zijn 3 regels in persoonfunctie voor 1 persoon).
 
-Eén functie (bv. “minister”) kan door meerdere persoonfuncties ingevuld worden doorheen de tijd.
-Elke persoonfunctie heeft precies één functie.
-→ 1:N relatie
+4. Relatie: functies ↔ persoonfunctie
+De Relatie: functies (1) ———— (0..N) persoonfunctie
+Waarom de 1 bij functies? Elke rolvervulling in persoonfunctie moet verwijzen naar één specifieke functiedefinitie (bijv. de code "MIN" voor Minister). Je moet weten wat voor functie het is.
+Waarom de 0..N bij persoonfunctie? De generieke functie "Tweede Kamerlid" (uit de tabel functies) kan:
+    N keer voorkomen in persoonfunctie (want er zijn 150 mensen die deze zelfde functietitel dragen).
 
-3. fractie — persoonfunctie
+5. Relatie: fractie ↔ persoonfunctie
+De Relatie: fractie (1) ———— (0..N) persoonfunctie
+Waarom de 1 bij fractie? Als iemand een functie uitoefent (zeker in een politieke context), doet hij/zij dat op dat moment namens één specifieke partij of fractie.
+Waarom de 0..N bij persoonfunctie? Eén fractie (bijv. "VVD") kan:
+    N keer voorkomen (want er zijn tientallen mensen die op dit moment namens de VVD een functie vervullen).
 
-Eén fractie kan meerdere personen bevatten.
-Een persoonfunctie hoort bij precies één fractie.
-→ 1:N relatie
+6. Relatie: persoonfunctie ↔ schriftelijke_vragen (Vragensteller)
+Let op: Dit is de Foreign Key id_prsfnc_vs in de tabel schriftelijke_vragen.
+De Relatie: persoonfunctie (1) ———— (0..N) schriftelijke_vragen
+Waarom de 1 bij persoonfunctie? In jouw model heeft elke schriftelijke vraag precies één indiener. De Foreign Key staat in de vraagtabel en wijst naar één specifiek record in persoonfunctie. (Zoals eerder besproken: dit sluit mede-indieners uit).
+Waarom de 0..N bij schriftelijke_vragen? Een specifiek Kamerlid (op dat moment in die functie) kan:
+    0 vragen hebben gesteld (net beëdigd).
+    N vragen hebben gesteld (zeer actief Kamerlid).
 
-4. schriftelijke_vragen — thema_koppeling
-
-Een schriftelijke vraag kan meerdere thema’s hebben.
-Een thema kan aan meerdere vragen gekoppeld worden.
-Dit is een klassieke associatietabel (M:N).
-→ Globaal: M:N via thema_koppeling
-
-5. schriftelijke_vragen — persoonfunctie (via id_prsnc_vs & id_prsnc_min)
-
-Een vraag heeft exact één verantwoordelijke en exact één minister.
-Een persoonfunctie kan in meerdere vragen voorkomen.
-→ Beide zijn 1:N relaties
+7. Relatie: persoonfunctie ↔ schriftelijke_vragen (Minister/Ontvanger)
+Let op: Dit is de Foreign Key id_prsfnc_min in de tabel schriftelijke_vragen.
+De Relatie: persoonfunctie (1) ———— (0..N) schriftelijke_vragen
+Waarom de 1 bij persoonfunctie? Elke vraag is gericht aan precies één bewindspersoon (in die specifieke periode).
+Waarom de 0..N bij schriftelijke_vragen? Een specifieke Minister (in die periode) kan:
+    0 vragen ontvangen hebben.
+    N vragen ontvangen hebben om te beantwoorden.
