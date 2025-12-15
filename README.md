@@ -117,3 +117,8 @@ create index if not exists idx_thmkpl_thm  on public.thema_koppeling (id_thm);
 ### DEMO VIDEO
 
 https://1drv.ms/v/c/316adbab80b3b2e9/IQAuQpCg4o7pToAh4oXU8AprAbDS8fninfyfXWiznnZshIE
+
+
+### PPT 
+
+https://1drv.ms/p/c/316adbab80b3b2e9/IQBIKVyKpSykQ6Fsz-7J2L9fAW1bz5ojENKjfJSQFDSZ7Is
