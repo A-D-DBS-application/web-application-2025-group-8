@@ -1,0 +1,82 @@
+### DDL
+
+-- ===== ENUMS =====
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'geslacht_enum') then
+    create type geslacht_enum as enum ('M', 'V', 'X');
+  end if;
+end$$;
+
+-- ===== Fractie =====
+create table if not exists public.fractie (
+  id       uuid primary key,                
+  naam     text not null,
+  logo_url text
+);
+
+-- ===== Functies =====
+create table if not exists public.functies (
+  id           uuid primary key,             
+  code         text not null unique,
+  naam         text not null,
+  omschrijving text
+);
+
+-- ===== Persoon =====
+create table if not exists public.persoon (
+  id             uuid primary key,            
+  voornaam       text not null,
+  naam           text not null,
+  geboortedatum  date,
+  geslacht       geslacht_enum,
+  roepnaam       text,
+  kieskring      text not null
+);
+
+-- ===== Persoonfunctie =====
+create table if not exists public.persoonfunctie (
+  id     uuid primary key,                   
+  id_fnc uuid not null references public.functies (id) on update cascade on delete set null,
+  id_prs uuid not null references public.persoon  (id) on update cascade on delete set null,
+  van    date not null,
+  tot    date,
+  id_frc uuid references public.fractie (id) on update cascade on delete restrict
+);
+
+-- ===== Thema =====
+create table if not exists public.thema (
+  id           uuid primary key,
+  naam         text not null,
+  omschrijving text
+);
+
+-- ===== SchriftelijkeVragen =====
+create table if not exists public.schriftelijke_vragen (
+  id            uuid primary key,
+  ingediend     date not null,
+  onderwerp     text not null,
+  tekst         text,
+  id_prsfnc_vs  uuid not null references public.persoonfunctie (id) on update cascade on delete restrict,
+  id_prsfnc_min uuid not null references public.persoonfunctie (id) on update cascade on delete restrict,
+  beantwoord    date
+);
+
+-- ===== ThemaKoppeling =====
+create table if not exists public.thema_koppeling (
+  id      uuid primary key,
+  id_thm  uuid not null references public.thema (id) on update cascade on delete cascade,
+  id_schv uuid not null references public.schriftelijke_vragen (id) on update cascade on delete cascade,
+  unique (id_thm, id_schv)
+);
+
+-- ===== Indexen =====
+create index if not exists idx_pf_prs on public.persoonfunctie (id_prs);
+create index if not exists idx_pf_fnc on public.persoonfunctie (id_fnc);
+create index if not exists idx_pf_frc on public.persoonfunctie (id_frc);
+
+create index if not exists idx_schv_vs  on public.schriftelijke_vragen (id_prsfnc_vs);
+create index if not exists idx_schv_min on public.schriftelijke_vragen (id_prsfnc_min);
+
+create index if not exists idx_thmkpl_schv on public.thema_koppeling (id_schv);
+create index if not exists idx_thmkpl_thm  on public.thema_koppeling (id_thm);

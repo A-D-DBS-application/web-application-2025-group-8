@@ -1,0 +1,34 @@
+User stories
+
+
+Als burger wil ik parlementaire vragen kunnen filteren op thema
+
+Als gebruiker wil ik sorteren op partij, geslacht of leeftijd
+
+Als burger wil ik kunnen zien hoeveel vragen een partij heeft ingediend (optioneel in een bepaald thema)
+
+Als burger wil ik kunnen zien hoe de activiteit van een partij zich verhoudt tot het parlement
+
+Als burger wil ik kunnen zien hoe de activiteit van een vertegenwoordiger zich verhoudt tot de anderen
+
+Als journalist wil ik per thema een overzicht krijgen van de activiteit in de tijd (grafiek per maand of jaar)
+
+Als journalist wil ik kunnen zien welke thema’s recent sterk in opkomst zijn, zodat ik actuele trends kan detecteren
+
+Als gebruiker wil ik twee partijen kunnen vergelijken op één of meerdere thema’s
+
+Als gebruiker wil ik de data kunnen downloaden (officiële parlementaire pdf)
+
+Als gebruiker wil ik via één dashboard toegang hebben tot alle overzichten
+
+Als journalist wil ik kunnen zoeken op sleutelwoorden (o.a. thema's) (bv. “onderwijs”, “mobiliteit”)
+
+Als burger wil ik informatie over een parlementslid kunnen bekijken (naam, partij, geslacht, leeftijd, kieskring, gestelde vragen...)
+
+Als gebruiker wil ik automatisch statistische inzichten zien (in verband met thema's, vertegenwoordigers...)
+
+Als ontwikkelaar wil ik een hogere score voor recente vragen (met eventueel combinatie andere zaken adhv gewichten)
+
+Als ontwikkelaar wil ik dat het datamodel uitbreidbaar is, dat nieuwe data ingeladen kan worden
+
+Als burger wil ik weten welke volksvertegenwoordigers in mijn regio mijn belangen verdedigen, om geïnformeerd te zijn
