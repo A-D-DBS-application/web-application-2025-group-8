@@ -27,8 +27,8 @@ Als burger wil ik informatie over een parlementslid kunnen bekijken (naam, parti
 
 Als gebruiker wil ik automatisch statistische inzichten zien (in verband met thema's, vertegenwoordigers...)
 
+Als burger wil ik weten welke volksvertegenwoordigers in mijn regio mijn belangen verdedigen, om geïnformeerd te zijn
+ --
 Als ontwikkelaar wil ik een hogere score voor recente vragen (met eventueel combinatie andere zaken adhv gewichten)
 
 Als ontwikkelaar wil ik dat het datamodel uitbreidbaar is, dat nieuwe data ingeladen kan worden
-
-Als burger wil ik weten welke volksvertegenwoordigers in mijn regio mijn belangen verdedigen, om geïnformeerd te zijn
